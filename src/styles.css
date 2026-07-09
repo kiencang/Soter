@@ -30,3 +30,14 @@ html, body {
   direction: ltr;
   -webkit-font-smoothing: antialiased;
 }
+
+/* Ensure all interactive elements have a hand pointer cursor */
+button, 
+[role="button"], 
+select, 
+input[type="button"], 
+input[type="submit"], 
+.clickable {
+  cursor: pointer !important;
+}
+

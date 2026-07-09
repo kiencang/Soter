@@ -149,6 +149,49 @@ export class SimulatorCameraService {
       this.rightMirrorCamera.setTarget(rightTargetWorld);
       this.rightMirrorCamera.update();
     }
+
+    // 4. Align front mirror 3D disc to HTML overlay container perfectly
+    if (this.frontMirrorDisc && this.mainCamera) {
+      const frameEl = document.getElementById('frame-front-mirror');
+      const canvasEl = this.mainCamera.getScene().getEngine().getRenderingCanvas();
+      if (frameEl && canvasEl) {
+        this.frontMirrorDisc.setEnabled(true);
+        const frameRect = frameEl.getBoundingClientRect();
+        const canvasRect = canvasEl.getBoundingClientRect();
+        
+        if (canvasRect.width > 0 && canvasRect.height > 0) {
+          // Calculate center of frame in normalized screen coordinates (-0.5 to 0.5, origin at center)
+          const centerX = (frameRect.left + frameRect.width / 2) - canvasRect.left;
+          const centerY = canvasRect.bottom - (frameRect.top + frameRect.height / 2);
+          
+          const nx = (centerX / canvasRect.width) - 0.5;
+          const ny = (centerY / canvasRect.height) - 0.5;
+          
+          // Normalized radius relative to canvas height
+          // Subtract the 4px border (8px total width) for a perfect fit inside the bezel
+          const innerWidth = frameRect.width - 8;
+          const nr = (innerWidth / 2) / canvasRect.height;
+          
+          const aspect = canvasRect.width / canvasRect.height;
+          const fov = this.mainCamera.fov;
+          const d = 3.0; // Fixed projection distance in front of camera
+          const frustumHeight = 2 * d * Math.tan(fov / 2);
+          const frustumWidth = frustumHeight * aspect;
+          
+          const localX = nx * frustumWidth;
+          const localY = ny * frustumHeight;
+          const localRadius = nr * frustumHeight;
+          
+          this.frontMirrorDisc.position.set(localX, localY, d);
+          
+          // Base disc has radius 0.3, so scaling factor is localRadius / 0.3
+          const targetScale = localRadius / 0.3;
+          this.frontMirrorDisc.scaling.set(targetScale, targetScale, 1);
+        }
+      } else {
+        this.frontMirrorDisc.setEnabled(false);
+      }
+    }
   }
 
   cleanup() {
