@@ -2,7 +2,7 @@
 <div class="relative w-full h-screen bg-slate-950 overflow-hidden font-sans select-none flex flex-col lg:flex-row" id="app-container">
   
   <!-- LEFT PANEL: 3D VIEWPORT (65% width on desktop) -->
-  <div class="relative flex-1 h-[45vh] lg:h-full bg-slate-900 border-b lg:border-b-0 lg:border-r border-white/5" id="simulation-viewport">
+  <div class="relative flex-1 h-[45vh] lg:h-full bg-slate-900 border-b lg:border-b-0 lg:border-r border-white/5 overflow-hidden" id="simulation-viewport">
     
     <!-- 3D WebGL Canvas -->
     <canvas #canvas class="w-full h-full block focus:outline-none" id="render-canvas"></canvas>
@@ -34,21 +34,32 @@
         <div class="absolute inset-0 bg-gradient-to-b from-white/5 via-transparent to-black/35 z-10 pointer-events-none"></div>
       </div>
 
-      <!-- Front Proximity Mirror Frame -->
-      <div class="absolute rounded-lg border-4 border-slate-700/80 shadow-2xl pointer-events-none flex flex-col justify-between overflow-hidden" 
-           style="top: 4%; left: 40.5%; width: 19%; height: 22%; min-width: 120px; min-height: 100px;"
+      <!-- Front Proximity Mirror Frame (Circular Convex Mirror) -->
+      <div class="absolute rounded-full border-4 border-slate-700/90 shadow-2xl pointer-events-none flex flex-col justify-between overflow-hidden" 
+           style="top: 3.5%; left: 42.5%; width: 15%; aspect-ratio: 1/1; min-width: 110px; max-width: 150px;"
            id="frame-front-mirror">
-        <div class="bg-slate-800/90 text-[9px] lg:text-[11px] font-semibold text-slate-300 py-0.5 px-2 text-center uppercase tracking-wider border-b border-white/5 z-20">
-          Gương Lồi Trước Đầu
+        
+        <!-- Badge Title -->
+        <div class="absolute top-2 left-1/2 -translate-x-1/2 z-20">
+          <span class="bg-slate-950/90 text-[8px] lg:text-[10px] font-bold text-slate-300 px-2 py-0.5 rounded-full uppercase tracking-wider border border-white/10 shadow-lg whitespace-nowrap">
+            Gương Lồi Đầu
+          </span>
         </div>
-        <div class="mt-auto bg-slate-950/75 py-1 px-1 text-center z-20">
+
+        <!-- Spacer -->
+        <div class="h-1/3"></div>
+
+        <!-- Status Indicator -->
+        <div class="mt-auto bg-slate-950/80 py-1 px-1 text-center z-20 border-t border-white/5 backdrop-blur-sm rounded-b-full overflow-hidden">
           @if (sim.motorcycleZ() >= 3.6 && sim.motorcycleZ() <= 7.2 && sim.motorcycleX() >= -1.8 && sim.motorcycleX() <= 1.8) {
-            <span class="text-[9px] lg:text-[10px] font-bold text-red-400 animate-pulse uppercase">⚠️ Điểm Mù Sát Cabin</span>
+            <span class="text-[9px] lg:text-[10px] font-black text-red-400 animate-pulse uppercase tracking-wide block">⚠️ Vùng Mù</span>
           } @else {
-            <span class="text-[9px] lg:text-[10px] text-slate-400">An Toàn</span>
+            <span class="text-[9px] lg:text-[10px] font-bold text-emerald-400 uppercase tracking-wide block">✓ An Toàn</span>
           }
         </div>
-        <div class="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-black/25 z-10 pointer-events-none"></div>
+
+        <!-- Convex Reflection Shine -->
+        <div class="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-black/25 z-10 pointer-events-none rounded-full"></div>
       </div>
 
       <!-- Right Mirror Frame -->
@@ -70,25 +81,7 @@
         <div class="absolute inset-0 bg-gradient-to-b from-white/5 via-transparent to-black/35 z-10 pointer-events-none"></div>
       </div>
 
-      <!-- Active Warnings Overlay (Center-top below mirror) -->
-      <div class="absolute top-[30%] left-1/2 -translate-x-1/2 z-30 w-full max-w-sm px-4 pointer-events-none" id="alert-banner">
-        <div class="flex items-center gap-3 p-3.5 rounded-2xl backdrop-blur-md shadow-lg border text-center justify-center transition-all duration-300"
-             [class.bg-red-500/90]="sim.isBlindSpot()"
-             [class.border-red-400/40]="sim.isBlindSpot()"
-             [class.text-white]="sim.isBlindSpot()"
-             [class.bg-emerald-500/90]="!sim.isBlindSpot()"
-             [class.border-emerald-400/40]="!sim.isBlindSpot()"
-             [class.text-white]="!sim.isBlindSpot()">
-          
-          @if (sim.isBlindSpot()) {
-            <svg class="w-6 h-6 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-            <span class="font-bold tracking-wider uppercase text-sm">NGUY HIỂM: ĐIỂM MÙ</span>
-          } @else {
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-            <span class="font-bold tracking-wider uppercase text-sm">AN TOÀN: TRONG TẦM NHÌN</span>
-          }
-        </div>
-      </div>
+      <!-- Active Warnings Overlay removed as requested -->
 
       <!-- Scenario overlay text -->
       @if (sim.isPlayingScenario() && sim.scenarioText()) {

@@ -15,60 +15,94 @@ export class SimulatorScenarioCutOffService {
       ctx.truckNode.rotation.y = 0;
     }
 
-    // Stage 0: 0s to 3s -> Motorcycle stops too close under front cockpit bumper
-    if (t < 3.2) {
+    // Stage 0: 0s to 3s -> Dừng chờ đèn đỏ
+    if (t < 3.0) {
       setStage(0);
-      setText("Tình huống: Xe máy leo lề hoặc đi từ hông lên, dừng đèn đỏ chắn ngang sát sàn cabin của xe container dưới 1.5 mét.");
+      setText("Đèn đỏ: Cả xe tải lớn và xe máy đang dừng chờ đèn đỏ tại ngã tư. Xe máy dừng chếch về phía trước bên phải cabin xe tải.");
       
-      if (ctx.truckNode) ctx.truckNode.position.set(0, 0, 0);
+      if (ctx.truckNode) {
+        ctx.truckNode.position.set(0, 0, 0);
+      }
       
-      const progressT = t / 3.2;
-      const xPos = 4.5 - progressT * 4.5;
-      const zPos = -1.0 + progressT * 6.6;
+      const xPos = 1.8;
+      const zPos = 4.0;
       
       ctx.motorcycleX.set(xPos);
       ctx.motorcycleZ.set(zPos);
       if (ctx.motorcycleNode) {
         ctx.motorcycleNode.position.set(xPos, 0, zPos);
-        ctx.motorcycleNode.rotation.y = -Math.PI / 4;
+        ctx.motorcycleNode.rotation.y = 0; // facing forward
+        ctx.motorcycleNode.rotation.x = 0; // standing upright
       }
     }
-    // Stage 1: 3.2s to 6.2s -> Green light, Truck accelerates, driver sees nothing
-    else if (t < 6.5) {
+    // Stage 1: 3.0s to 6.2s -> Đèn xanh, cả hai cùng khởi hành, xe máy tạt đầu
+    else if (t < 6.2) {
       setStage(1);
-      setText("Đèn xanh: Tài xế container khởi hành. Do sàn lái quá cao và kính chắn gió thẳng không thể quét sát mũi xe, tài xế không thấy và cán qua xe máy.");
+      setText("Đèn xanh: Cả hai di chuyển. Xe máy tăng tốc nhanh hơn và đột ngột rẽ trái tạt đầu ngay sát mũi cabin xe tải để chuyển làn.");
       
-      const activeT = t - 3.2;
-      const truckSpeedZ = activeT * 1.3;
+      const activeT = t - 3.0; // ranges from 0 to 3.2
+      // Truck accelerates slowly
+      const truckZ = activeT * 1.5; // reaches 4.8 at t=6.2
       if (ctx.truckNode) {
-        ctx.truckNode.position.set(0, 0, truckSpeedZ);
+        ctx.truckNode.position.set(0, 0, truckZ);
       }
 
-      ctx.motorcycleX.set(0);
-      ctx.motorcycleZ.set(5.6 + activeT * 0.2);
+      // Motorcycle starts from (1.8, 4.0).
+      // Between activeT = 0 and 1.5 (t=3 to 4.5): goes straight to z = 8.5
+      // Between activeT = 1.5 and 3.2 (t=4.5 to 6.2): cuts left to x = 0.0, z = 9.5
+      let bikeX = 1.8;
+      let bikeZ = 4.0;
+      let bikeRotY = 0;
+
+      if (activeT < 1.5) {
+        const ratio = activeT / 1.5;
+        bikeX = 1.8;
+        bikeZ = 4.0 + ratio * 4.5; // moves to 8.5
+        bikeRotY = 0;
+      } else {
+        const ratio = (activeT - 1.5) / 1.7; // 0 to 1
+        bikeX = 1.8 - ratio * 1.8; // cuts left to 0.0
+        bikeZ = 8.5 + ratio * 1.0; // moves forward to 9.5
+        bikeRotY = -Math.PI / 3 * ratio; // turn left angle
+      }
+
+      ctx.motorcycleX.set(bikeX);
+      ctx.motorcycleZ.set(bikeZ);
       if (ctx.motorcycleNode) {
-        ctx.motorcycleNode.position.set(0, 0.1, 5.6 + activeT * 0.2);
-        ctx.motorcycleNode.rotation.y = 0;
+        ctx.motorcycleNode.position.set(bikeX, 0.0, bikeZ);
+        ctx.motorcycleNode.rotation.y = bikeRotY;
+        ctx.motorcycleNode.rotation.x = 0;
       }
     }
-    // Stage 2: 6.5s to 9.5s -> Knocked down!
-    else if (t < 9.5) {
+    // Stage 2: 6.2s to 9.2s -> Va chạm do rơi vào vùng mù
+    else if (t < 9.2) {
       setStage(2);
-      setText("CẢNH BÁO: Tai nạn xảy ra! Chiếc xe máy bị gạt đổ dưới gầm cabin đầu xe. Tài xế không nghe thấy tiếng động gì từ cabin cách âm cao nên vẫn ga tiếp.");
+      setText("CẢNH BÁO TAI NẠN: Xe máy tạt đầu quá sát cabin (dưới 1.5 mét). Đây là cực cận vùng mù phía trước xe tải, tài xế không nhìn thấy xe máy và gây va chạm!");
       
-      if (ctx.truckNode) ctx.truckNode.position.set(0, 0, 4.2);
-      ctx.motorcycleX.set(0);
-      ctx.motorcycleZ.set(8.2);
+      const activeT = t - 6.2; // 0 to 3.0
+      // Truck stops or slows down slightly after collision
+      const truckFinalZ = 3.2 * 1.5 + Math.min(activeT * 0.3, 0.5); 
+      if (ctx.truckNode) {
+        ctx.truckNode.position.set(0, 0, truckFinalZ);
+      }
+
+      // Motorcycle gets knocked down and slides slightly
+      const bikeX = 0.0;
+      const bikeZ = 9.5 + Math.min(activeT * 0.4, 0.8);
+      
+      ctx.motorcycleX.set(bikeX);
+      ctx.motorcycleZ.set(bikeZ);
       if (ctx.motorcycleNode) {
-        ctx.motorcycleNode.position.set(0, 0.15, 8.2);
-        ctx.motorcycleNode.rotation.x = Math.PI / 2;
+        ctx.motorcycleNode.position.set(bikeX, 0.15, bikeZ);
+        ctx.motorcycleNode.rotation.y = -Math.PI / 2;
+        ctx.motorcycleNode.rotation.x = Math.PI / 2.3; // falls sideways
       }
       ctx.checkBlindSpotState();
     }
     // Stage 3: End of Scenario
     else {
       setPlaying(false);
-      setText("Bài học sống sót: Tuyệt đối không dừng chờ đèn đỏ ngay sát trước mặt xe container hay xe tải nặng. Phải dừng lệch hông lái hoặc đứng cách xa ít nhất 3.5 mét để tài xế có thể thấy bạn.");
+      setText("Bài học sinh tồn: Tuyệt đối không bao giờ tạt đầu đột ngột ngay sát mũi xe tải lớn hoặc xe container. Hãy vượt bên trái với khoảng cách xa an toàn ít nhất 5 mét trước khi nhập làn.");
     }
   }
 }

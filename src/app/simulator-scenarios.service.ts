@@ -15,7 +15,7 @@ export interface ScenarioContext {
   setViewMode: (mode: 'orbit' | 'cabin' | 'rider') => void;
   intersectionMeshes: BABYLON.Mesh[];
   laneLines: any[];
-  setBlinkerActive: (active: boolean) => void;
+  setBlinkerActive: (active: boolean, side?: 'left' | 'right' | 'both') => void;
   getTrailerRearPos: () => BABYLON.Vector3 | null;
   setTrailerRearPos: (pos: BABYLON.Vector3 | null) => void;
 }

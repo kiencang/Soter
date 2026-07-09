@@ -66,6 +66,7 @@ export class SimulatorService {
   private blinkerRight: BABYLON.Mesh | null = null;
   private blinkerTimer = 0;
   private blinkerActive = false;
+  private blinkerSide: 'left' | 'right' | 'both' = 'both';
   private blinkerOn = false;
 
   // Key states
@@ -140,7 +141,8 @@ export class SimulatorService {
   };
 
   toggleSound() {
-    this.audioService.toggleSound(this.gameState() === 'SIMULATION');
+    const isScenarioActive = this.gameState() === 'SIMULATION' && this.activeScenario() !== 'free' && this.isPlayingScenario();
+    this.audioService.toggleSound(isScenarioActive);
   }
 
   // --- POV Controls ---
@@ -208,7 +210,10 @@ export class SimulatorService {
       setViewMode: (mode) => this.setViewMode(mode),
       intersectionMeshes: this.intersectionMeshes,
       laneLines: this.laneLines,
-      setBlinkerActive: (active) => { this.blinkerActive = active; },
+      setBlinkerActive: (active, side) => { 
+        this.blinkerActive = active; 
+        this.blinkerSide = side || 'both';
+      },
       getTrailerRearPos: () => this.trailerRearPos,
       setTrailerRearPos: (pos) => { this.trailerRearPos = pos; }
     };
@@ -217,24 +222,35 @@ export class SimulatorService {
   // --- Scenario handling ---
   startScenario(type: 'free' | 'right_turn' | 'cut_off' | 'tailgate') {
     this.scenarioService.startScenario(type, this.getScenarioContext());
+    this.updateAudioForScenario(type);
   }
 
   resetScenario() {
     this.scenarioService.resetScenario(this.getScenarioContext());
+    this.updateAudioForScenario(this.activeScenario());
+  }
+
+  private updateAudioForScenario(type: 'free' | 'right_turn' | 'cut_off' | 'tailgate') {
+    if (type !== 'free') {
+      if (this.soundEnabled()) {
+        this.audioService.initAudio();
+      }
+    } else {
+      this.audioService.stopSound();
+    }
   }
 
   // --- Simulation Flow ---
   startSimulation() {
     this.gameState.set('SIMULATION');
+    this.cameraService.setFrontMirrorVisible(true);
     this.startScenario('free');
-    if (this.soundEnabled()) {
-      this.audioService.initAudio();
-    }
   }
 
   goToMenu() {
     this.gameState.set('MENU');
     this.audioService.stopSound();
+    this.cameraService.setFrontMirrorVisible(false);
     this.setViewMode('orbit');
   }
 
@@ -252,7 +268,7 @@ export class SimulatorService {
       const canvas = this.canvas;
       this.engine = new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true });
       this.scene = new BABYLON.Scene(this.engine);
-      this.scene.clearColor = new BABYLON.Color4(0.08, 0.1, 0.15, 1); // Slate gray sky
+      this.scene.clearColor = new BABYLON.Color4(0.0588, 0.0902, 0.1647, 1); // Perfect match with Tailwind's bg-slate-900 (#0f172a)
 
       // Lights
       const hemiLight = new BABYLON.HemisphericLight('hemiLight', new BABYLON.Vector3(0, 1, 0), this.scene);
@@ -315,27 +331,44 @@ export class SimulatorService {
       if (this.blinkerTimer >= 0.35) {
         this.blinkerTimer = 0;
         this.blinkerOn = !this.blinkerOn;
+        
+        const isLeftOn = this.blinkerOn && (this.blinkerSide === 'left' || this.blinkerSide === 'both');
+        const isRightOn = this.blinkerOn && (this.blinkerSide === 'right' || this.blinkerSide === 'both');
+
+        if (this.blinkerLeft) {
+          const mat = this.blinkerLeft.material as BABYLON.StandardMaterial;
+          mat.emissiveColor = isLeftOn ? new BABYLON.Color3(1.0, 0.7, 0.0) : new BABYLON.Color3(0.1, 0.1, 0.0);
+        }
         if (this.blinkerRight) {
           const mat = this.blinkerRight.material as BABYLON.StandardMaterial;
-          mat.emissiveColor = this.blinkerOn ? new BABYLON.Color3(1.0, 0.7, 0.0) : new BABYLON.Color3(0.1, 0.1, 0.0);
+          mat.emissiveColor = isRightOn ? new BABYLON.Color3(1.0, 0.7, 0.0) : new BABYLON.Color3(0.1, 0.1, 0.0);
         }
       }
     } else {
       this.blinkerOn = false;
+      if (this.blinkerLeft) {
+        const mat = this.blinkerLeft.material as BABYLON.StandardMaterial;
+        mat.emissiveColor = new BABYLON.Color3(0.1, 0.1, 0.0);
+      }
       if (this.blinkerRight) {
         const mat = this.blinkerRight.material as BABYLON.StandardMaterial;
-        mat.emissiveColor = new BABYLON.Color3(0.1, 0.1, 0);
+        mat.emissiveColor = new BABYLON.Color3(0.1, 0.1, 0.0);
       }
     }
 
     // 2. Animate look angle when in Cabin view
     this.cameraService.updateCabinLookAngle();
+    this.cameraService.update(this.truckNode);
 
     // 3. Dispatch Scenario / Sandbox Update
     if (this.activeScenario() === 'free') {
       this.updateSandboxMovement(dt);
     } else {
       this.scenarioService.updateScenario(dt, this.getScenarioContext());
+      // If the scenario lesson has finished (is no longer actively playing), turn off the audio hum
+      if (!this.isPlayingScenario()) {
+        this.audioService.stopSound();
+      }
     }
 
     // 4. Update articulated trailer physics

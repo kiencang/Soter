@@ -25,6 +25,14 @@ export class SimulatorVehicleTruckService {
     glassMat.emissiveColor = new BABYLON.Color3(0.05, 0.1, 0.15);
     glassMat.alpha = 0.8;
 
+    const blinkerLeftMat = new BABYLON.StandardMaterial('blinkLMat', scene);
+    blinkerLeftMat.diffuseColor = new BABYLON.Color3(0.4, 0.3, 0.0);
+    blinkerLeftMat.emissiveColor = new BABYLON.Color3(0.1, 0.1, 0.0);
+
+    const blinkerRightMat = new BABYLON.StandardMaterial('blinkRMat', scene);
+    blinkerRightMat.diffuseColor = new BABYLON.Color3(0.4, 0.3, 0.0);
+    blinkerRightMat.emissiveColor = new BABYLON.Color3(0.1, 0.1, 0.0);
+
     const yellowLightMat = new BABYLON.StandardMaterial('ylight', scene);
     yellowLightMat.emissiveColor = new BABYLON.Color3(1.0, 0.7, 0.0);
 
@@ -78,12 +86,12 @@ export class SimulatorVehicleTruckService {
     // Blinkers (Xi-nhan) for turns
     blinkerLeft = BABYLON.MeshBuilder.CreateBox('blinkL', { width: 0.15, height: 0.15, depth: 0.1 }, scene);
     blinkerLeft.position.set(-1.35, 1.0, 4.81);
-    blinkerLeft.material = yellowLightMat;
+    blinkerLeft.material = blinkerLeftMat;
     blinkerLeft.parent = truckNode;
 
     blinkerRight = BABYLON.MeshBuilder.CreateBox('blinkR', { width: 0.15, height: 0.15, depth: 0.1 }, scene);
     blinkerRight.position.set(1.35, 1.0, 4.81);
-    blinkerRight.material = yellowLightMat;
+    blinkerRight.material = blinkerRightMat;
     blinkerRight.parent = truckNode;
 
     // 2. Large Rear Trailer Container (Cargo box)

@@ -18,14 +18,14 @@ export class SimulatorAudioService {
       
       this.engineOsc = this.audioCtx.createOscillator();
       this.engineOsc.type = 'triangle';
-      this.engineOsc.frequency.setValueAtTime(55, this.audioCtx.currentTime);
+      this.engineOsc.frequency.setValueAtTime(75, this.audioCtx.currentTime);
 
       const filter = this.audioCtx.createBiquadFilter();
       filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(150, this.audioCtx.currentTime);
+      filter.frequency.setValueAtTime(220, this.audioCtx.currentTime);
 
       this.engineGain = this.audioCtx.createGain();
-      this.engineGain.gain.setValueAtTime(0.12, this.audioCtx.currentTime);
+      this.engineGain.gain.setValueAtTime(0.35, this.audioCtx.currentTime);
 
       this.engineOsc.connect(filter);
       filter.connect(this.engineGain);
@@ -52,11 +52,11 @@ export class SimulatorAudioService {
     }
   }
 
-  toggleSound(inSimulation: boolean) {
+  toggleSound(inActiveScenario: boolean) {
     this.soundEnabled.update(s => !s);
     if (!this.soundEnabled()) {
       this.stopSound();
-    } else if (inSimulation) {
+    } else if (inActiveScenario) {
       this.initAudio();
     }
   }
@@ -69,7 +69,7 @@ export class SimulatorAudioService {
       this.hornOsc.frequency.setValueAtTime(320, this.audioCtx.currentTime);
 
       this.hornGain = this.audioCtx.createGain();
-      this.hornGain.gain.setValueAtTime(0.15, this.audioCtx.currentTime);
+      this.hornGain.gain.setValueAtTime(0.35, this.audioCtx.currentTime);
 
       this.hornOsc.connect(this.hornGain);
       this.hornGain.connect(this.audioCtx.destination);

@@ -32,7 +32,7 @@ export class SimulatorVehicleMotorcycleService {
     wheelR.material = tireMat;
     wheelR.parent = motorcycleNode;
 
-    // 2. Bike chassis and tank
+    // 2. Honda scooter style body, seat, exhaust pipe, and shields
     const frame = BABYLON.MeshBuilder.CreateBox('mFrame', { width: 0.28, height: 0.6, depth: 1.4 }, scene);
     frame.position.set(0, 0.65, 0);
     frame.material = frameMat;
@@ -43,10 +43,131 @@ export class SimulatorVehicleMotorcycleService {
     tank.material = frameMat;
     tank.parent = motorcycleNode;
 
-    const handlebar = BABYLON.MeshBuilder.CreateCylinder('mBar', { diameter: 0.08, height: 0.95 }, scene);
+    // Front shield (yếm xe máy) typical of Honda Wave / Vision
+    const shield = BABYLON.MeshBuilder.CreateBox('mShield', { width: 0.65, height: 0.85, depth: 0.08 }, scene);
+    shield.position.set(0, 1.0, 0.62);
+    shield.rotation.x = -0.22; // slanted back
+    shield.material = frameMat;
+    shield.parent = motorcycleNode;
+
+    const shieldInner = BABYLON.MeshBuilder.CreateBox('mShieldInner', { width: 0.55, height: 0.75, depth: 0.08 }, scene);
+    shieldInner.position.set(0, 0.98, 0.64);
+    shieldInner.rotation.x = -0.22;
+    const darkGreyMat = new BABYLON.StandardMaterial('darkGrey', scene);
+    darkGreyMat.diffuseColor = new BABYLON.Color3(0.15, 0.15, 0.15);
+    shieldInner.material = darkGreyMat;
+    shieldInner.parent = motorcycleNode;
+
+    // Long double leather seat (yên xe)
+    const seatMat = new BABYLON.StandardMaterial('seatMat', scene);
+    seatMat.diffuseColor = new BABYLON.Color3(0.12, 0.12, 0.12);
+    const seat = BABYLON.MeshBuilder.CreateBox('mSeat', { width: 0.38, height: 0.18, depth: 0.85 }, scene);
+    seat.position.set(0, 0.88, -0.3);
+    seat.rotation.x = -0.05; // slight tilt
+    seat.material = seatMat;
+    seat.parent = motorcycleNode;
+
+    // Upward-swept exhaust pipe (ống pô) on right side
+    const exhaustMat = new BABYLON.StandardMaterial('exhaustMat', scene);
+    exhaustMat.diffuseColor = new BABYLON.Color3(0.5, 0.5, 0.5);
+    exhaustMat.specularColor = new BABYLON.Color3(0.8, 0.8, 0.8);
+    const exhaust = BABYLON.MeshBuilder.CreateCylinder('mExhaust', { diameter: 0.12, height: 0.85 }, scene);
+    exhaust.position.set(0.28, 0.38, -0.55);
+    exhaust.rotation.x = Math.PI / 2 - 0.15; // swept upwards
+    exhaust.rotation.y = 0.08; // slightly out
+    exhaust.material = exhaustMat;
+    exhaust.parent = motorcycleNode;
+
+    // Rear fender (chắn bùn sau) with license plate
+    const fenderMat = new BABYLON.StandardMaterial('fenderMat', scene);
+    fenderMat.diffuseColor = new BABYLON.Color3(0.15, 0.15, 0.15);
+    const fender = BABYLON.MeshBuilder.CreateBox('mFender', { width: 0.28, height: 0.45, depth: 0.05 }, scene);
+    fender.position.set(0, 0.45, -0.92);
+    fender.rotation.x = 0.25;
+    fender.material = fenderMat;
+    fender.parent = motorcycleNode;
+
+    const licensePlate = BABYLON.MeshBuilder.CreateBox('mPlate', { width: 0.24, height: 0.18, depth: 0.02 }, scene);
+    licensePlate.position.set(0, 0.4, -0.98);
+    licensePlate.rotation.x = 0.25;
+    const plateMat = new BABYLON.StandardMaterial('plateMat', scene);
+    plateMat.diffuseColor = new BABYLON.Color3(0.9, 0.9, 0.9);
+    licensePlate.material = plateMat;
+    licensePlate.parent = motorcycleNode;
+
+    // Handlebar (Ghi-đông)
+    const handlebar = BABYLON.MeshBuilder.CreateCylinder('mBar', { diameter: 0.06, height: 0.85 }, scene);
     handlebar.rotation.z = Math.PI / 2;
     handlebar.position.set(0, 1.15, 0.55);
     handlebar.parent = motorcycleNode;
+
+    // Handle grips
+    const gripMat = new BABYLON.StandardMaterial('gripMat', scene);
+    gripMat.diffuseColor = new BABYLON.Color3(0.05, 0.05, 0.05);
+
+    const gripL = BABYLON.MeshBuilder.CreateCylinder('mGripL', { diameter: 0.08, height: 0.18 }, scene);
+    gripL.rotation.z = Math.PI / 2;
+    gripL.position.set(-0.35, 1.15, 0.55);
+    gripL.material = gripMat;
+    gripL.parent = motorcycleNode;
+
+    const gripR = BABYLON.MeshBuilder.CreateCylinder('mGripR', { diameter: 0.08, height: 0.18 }, scene);
+    gripR.rotation.z = Math.PI / 2;
+    gripR.position.set(0.35, 1.15, 0.55);
+    gripR.material = gripMat;
+    gripR.parent = motorcycleNode;
+
+    // 2.5 Rear View Mirrors (Cặp gương chiếu hậu tròn đặc trưng Việt Nam)
+    const mirrorStemMat = new BABYLON.StandardMaterial('mStemMat', scene);
+    mirrorStemMat.diffuseColor = new BABYLON.Color3(0.4, 0.4, 0.4);
+
+    const mirrorGlassMat = new BABYLON.StandardMaterial('mGlassMat', scene);
+    mirrorGlassMat.diffuseColor = new BABYLON.Color3(0.85, 0.88, 0.9);
+    mirrorGlassMat.emissiveColor = new BABYLON.Color3(0.15, 0.15, 0.2);
+
+    // Left Mirror
+    const stemL = BABYLON.MeshBuilder.CreateCylinder('mStemL', { diameter: 0.02, height: 0.25 }, scene);
+    stemL.position.set(-0.3, 1.25, 0.58);
+    stemL.rotation.z = 0.25; // tilted out
+    stemL.rotation.x = -0.15; // tilted forward
+    stemL.material = mirrorStemMat;
+    stemL.parent = motorcycleNode;
+
+    const mirrorL = BABYLON.MeshBuilder.CreateCylinder('mMirrorL', { diameter: 0.18, height: 0.04 }, scene);
+    mirrorL.position.set(-0.34, 1.37, 0.6);
+    mirrorL.rotation.x = Math.PI / 2 - 0.1; // facing back
+    mirrorL.rotation.y = 0.15;
+    mirrorL.material = frameMat; // back is body color
+    mirrorL.parent = motorcycleNode;
+
+    const glassL = BABYLON.MeshBuilder.CreateCylinder('mGlassL', { diameter: 0.16, height: 0.01 }, scene);
+    glassL.position.set(-0.34, 1.37, 0.58);
+    glassL.rotation.x = Math.PI / 2 - 0.1;
+    glassL.rotation.y = 0.15;
+    glassL.material = mirrorGlassMat;
+    glassL.parent = motorcycleNode;
+
+    // Right Mirror
+    const stemR = BABYLON.MeshBuilder.CreateCylinder('mStemR', { diameter: 0.02, height: 0.25 }, scene);
+    stemR.position.set(0.3, 1.25, 0.58);
+    stemR.rotation.z = -0.25; // tilted out
+    stemR.rotation.x = -0.15; // tilted forward
+    stemR.material = mirrorStemMat;
+    stemR.parent = motorcycleNode;
+
+    const mirrorR = BABYLON.MeshBuilder.CreateCylinder('mMirrorR', { diameter: 0.18, height: 0.04 }, scene);
+    mirrorR.position.set(0.34, 1.37, 0.6);
+    mirrorR.rotation.x = Math.PI / 2 - 0.1; // facing back
+    mirrorR.rotation.y = -0.15;
+    mirrorR.material = frameMat; // back is body color
+    mirrorR.parent = motorcycleNode;
+
+    const glassR = BABYLON.MeshBuilder.CreateCylinder('mGlassR', { diameter: 0.16, height: 0.01 }, scene);
+    glassR.position.set(0.34, 1.37, 0.58);
+    glassR.rotation.x = Math.PI / 2 - 0.1;
+    glassR.rotation.y = -0.15;
+    glassR.material = mirrorGlassMat;
+    glassR.parent = motorcycleNode;
 
     // Small headlight
     const light = BABYLON.MeshBuilder.CreateSphere('mHeadlight', { diameter: 0.25 }, scene);
@@ -56,20 +177,65 @@ export class SimulatorVehicleMotorcycleService {
     light.material = lMat;
     light.parent = motorcycleNode;
 
-    // 3. Simple Rider dummy (Torso & Helmet)
-    const torso = BABYLON.MeshBuilder.CreateCylinder('torso', { diameter: 0.5, height: 0.9 }, scene);
-    torso.rotation.x = 0.25; // Lean forward slightly
-    torso.position.set(0, 1.1, -0.1);
+    // 3. Realistic Rider dummy with safety gear, articulated arms, and gloves
+    const torso = BABYLON.MeshBuilder.CreateCylinder('torso', { diameter: 0.45, height: 0.8 }, scene);
+    torso.rotation.x = 0.15; // natural upright riding position
+    torso.position.set(0, 1.25, -0.22);
     torso.material = jacketMat;
     torso.parent = motorcycleNode;
 
+    // Left Arm holding handle grip
+    const leftUpperArm = BABYLON.MeshBuilder.CreateCylinder('mLeftUpperArm', { diameter: 0.14, height: 0.4 }, scene);
+    leftUpperArm.position.set(-0.25, 1.38, -0.05);
+    leftUpperArm.rotation.x = 0.4;
+    leftUpperArm.rotation.z = 0.15;
+    leftUpperArm.material = jacketMat;
+    leftUpperArm.parent = motorcycleNode;
+
+    const leftForearm = BABYLON.MeshBuilder.CreateCylinder('mLeftForearm', { diameter: 0.12, height: 0.45 }, scene);
+    leftForearm.position.set(-0.29, 1.22, 0.28);
+    leftForearm.rotation.x = -0.65;
+    leftForearm.rotation.y = -0.15;
+    leftForearm.material = jacketMat;
+    leftForearm.parent = motorcycleNode;
+
+    // Right Arm holding handle grip
+    const rightUpperArm = BABYLON.MeshBuilder.CreateCylinder('mRightUpperArm', { diameter: 0.14, height: 0.4 }, scene);
+    rightUpperArm.position.set(0.25, 1.38, -0.05);
+    rightUpperArm.rotation.x = 0.4;
+    rightUpperArm.rotation.z = -0.15;
+    rightUpperArm.material = jacketMat;
+    rightUpperArm.parent = motorcycleNode;
+
+    const rightForearm = BABYLON.MeshBuilder.CreateCylinder('mRightForearm', { diameter: 0.12, height: 0.45 }, scene);
+    rightForearm.position.set(0.29, 1.22, 0.28);
+    rightForearm.rotation.x = -0.65;
+    rightForearm.rotation.y = 0.15;
+    rightForearm.material = jacketMat;
+    rightForearm.parent = motorcycleNode;
+
+    // Dark grey driving gloves
+    const gloveMat = new BABYLON.StandardMaterial('gloveMat', scene);
+    gloveMat.diffuseColor = new BABYLON.Color3(0.12, 0.12, 0.14);
+
+    const gloveL = BABYLON.MeshBuilder.CreateSphere('mGloveL', { diameter: 0.15 }, scene);
+    gloveL.position.set(-0.32, 1.15, 0.55);
+    gloveL.material = gloveMat;
+    gloveL.parent = motorcycleNode;
+
+    const gloveR = BABYLON.MeshBuilder.CreateSphere('mGloveR', { diameter: 0.15 }, scene);
+    gloveR.position.set(0.32, 1.15, 0.55);
+    gloveR.material = gloveMat;
+    gloveR.parent = motorcycleNode;
+
+    // Helmet & Visor on the upright head
     const head = BABYLON.MeshBuilder.CreateSphere('helmet', { diameter: 0.42 }, scene);
-    head.position.set(0, 1.62, 0.02);
+    head.position.set(0, 1.72, -0.15);
     head.material = helmetMat;
     head.parent = motorcycleNode;
 
     const visor = BABYLON.MeshBuilder.CreateBox('visor', { width: 0.32, height: 0.14, depth: 0.18 }, scene);
-    visor.position.set(0, 1.66, 0.16);
+    visor.position.set(0, 1.76, -0.01);
     const visorMat = new BABYLON.StandardMaterial('visor', scene);
     visorMat.diffuseColor = new BABYLON.Color3(0, 0, 0);
     visor.material = visorMat;

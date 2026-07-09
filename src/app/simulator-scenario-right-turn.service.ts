@@ -15,7 +15,7 @@ export class SimulatorScenarioRightTurnService {
     if (t < 3.2) {
       setStage(0);
       setText("Hành trình: Xe container xi-nhan rẽ phải chuẩn bị rẽ ngã tư. Xe máy đang bám sát song song phía bên phải rơ-moóc rọ - đây là vùng tử thần khuất 100% gương lái!");
-      ctx.setBlinkerActive(true);
+      ctx.setBlinkerActive(true, 'right');
 
       const progressZ = -8.0 + t * 2.2;
       if (ctx.truckNode) {

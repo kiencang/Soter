@@ -22,33 +22,33 @@ export class SimulatorVehiclesService {
     let rightBlindSpotMesh: BABYLON.Mesh;
     let rearBlindSpotMesh: BABYLON.Mesh;
 
-    const redMat = new BABYLON.StandardMaterial('bsRedMat', scene);
-    redMat.emissiveColor = new BABYLON.Color3(1.0, 0.1, 0.1);
-    redMat.diffuseColor = new BABYLON.Color3(0.9, 0, 0);
-    redMat.alpha = 0.38;
+    const yellowMat = new BABYLON.StandardMaterial('bsYellowMat', scene);
+    yellowMat.emissiveColor = new BABYLON.Color3(1.0, 0.72, 0.0); // Vibrant amber/yellow warning
+    yellowMat.diffuseColor = new BABYLON.Color3(0.9, 0.65, 0.0);
+    yellowMat.alpha = 0.38;
 
     // 1. Front Blind Spot (Điểm mù trước đầu xe) - Local to Cabin
     frontBlindSpotMesh = BABYLON.MeshBuilder.CreateBox('frontBS', { width: 3.6, height: 0.02, depth: 3.6 }, scene);
     frontBlindSpotMesh.position.set(0, 0.015, 5.4); // Centered right in front of nose
-    frontBlindSpotMesh.material = redMat;
+    frontBlindSpotMesh.material = yellowMat;
     frontBlindSpotMesh.parent = truckNode;
 
     // 2. Right Blind Spot (Bên phụ - Rất lớn) - Local to Trailer
     rightBlindSpotMesh = BABYLON.MeshBuilder.CreateBox('rightBS', { width: 5.0, height: 0.02, depth: 16.5 }, scene);
     rightBlindSpotMesh.position.set(4.0, 0.015, -4.75); // Centered on right side
-    rightBlindSpotMesh.material = redMat;
+    rightBlindSpotMesh.material = yellowMat;
     rightBlindSpotMesh.parent = trailerNode;
 
     // 3. Left Blind Spot (Bên lái) - Local to Cabin
     leftBlindSpotMesh = BABYLON.MeshBuilder.CreateBox('leftBS', { width: 4.0, height: 0.02, depth: 12.2 }, scene);
     leftBlindSpotMesh.position.set(-3.5, 0.015, -3.9); // Centered on left side
-    leftBlindSpotMesh.material = redMat;
+    leftBlindSpotMesh.material = yellowMat;
     leftBlindSpotMesh.parent = truckNode;
 
     // 4. Rear Blind Spot (Sau đuôi rơ-moóc) - Local to Trailer
     rearBlindSpotMesh = BABYLON.MeshBuilder.CreateBox('rearBS', { width: 5.0, height: 0.02, depth: 11.5 }, scene);
     rearBlindSpotMesh.position.set(0, 0.015, -19.25); // Centered behind trailer
-    rearBlindSpotMesh.material = redMat;
+    rearBlindSpotMesh.material = yellowMat;
     rearBlindSpotMesh.parent = trailerNode;
 
     return { front: frontBlindSpotMesh!, left: leftBlindSpotMesh!, right: rightBlindSpotMesh!, rear: rearBlindSpotMesh! };
