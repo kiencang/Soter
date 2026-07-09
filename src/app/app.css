@@ -1,0 +1,8 @@
+canvas {
+  touch-action: none;
+  outline: none;
+}
+
+#render-canvas {
+  background: radial-gradient(circle at center, #020617 0%, #090d16 100%);
+}

@@ -1,0 +1,60 @@
+<div class="flex flex-col h-full justify-between py-4" id="menu-view">
+        <div class="space-y-6">
+          <div class="text-center">
+            <div class="w-20 h-20 bg-amber-500/10 border-2 border-amber-500/30 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg shadow-amber-500/5 animate-pulse">
+              <svg class="w-12 h-12 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+              </svg>
+            </div>
+            <h1 class="text-2xl lg:text-3xl font-display font-black tracking-tight text-white uppercase leading-none">
+              SOTER
+            </h1>
+            <p class="text-amber-500 text-xs font-mono font-bold tracking-widest uppercase mt-2">
+              Sát thủ thầm lặng đường quốc lộ
+            </p>
+          </div>
+
+          <div class="bg-slate-950/60 border border-white/5 rounded-2xl p-4 text-sm text-slate-400 space-y-3 leading-relaxed">
+            <p>
+              Mỗi năm có hàng ngàn vụ tai nạn xe máy thương tâm xảy ra do đi vào <strong>điểm mù</strong> của các phương tiện lớn như xe tải nặng, xe đầu kéo container.
+            </p>
+            <p>
+              Ứng dụng này được thiết kế để giúp bạn trải nghiệm thực tế dưới <strong>Góc nhìn của Tài xế Container</strong>, từ đó thấu hiểu tầm quan sát hạn chế từ cabin cao và học cách tự bảo vệ bản thân khi tham gia giao thông.
+            </p>
+          </div>
+
+          <div class="space-y-3">
+            <h3 class="text-xs font-mono font-bold text-slate-400 uppercase tracking-widest">
+              NỘI DUNG TRẢI NGHIỆM
+            </h3>
+            <ul class="space-y-2.5 text-xs font-mono text-slate-300">
+              <li class="flex items-start gap-2.5">
+                <span class="text-amber-500">✓</span>
+                <span>Khám phá tự do vị trí xe máy quanh xe container 15m.</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="text-amber-500">✓</span>
+                <span>Xem 3 góc kính chiếu hậu thời gian thực của tài xế.</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="text-amber-500">✓</span>
+                <span>Trải nghiệm 3 tình huống tai nạn cực kỳ phổ biến.</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="text-amber-500">✓</span>
+                <span>Kiểm tra trắc nghiệm phản xạ lái xe an toàn.</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="pt-6 border-t border-white/5 space-y-4">
+          <button (click)="sim.startSimulation()" class="w-full py-4 bg-amber-500 hover:bg-amber-400 active:scale-95 text-slate-950 font-display font-bold rounded-2xl transition-all shadow-lg shadow-amber-500/20 text-md flex items-center justify-center gap-2 cursor-pointer" id="btn-start-exp">
+            BẮT ĐẦU TRẢI NGHIỆM
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+          </button>
+          <div class="pt-2 text-center">
+            <p class="text-[10px] text-slate-500 font-mono">Soter • v1.0.0 • Dự án An toàn Giao thông</p>
+          </div>
+        </div>
+      </div>

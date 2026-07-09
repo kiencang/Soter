@@ -1,0 +1,8 @@
+{
+  "name": "Soter",
+  "description": "Trải nghiệm mô phỏng 3D điểm mù nguy hiểm quanh xe tải/container dưới góc nhìn thực tế của tài xế và lái xe máy để nâng cao ý thức an toàn giao thông.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
