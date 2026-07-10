@@ -134,12 +134,13 @@ export class SimulatorVehicleTruckService {
 
     // Front Proximity Blind-Spot mirror bracket
     const frontMirrorBar = BABYLON.MeshBuilder.CreateBox('fmBar', { width: 0.08, height: 0.6, depth: 0.6 }, scene);
-    frontMirrorBar.position.set(0.5, 3.0, 4.3);
+    // Mounted on the front-right corner of the cabin above windshield
+    frontMirrorBar.position.set(1.1, 3.2, 4.6);
     frontMirrorBar.rotation.x = 0.4;
     frontMirrorBar.parent = truckNode;
 
     const frontMirrorPlate = BABYLON.MeshBuilder.CreateBox('fmPlate', { width: 0.4, height: 0.06, depth: 0.4 }, scene);
-    frontMirrorPlate.position.set(0.5, 3.2, 4.5);
+    frontMirrorPlate.position.set(1.1, 3.4, 4.8);
     frontMirrorPlate.material = tireMat;
     frontMirrorPlate.parent = truckNode;
 
@@ -148,9 +149,9 @@ export class SimulatorVehicleTruckService {
       { x: -1.2, y: 0.6, z: 4.0 },  { x: 1.2, y: 0.6, z: 4.0 },
       { x: -1.2, y: 0.6, z: 1.5 },  { x: 1.2, y: 0.6, z: 1.5 },
       { x: -1.2, y: 0.6, z: -3.5 }, { x: 1.2, y: 0.6, z: -3.5 },
-      { x: -1.2, y: 0.6, z: -8.0 }, { x: 1.2, y: 0.6, z: -8.0 },
-      { x: -1.2, y: 0.6, z: -9.2 }, { x: 1.2, y: 0.6, z: -9.2 },
-      { x: -1.2, y: 0.6, z: -10.4 }, { x: 1.2, y: 0.6, z: -10.4 }
+      { x: -1.2, y: 0.6, z: -7.5 }, { x: 1.2, y: 0.6, z: -7.5 },
+      { x: -1.2, y: 0.6, z: -8.7 }, { x: 1.2, y: 0.6, z: -8.7 },
+      { x: -1.2, y: 0.6, z: -9.9 }, { x: 1.2, y: 0.6, z: -9.9 }
     ];
 
     tirePositions.forEach((pos, idx) => {
@@ -165,16 +166,59 @@ export class SimulatorVehicleTruckService {
       }
     });
 
-    // Rear taillights on trailer back
-    const tailL = BABYLON.MeshBuilder.CreateBox('tailL', { width: 0.5, height: 0.15, depth: 0.1 }, scene);
-    tailL.position.set(-1.0, 0.8, -10.75);
+    // Rear bumper bar (Thanh chống va chạm sau / Cản sau)
+    const bumperMat = new BABYLON.StandardMaterial('bumperMat', scene);
+    bumperMat.diffuseColor = new BABYLON.Color3(0.12, 0.12, 0.14);
+    
+    const rearBumper = BABYLON.MeshBuilder.CreateBox('rearBumper', { width: 2.45, height: 0.35, depth: 0.15 }, scene);
+    rearBumper.position.set(0, 0.8, -10.75);
+    rearBumper.material = bumperMat;
+    rearBumper.parent = trailerNode;
+
+    // Rear taillights on the rear bumper
+    const tailL = BABYLON.MeshBuilder.CreateBox('tailL', { width: 0.5, height: 0.18, depth: 0.1 }, scene);
+    tailL.position.set(-0.7, 0.8, -10.90);
     tailL.material = redLightMat;
     tailL.parent = trailerNode;
 
-    const tailR = BABYLON.MeshBuilder.CreateBox('tailR', { width: 0.5, height: 0.15, depth: 0.1 }, scene);
-    tailR.position.set(1.0, 0.8, -10.75);
+    const tailR = BABYLON.MeshBuilder.CreateBox('tailR', { width: 0.5, height: 0.18, depth: 0.1 }, scene);
+    tailR.position.set(0.7, 0.8, -10.90);
     tailR.material = redLightMat;
     tailR.parent = trailerNode;
+
+    // Rear blinkers (Xi-nhan sau) on the rear bumper
+    const rearBlinkerLeft = BABYLON.MeshBuilder.CreateBox('rearBlinkL', { width: 0.35, height: 0.18, depth: 0.1 }, scene);
+    rearBlinkerLeft.position.set(-1.15, 0.8, -10.90);
+    rearBlinkerLeft.material = blinkerLeftMat;
+    rearBlinkerLeft.parent = trailerNode;
+
+    const rearBlinkerRight = BABYLON.MeshBuilder.CreateBox('rearBlinkR', { width: 0.35, height: 0.18, depth: 0.1 }, scene);
+    rearBlinkerRight.position.set(1.15, 0.8, -10.90);
+    rearBlinkerRight.material = blinkerRightMat;
+    rearBlinkerRight.parent = trailerNode;
+
+    // Side blinkers on trailer body to be visible from side views and mirrors
+    // Left side blinkers
+    const sideBlinkL1 = BABYLON.MeshBuilder.CreateBox('sideBlinkL1', { width: 0.05, height: 0.15, depth: 0.3 }, scene);
+    sideBlinkL1.position.set(-1.26, 1.2, -2.5);
+    sideBlinkL1.material = blinkerLeftMat;
+    sideBlinkL1.parent = trailerNode;
+
+    const sideBlinkL2 = BABYLON.MeshBuilder.CreateBox('sideBlinkL2', { width: 0.05, height: 0.15, depth: 0.3 }, scene);
+    sideBlinkL2.position.set(-1.26, 1.2, -7.0);
+    sideBlinkL2.material = blinkerLeftMat;
+    sideBlinkL2.parent = trailerNode;
+
+    // Right side blinkers
+    const sideBlinkR1 = BABYLON.MeshBuilder.CreateBox('sideBlinkR1', { width: 0.05, height: 0.15, depth: 0.3 }, scene);
+    sideBlinkR1.position.set(1.26, 1.2, -2.5);
+    sideBlinkR1.material = blinkerRightMat;
+    sideBlinkR1.parent = trailerNode;
+
+    const sideBlinkR2 = BABYLON.MeshBuilder.CreateBox('sideBlinkR2', { width: 0.05, height: 0.15, depth: 0.3 }, scene);
+    sideBlinkR2.position.set(1.26, 1.2, -7.0);
+    sideBlinkR2.material = blinkerRightMat;
+    sideBlinkR2.parent = trailerNode;
 
     return { truckNode, trailerNode, blinkerLeft: blinkerLeft!, blinkerRight: blinkerRight! };
   }

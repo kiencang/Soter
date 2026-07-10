@@ -13,7 +13,7 @@ export class SimulatorScenarioTailgateService {
     setPlaying: (playing: boolean) => void
   ) {
     if (ctx.truckNode) {
-      ctx.truckNode.position.set(0, 0, 0);
+      ctx.truckNode.position.set(2.25, 0, 0);
       ctx.truckNode.rotation.y = 0;
     }
 
@@ -22,7 +22,7 @@ export class SimulatorScenarioTailgateService {
       setStage(0);
       setText("Hành trình: Xe máy bám sát sạt đuôi rơ-moóc thùng container ở khoảng cách 1.5 mét. Người lái xe máy hoàn toàn bị mất tầm nhìn phía trước.");
       
-      ctx.motorcycleX.set(0);
+      ctx.motorcycleX.set(2.25);
       ctx.motorcycleZ.set(-15.0);
       ctx.syncMotorcyclePosition();
       
@@ -33,7 +33,7 @@ export class SimulatorScenarioTailgateService {
       setStage(1);
       setText("Rủi ro ẩn: Ở vị trí bám sát sạt này, gương chiếu hậu bên hông xe container không thể thu giữ bóng dáng xe máy. Tài xế hoàn toàn mù thông tin sau đuôi.");
       
-      ctx.motorcycleX.set(0);
+      ctx.motorcycleX.set(2.25);
       ctx.motorcycleZ.set(-15.0);
       ctx.syncMotorcyclePosition();
       
@@ -44,10 +44,10 @@ export class SimulatorScenarioTailgateService {
       setStage(2);
       setText("PHANH GẤP: Gặp vật cản, container phanh gấp. Do bị che khuất tầm nhìn trước hoàn toàn và khoảng cách quá ngắn, xe máy húc thẳng vào đuôi rơ-moóc sắt thép.");
       
-      ctx.motorcycleX.set(0);
+      ctx.motorcycleX.set(2.25);
       ctx.motorcycleZ.set(-13.5);
       if (ctx.motorcycleNode) {
-        ctx.motorcycleNode.position.set(0, 0.35, -13.5);
+        ctx.motorcycleNode.position.set(2.25, 0.35, -13.5);
         ctx.motorcycleNode.rotation.x = -Math.PI / 4.5;
       }
       

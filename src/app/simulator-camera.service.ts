@@ -37,11 +37,16 @@ export class SimulatorCameraService {
     this.rightMirrorCamera.viewport = new BABYLON.Viewport(0.82, 0.63, 0.17, 0.33);
 
     // 4. Front Proximity Mirror Camera (convex look-down mirror on high cabin)
-    this.frontMirrorCamera = new BABYLON.FreeCamera('frontMirrorCamera', new BABYLON.Vector3(0.5, 3.2, 4.5), scene);
-    // Convex mirror has a wide field of view (approx 80 degrees)
-    this.frontMirrorCamera.fov = 1.4;
-    this.frontMirrorCamera.setTarget(new BABYLON.Vector3(0.0, 0.3, 5.8)); // Pointing sharp down/forward
+    // Mounted on the front-right corner of the cabin roof/visor pointing straight down & forward
+    this.frontMirrorCamera = new BABYLON.FreeCamera('frontMirrorCamera', new BABYLON.Vector3(1.1, 3.4, 4.8), scene);
+    // Convex mirror has a wide field of view (approx 85 degrees)
+    this.frontMirrorCamera.fov = 1.5;
+    // Set parent first, then set local rotation to avoid coordinate system and gimbal flip bugs.
     this.frontMirrorCamera.parent = truckNode;
+    // Pitch (rotation around X) = 1.15 rad (approx 66 degrees down)
+    // Yaw (rotation around Y) = -0.3 rad (approx 17 degrees left, across front bumper)
+    // Roll (rotation around Z) = 0 rad (keep viewport parallel to front bumper)
+    this.frontMirrorCamera.rotation.set(1.15, -0.3, 0);
 
     // Use RenderTargetTexture for perfect circular masking in WebGL
     this.frontMirrorRTT = new BABYLON.RenderTargetTexture('frontMirrorRTT', 512, scene);
@@ -128,9 +133,8 @@ export class SimulatorCameraService {
 
     // 1. Update front mirror camera
     if (this.frontMirrorCamera) {
-      const relativeTarget = new BABYLON.Vector3(0.0, 0.3, 5.8);
-      const worldTarget = BABYLON.Vector3.TransformCoordinates(relativeTarget, truckNode.getWorldMatrix());
-      this.frontMirrorCamera.setTarget(worldTarget);
+      // Rotation is locked locally relative to parent truckNode, so no setTarget is needed.
+      // This prevents gimbal flip / 180-degree rotation bugs when looking straight down.
       this.frontMirrorCamera.update();
     }
 

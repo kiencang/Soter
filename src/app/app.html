@@ -74,16 +74,7 @@
 
       <!-- Active Warnings Overlay removed as requested -->
 
-      <!-- Scenario overlay text -->
-      @if (sim.isPlayingScenario() && sim.scenarioText()) {
-        <div class="absolute bottom-[20%] lg:bottom-12 left-1/2 -translate-x-1/2 z-30 w-full max-w-lg px-4 pointer-events-none" id="scenario-text-banner">
-          <div class="bg-slate-950/90 border-l-4 border-amber-500 p-4 rounded-xl shadow-2xl backdrop-blur-md">
-            <p class="text-sm lg:text-base text-white leading-relaxed font-medium">
-              {{ sim.scenarioText() }}
-            </p>
-          </div>
-        </div>
-      }
+      <!-- Scenario overlay text removed as requested because it is already displayed in the right dashboard panel -->
 
       <!-- Screen Mode / Camera View indicator -->
       @if (sim.viewMode() === 'cabin') {

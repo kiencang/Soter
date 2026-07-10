@@ -55,7 +55,7 @@
             <!-- Toggle Blind Spot Overlays (Moved to right column) -->
             @if (sim.viewMode() === 'orbit') {
               <div class="flex items-center justify-between p-3 bg-slate-950/40 border border-white/5 rounded-xl transition-all">
-                <span class="text-xs font-medium text-slate-300">Hiển thị vùng điểm mù (Đỏ 3D)</span>
+                <span class="text-xs font-medium text-slate-300">Hiển thị vùng điểm mù</span>
                 <button (click)="sim.toggleBlindSpotOverlays()" class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none cursor-pointer"
                         [class.bg-amber-500]="sim.showBlindSpotOverlays()" [class.bg-slate-700]="!sim.showBlindSpotOverlays()"
                         id="toggle-blindspot-right">
