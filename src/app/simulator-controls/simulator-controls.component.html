@@ -51,6 +51,19 @@
                 Góc Xe Máy
               </button>
             </div>
+
+            <!-- Toggle Blind Spot Overlays (Moved to right column) -->
+            @if (sim.viewMode() === 'orbit') {
+              <div class="flex items-center justify-between p-3 bg-slate-950/40 border border-white/5 rounded-xl transition-all">
+                <span class="text-xs font-medium text-slate-300">Hiển thị vùng điểm mù (Đỏ 3D)</span>
+                <button (click)="sim.toggleBlindSpotOverlays()" class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none cursor-pointer"
+                        [class.bg-amber-500]="sim.showBlindSpotOverlays()" [class.bg-slate-700]="!sim.showBlindSpotOverlays()"
+                        id="toggle-blindspot-right">
+                  <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform"
+                        [class.translate-x-6]="sim.showBlindSpotOverlays()" [class.translate-x-1]="!sim.showBlindSpotOverlays()"></span>
+                </button>
+              </div>
+            }
           </div>
 
           <!-- Section 2: Mode Tabs -->
@@ -122,20 +135,6 @@
                 </div>
               </div>
 
-              <!-- Toggle Blind Spot Overlays 3D -->
-              <div class="flex items-center justify-between border-t border-white/5 pt-3 mt-1">
-                <span class="text-xs font-medium text-slate-300">Vẽ vùng Điểm Mù (Màu đỏ 3D)</span>
-                <button (click)="sim.toggleBlindSpotOverlays()" 
-                        class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border"
-                        [class.bg-amber-500/20]="sim.showBlindSpotOverlays()"
-                        [class.text-amber-400]="sim.showBlindSpotOverlays()"
-                        [class.border-amber-500/30]="sim.showBlindSpotOverlays()"
-                        [class.bg-slate-800]="!sim.showBlindSpotOverlays()"
-                        [class.text-slate-400]="!sim.showBlindSpotOverlays()"
-                        [class.border-white/5]="!sim.showBlindSpotOverlays()">
-                  {{ sim.showBlindSpotOverlays() ? 'ĐANG BẬT' : 'ĐANG TẮT' }}
-                </button>
-              </div>
             </div>
 
             <!-- Detail Explanation card (Zonewise feedback) -->
@@ -244,6 +243,6 @@
         <app-quiz></app-quiz>
         </div>
         <div class="pt-6 border-t border-white/5 text-center">
-          <p class="text-[10px] text-slate-500 font-mono">Soter • v1.0.2 • Dự án An toàn Giao thông</p>
+          <p class="text-[10px] text-slate-500 font-mono">Soter • v1.0.3 • Dự án An toàn Giao thông</p>
         </div>
       </div>

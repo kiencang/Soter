@@ -1,5 +1,5 @@
 
-import { Injectable, signal, inject } from '@angular/core';
+import { Injectable, signal, inject, computed } from '@angular/core';
 import { SimulatorVehiclesService } from './simulator-vehicles.service';
 import { SimulatorAudioService } from './simulator-audio.service';
 import { SimulatorScenarioService, ScenarioContext } from './simulator-scenarios.service';
@@ -30,6 +30,55 @@ export class SimulatorService {
   currentZone = signal<string>('Ngoài vùng nguy hiểm');
   isBlindSpot = signal<boolean>(false);
   currentDetail = signal<string>('Bạn đang ở ngoài các vùng nguy hiểm. Hãy thử di chuyển xe máy vào sát xe tải để xem sự thay đổi tầm nhìn.');
+
+  leftMirrorStatus = computed(() => {
+    if (!this.motorcycleNode || !this.truckNode) return 'EMPTY';
+    const motorcycleWorldPos = this.motorcycleNode.position;
+    const mLocalTruck = BABYLON.Vector3.TransformCoordinates(motorcycleWorldPos, this.truckNode.getWorldMatrix().clone().invert());
+    const tx = mLocalTruck.x;
+    const tz = mLocalTruck.z;
+
+    // Left mirror coverage check
+    if (tx <= -0.5 && tx >= -12.0 && tz <= 4.0 && tz >= -30.0) {
+      const qLeft = this.logicService.getLeftBlindSpotVerticesLocal();
+      const isBlind = this.logicService.isPointInQuad(tx, tz, qLeft);
+      return isBlind ? 'BLIND' : 'VISIBLE';
+    }
+    return 'EMPTY';
+  });
+
+  rightMirrorStatus = computed(() => {
+    if (!this.motorcycleNode || !this.truckNode) return 'EMPTY';
+    const motorcycleWorldPos = this.motorcycleNode.position;
+    const mLocalTruck = BABYLON.Vector3.TransformCoordinates(motorcycleWorldPos, this.truckNode.getWorldMatrix().clone().invert());
+    const tx = mLocalTruck.x;
+    const tz = mLocalTruck.z;
+
+    // Right mirror coverage check (now relative to truckNode as well for perfect alignment!)
+    if (tx >= 0.5 && tx <= 12.0 && tz <= 4.0 && tz >= -30.0) {
+      const qRight = this.logicService.getRightBlindSpotVerticesLocal();
+      const isBlind = this.logicService.isPointInQuad(tx, tz, qRight);
+      return isBlind ? 'BLIND' : 'VISIBLE';
+    }
+    return 'EMPTY';
+  });
+
+  frontMirrorStatus = computed(() => {
+    if (!this.motorcycleNode || !this.truckNode) return 'EMPTY';
+    const motorcycleWorldPos = this.motorcycleNode.position;
+    const mLocalTruck = BABYLON.Vector3.TransformCoordinates(motorcycleWorldPos, this.truckNode.getWorldMatrix().clone().invert());
+    const tx = mLocalTruck.x;
+    const tz = mLocalTruck.z;
+
+    const qFront = [
+      { x: -1.5, z: 4.85 },
+      { x: 1.5, z: 4.85 },
+      { x: 1.5, z: 7.3 },
+      { x: -1.5, z: 7.3 }
+    ];
+    const isBlind = this.logicService.isPointInQuad(tx, tz, qFront);
+    return isBlind ? 'BLIND' : 'EMPTY';
+  });
 
   // Scenario states
   get activeScenario() { return this.scenarioService.activeScenario; }

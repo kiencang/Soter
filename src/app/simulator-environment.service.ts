@@ -14,17 +14,16 @@ export class SimulatorEnvironmentService {
     ground.position.y = 0;
     ground.material = groundMat;
 
-    // Build double yellow line (North-South)
+    // Build single yellow dashed center line (North-South)
     const lineMat = new BABYLON.StandardMaterial('lineMat', scene);
     lineMat.emissiveColor = new BABYLON.Color3(0.9, 0.7, 0.1); // Glowing Yellow
 
-    const yellowLine1 = BABYLON.MeshBuilder.CreateBox('yl1', { width: 0.1, height: 0.01, depth: 100 }, scene);
-    yellowLine1.position.set(-0.1, 0.01, 0);
-    yellowLine1.material = lineMat;
-
-    const yellowLine2 = BABYLON.MeshBuilder.CreateBox('yl2', { width: 0.1, height: 0.01, depth: 100 }, scene);
-    yellowLine2.position.set(0.1, 0.01, 0);
-    yellowLine2.material = lineMat;
+    for (let i = 0; i < 15; i++) {
+      const line = BABYLON.MeshBuilder.CreateBox(`yl_center_${i}`, { width: 0.15, height: 0.01, depth: 3.5 }, scene);
+      line.position.set(0, 0.01, -40 + i * 8.0);
+      line.material = lineMat;
+      laneLines.push({ mesh: line, initialZ: line.position.z });
+    }
 
     // White dashed lane dividers (left & right lanes)
     const whiteLineMat = new BABYLON.StandardMaterial('whiteLineMat', scene);

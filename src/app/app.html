@@ -21,17 +21,21 @@
           Gương Trái
         </div>
         <!-- Dynamic overlay message inside mirror -->
-        <div class="mt-auto bg-slate-950/75 py-1 px-1 text-center z-20">
-          @if (sim.isBlindSpot() && sim.motorcycleX() <= -1.5 && sim.motorcycleZ() >= -10.0 && sim.motorcycleZ() <= 2.2) {
+        @if (sim.leftMirrorStatus() === 'BLIND') {
+          <div class="mt-auto bg-slate-950/75 py-1.5 px-1 text-center z-20">
             <span class="text-[9px] lg:text-[10px] font-bold text-red-400 animate-pulse uppercase">⚠️ Bị Khuất</span>
-          } @else if (sim.motorcycleX() <= -1.5 && sim.motorcycleZ() >= -25.0 && sim.motorcycleZ() <= 10.0) {
-            <span class="text-[9px] lg:text-[10px] font-bold text-emerald-400 uppercase">✓ Nhìn Thấy</span>
-          } @else {
-            <span class="text-[9px] lg:text-[10px] text-slate-400">Trống</span>
-          }
-        </div>
+          </div>
+        }
         <!-- Inner shadow / reflection overlay -->
         <div class="absolute inset-0 bg-gradient-to-b from-white/5 via-transparent to-black/35 z-10 pointer-events-none"></div>
+      </div>
+
+      <!-- Title above the front mirror -->
+      <div class="absolute pointer-events-none z-20 text-center flex justify-center items-center"
+           style="top: 0.5%; left: 42.5%; width: 15%; min-width: 110px; max-width: 150px;">
+        <span class="bg-slate-950/95 text-[9px] lg:text-[10px] font-bold text-slate-200 px-2.5 py-0.5 rounded-full uppercase tracking-wider border border-white/10 shadow-lg whitespace-nowrap">
+          Gương Lồi Đầu Xe
+        </span>
       </div>
 
       <!-- Front Proximity Mirror Frame (Circular Convex Mirror) -->
@@ -39,24 +43,15 @@
            style="top: 3.5%; left: 42.5%; width: 15%; aspect-ratio: 1/1; min-width: 110px; max-width: 150px;"
            id="frame-front-mirror">
         
-        <!-- Badge Title -->
-        <div class="absolute top-2 left-1/2 -translate-x-1/2 z-20">
-          <span class="bg-slate-950/90 text-[8px] lg:text-[10px] font-bold text-slate-300 px-2 py-0.5 rounded-full uppercase tracking-wider border border-white/10 shadow-lg whitespace-nowrap">
-            Gương Lồi Đầu
-          </span>
-        </div>
-
         <!-- Spacer -->
         <div class="h-1/3"></div>
 
         <!-- Status Indicator -->
-        <div class="mt-auto bg-slate-950/80 py-1 px-1 text-center z-20 border-t border-white/5 backdrop-blur-sm rounded-b-full overflow-hidden">
-          @if (sim.motorcycleZ() >= 3.6 && sim.motorcycleZ() <= 7.2 && sim.motorcycleX() >= -1.8 && sim.motorcycleX() <= 1.8) {
+        @if (sim.frontMirrorStatus() === 'BLIND') {
+          <div class="mt-auto bg-slate-950/80 py-1.5 px-1 text-center z-20 border-t border-white/5 backdrop-blur-sm rounded-b-full overflow-hidden">
             <span class="text-[9px] lg:text-[10px] font-black text-red-400 animate-pulse uppercase tracking-wide block">⚠️ Vùng Mù</span>
-          } @else {
-            <span class="text-[9px] lg:text-[10px] font-bold text-emerald-400 uppercase tracking-wide block">✓ An Toàn</span>
-          }
-        </div>
+          </div>
+        }
 
         <!-- Convex Reflection Shine -->
         <div class="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-black/25 z-10 pointer-events-none rounded-full"></div>
@@ -69,15 +64,11 @@
         <div class="bg-slate-800/90 text-[9px] lg:text-xs font-semibold text-slate-300 py-1 px-2 text-center uppercase tracking-wider border-b border-white/5 z-20">
           Gương Phải
         </div>
-        <div class="mt-auto bg-slate-950/75 py-1 px-1 text-center z-20">
-          @if (sim.isBlindSpot() && sim.motorcycleX() >= 1.5 && sim.motorcycleZ() >= -13.0 && sim.motorcycleZ() <= 3.5) {
+        @if (sim.rightMirrorStatus() === 'BLIND') {
+          <div class="mt-auto bg-slate-950/75 py-1.5 px-1 text-center z-20">
             <span class="text-[9px] lg:text-[10px] font-bold text-red-400 animate-pulse uppercase">⚠️ Bị Khuất</span>
-          } @else if (sim.motorcycleX() >= 1.5 && sim.motorcycleZ() >= -25.0 && sim.motorcycleZ() <= 10.0) {
-            <span class="text-[9px] lg:text-[10px] font-bold text-emerald-400 uppercase">✓ Nhìn Thấy</span>
-          } @else {
-            <span class="text-[9px] lg:text-[10px] text-slate-400">Trống</span>
-          }
-        </div>
+          </div>
+        }
         <div class="absolute inset-0 bg-gradient-to-b from-white/5 via-transparent to-black/35 z-10 pointer-events-none"></div>
       </div>
 
@@ -123,18 +114,7 @@
         </div>
       }
 
-      @if (sim.viewMode() === 'orbit') {
-        <div class="absolute bottom-6 left-6 right-6 lg:left-1/2 lg:right-auto lg:-translate-x-1/2 z-40">
-          <div class="bg-slate-950/80 px-4 py-3 rounded-2xl border border-white/10 shadow-2xl flex items-center justify-between gap-6 max-w-sm w-full mx-auto">
-            <span class="text-xs font-mono text-slate-300 uppercase">Hiển thị vùng điểm mù</span>
-            <button (click)="sim.toggleBlindSpotOverlays()" class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none"
-                    [class.bg-amber-500]="sim.showBlindSpotOverlays()" [class.bg-slate-700]="!sim.showBlindSpotOverlays()">
-              <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform"
-                    [class.translate-x-6]="sim.showBlindSpotOverlays()" [class.translate-x-1]="!sim.showBlindSpotOverlays()"></span>
-            </button>
-          </div>
-        </div>
-      }
+
 
       <!-- Sandbox manual controls overlay (only for rider mode) -->
       <div class="absolute bottom-6 right-6 z-40 bg-slate-950/80 p-3 rounded-2xl border border-white/10 shadow-2xl" 

@@ -2,11 +2,13 @@ import { Injectable, inject } from '@angular/core';
 import * as BABYLON from '@babylonjs/core';
 import { SimulatorVehicleTruckService } from './simulator-vehicle-truck.service';
 import { SimulatorVehicleMotorcycleService } from './simulator-vehicle-motorcycle.service';
+import { SimulatorLogicService } from './simulator-logic.service';
 
 @Injectable({ providedIn: 'root' })
 export class SimulatorVehiclesService {
   private truckService = inject(SimulatorVehicleTruckService);
   private motorcycleService = inject(SimulatorVehicleMotorcycleService);
+  private logicService = inject(SimulatorLogicService);
 
   createTruck(scene: BABYLON.Scene) {
     return this.truckService.createTruck(scene);
@@ -14,6 +16,40 @@ export class SimulatorVehiclesService {
 
   createMotorcycle(scene: BABYLON.Scene) {
     return this.motorcycleService.createMotorcycle(scene);
+  }
+
+  private createFlatPolygon(name: string, vertices: BABYLON.Vector3[], scene: BABYLON.Scene, material: BABYLON.Material): BABYLON.Mesh {
+    const customMesh = new BABYLON.Mesh(name, scene);
+    
+    const positions: number[] = [];
+    const indices: number[] = [];
+    const normals: number[] = [];
+    
+    vertices.forEach(v => {
+      positions.push(v.x, v.y, v.z);
+    });
+    
+    if (vertices.length === 4) {
+      // Front face
+      indices.push(0, 1, 2);
+      indices.push(0, 2, 3);
+      // Back face
+      indices.push(2, 1, 0);
+      indices.push(3, 2, 0);
+    }
+    
+    for (let i = 0; i < vertices.length; i++) {
+      normals.push(0, 1, 0);
+    }
+    
+    const vertexData = new BABYLON.VertexData();
+    vertexData.positions = positions;
+    vertexData.indices = indices;
+    vertexData.normals = normals;
+    
+    vertexData.applyToMesh(customMesh);
+    customMesh.material = material;
+    return customMesh;
   }
 
   createBlindSpots(scene: BABYLON.Scene, truckNode: BABYLON.TransformNode, trailerNode: BABYLON.TransformNode) {
@@ -27,28 +63,34 @@ export class SimulatorVehiclesService {
     yellowMat.diffuseColor = new BABYLON.Color3(0.9, 0.65, 0.0);
     yellowMat.alpha = 0.38;
 
-    // 1. Front Blind Spot (Điểm mù trước đầu xe) - Local to Cabin
-    frontBlindSpotMesh = BABYLON.MeshBuilder.CreateBox('frontBS', { width: 3.6, height: 0.02, depth: 3.6 }, scene);
-    frontBlindSpotMesh.position.set(0, 0.015, 5.4); // Centered right in front of nose
-    frontBlindSpotMesh.material = yellowMat;
+    // 1. Front Blind Spot (Điểm mù trước đầu xe) - Local to Cabin (Rectangle)
+    const frontVerts = [
+      new BABYLON.Vector3(-1.5, 0.015, 4.85),
+      new BABYLON.Vector3(1.5, 0.015, 4.85),
+      new BABYLON.Vector3(1.5, 0.015, 7.3),
+      new BABYLON.Vector3(-1.5, 0.015, 7.3)
+    ];
+    frontBlindSpotMesh = this.createFlatPolygon('frontBS', frontVerts, scene, yellowMat);
     frontBlindSpotMesh.parent = truckNode;
 
-    // 2. Right Blind Spot (Bên phụ - Rất lớn) - Local to Trailer
-    rightBlindSpotMesh = BABYLON.MeshBuilder.CreateBox('rightBS', { width: 5.0, height: 0.02, depth: 16.5 }, scene);
-    rightBlindSpotMesh.position.set(4.0, 0.015, -4.75); // Centered on right side
-    rightBlindSpotMesh.material = yellowMat;
-    rightBlindSpotMesh.parent = trailerNode;
+    // 2. Right Blind Spot (Bên phụ - Rất lớn) - Local to Cabin/Mirror (Wedge expanding out-back)
+    const rightVerts = this.logicService.getRightBlindSpotVerticesLocal();
+    rightBlindSpotMesh = this.createFlatPolygon('rightBS', rightVerts, scene, yellowMat);
+    rightBlindSpotMesh.parent = truckNode;
 
-    // 3. Left Blind Spot (Bên lái) - Local to Cabin
-    leftBlindSpotMesh = BABYLON.MeshBuilder.CreateBox('leftBS', { width: 4.0, height: 0.02, depth: 12.2 }, scene);
-    leftBlindSpotMesh.position.set(-3.5, 0.015, -3.9); // Centered on left side
-    leftBlindSpotMesh.material = yellowMat;
+    // 3. Left Blind Spot (Bên lái) - Local to Cabin/Mirror (Narrow wedge)
+    const leftVerts = this.logicService.getLeftBlindSpotVerticesLocal();
+    leftBlindSpotMesh = this.createFlatPolygon('leftBS', leftVerts, scene, yellowMat);
     leftBlindSpotMesh.parent = truckNode;
 
-    // 4. Rear Blind Spot (Sau đuôi rơ-moóc) - Local to Trailer
-    rearBlindSpotMesh = BABYLON.MeshBuilder.CreateBox('rearBS', { width: 5.0, height: 0.02, depth: 11.5 }, scene);
-    rearBlindSpotMesh.position.set(0, 0.015, -19.25); // Centered behind trailer
-    rearBlindSpotMesh.material = yellowMat;
+    // 4. Rear Blind Spot (Sau đuôi rơ-moóc) - Local to Trailer (Rectangle)
+    const rearVerts = [
+      new BABYLON.Vector3(-1.25, 0.015, -20.0),
+      new BABYLON.Vector3(1.25, 0.015, -20.0),
+      new BABYLON.Vector3(1.25, 0.015, -10.7),
+      new BABYLON.Vector3(-1.25, 0.015, -10.7)
+    ];
+    rearBlindSpotMesh = this.createFlatPolygon('rearBS', rearVerts, scene, yellowMat);
     rearBlindSpotMesh.parent = trailerNode;
 
     return { front: frontBlindSpotMesh!, left: leftBlindSpotMesh!, right: rightBlindSpotMesh!, rear: rearBlindSpotMesh! };

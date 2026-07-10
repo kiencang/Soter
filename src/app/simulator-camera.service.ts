@@ -23,21 +23,21 @@ export class SimulatorCameraService {
     this.mainCamera.viewport = new BABYLON.Viewport(0, 0, 1, 1);
 
     // 2. Left Mirror Camera (Backwards-Left angle from cabin mirror wing)
-    this.leftMirrorCamera = new BABYLON.FreeCamera('leftMirrorCamera', new BABYLON.Vector3(-1.92, 2.5, 3.1), scene);
-    this.leftMirrorCamera.setTarget(new BABYLON.Vector3(-12.0, 0.8, -35.0)); // Wide angle backward-left
+    this.leftMirrorCamera = new BABYLON.FreeCamera('leftMirrorCamera', new BABYLON.Vector3(-1.65, 2.4, 3.2), scene);
+    this.leftMirrorCamera.setTarget(new BABYLON.Vector3(-1.9, 0.8, -25.0)); // Adjusted to look along the truck side
     this.leftMirrorCamera.parent = truckNode;
     // Positioned inside left overlay on client canvas: 0.02 width-offset, 0.65 height-offset
     this.leftMirrorCamera.viewport = new BABYLON.Viewport(0.01, 0.63, 0.17, 0.33);
 
     // 3. Right Mirror Camera (Backwards-Right angle from cabin mirror wing)
-    this.rightMirrorCamera = new BABYLON.FreeCamera('rightMirrorCamera', new BABYLON.Vector3(1.92, 2.5, 3.1), scene);
-    this.rightMirrorCamera.setTarget(new BABYLON.Vector3(12.0, 0.8, -35.0)); // Wide angle backward-right
+    this.rightMirrorCamera = new BABYLON.FreeCamera('rightMirrorCamera', new BABYLON.Vector3(1.65, 2.4, 3.2), scene);
+    this.rightMirrorCamera.setTarget(new BABYLON.Vector3(1.9, 0.8, -25.0)); // Adjusted to look along the truck side
     this.rightMirrorCamera.parent = truckNode;
     // Positioned inside right overlay on client canvas: 0.82 width-offset, 0.65 height-offset
     this.rightMirrorCamera.viewport = new BABYLON.Viewport(0.82, 0.63, 0.17, 0.33);
 
     // 4. Front Proximity Mirror Camera (convex look-down mirror on high cabin)
-    this.frontMirrorCamera = new BABYLON.FreeCamera('frontMirrorCamera', new BABYLON.Vector3(0.6, 3.25, 4.6), scene);
+    this.frontMirrorCamera = new BABYLON.FreeCamera('frontMirrorCamera', new BABYLON.Vector3(0.5, 3.2, 4.5), scene);
     // Convex mirror has a wide field of view (approx 80 degrees)
     this.frontMirrorCamera.fov = 1.4;
     this.frontMirrorCamera.setTarget(new BABYLON.Vector3(0.0, 0.3, 5.8)); // Pointing sharp down/forward
@@ -106,17 +106,17 @@ export class SimulatorCameraService {
       // Un-link orbit controller so we can lock look-around inside cabin
       this.mainCamera.detachControl();
       this.mainCamera.parent = truckNode;
-      this.mainCamera.position.set(-0.6, 2.7, 3.8); // Inside left seat at eye level
+      this.mainCamera.position.set(-0.6, 2.3, 3.4); // Inside left seat at eye level (1.5m seat + 0.8m eye level)
     }
   }
 
   updateCabinLookAngle() {
     if (this.viewMode() === 'cabin' && this.mainCamera) {
-      let targetLook = new BABYLON.Vector3(-0.6, 2.5, 30.0); // look front
+      let targetLook = new BABYLON.Vector3(-0.6, 2.3, 30.0); // look front
       if (this.lookDirection() === 'left') {
-        targetLook = new BABYLON.Vector3(-10.0, 2.0, 4.0); // look left window
+        targetLook = new BABYLON.Vector3(-10.0, 2.1, 4.0); // look left window
       } else if (this.lookDirection() === 'right') {
-        targetLook = new BABYLON.Vector3(10.0, 1.8, 2.0); // look right passenger door
+        targetLook = new BABYLON.Vector3(10.0, 1.9, 2.0); // look right passenger door
       }
       this.mainCamera.setTarget(targetLook);
     }
@@ -136,7 +136,7 @@ export class SimulatorCameraService {
 
     // 2. Update left mirror camera
     if (this.leftMirrorCamera) {
-      const leftTargetLocal = new BABYLON.Vector3(-12.0, 0.8, -35.0);
+      const leftTargetLocal = new BABYLON.Vector3(-1.9, 0.8, -25.0);
       const leftTargetWorld = BABYLON.Vector3.TransformCoordinates(leftTargetLocal, truckNode.getWorldMatrix());
       this.leftMirrorCamera.setTarget(leftTargetWorld);
       this.leftMirrorCamera.update();
@@ -144,7 +144,7 @@ export class SimulatorCameraService {
 
     // 3. Update right mirror camera
     if (this.rightMirrorCamera) {
-      const rightTargetLocal = new BABYLON.Vector3(12.0, 0.8, -35.0);
+      const rightTargetLocal = new BABYLON.Vector3(1.9, 0.8, -25.0);
       const rightTargetWorld = BABYLON.Vector3.TransformCoordinates(rightTargetLocal, truckNode.getWorldMatrix());
       this.rightMirrorCamera.setTarget(rightTargetWorld);
       this.rightMirrorCamera.update();
