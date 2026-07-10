@@ -11,7 +11,7 @@ export interface BlindSpotResult {
 export class SimulatorLogicService {
   getLeftBlindSpotVerticesLocal(): BABYLON.Vector3[] {
     return [
-      new BABYLON.Vector3(-6.0, 0.015, -4.0),
+      new BABYLON.Vector3(-8.0, 0.015, -4.0),
       new BABYLON.Vector3(-1.25, 0.015, 1.5),
       new BABYLON.Vector3(-1.25, 0.015, 3.2),
       new BABYLON.Vector3(-8.0, 0.015, 1.0)
@@ -21,7 +21,7 @@ export class SimulatorLogicService {
   getRightBlindSpotVerticesLocal(): BABYLON.Vector3[] {
     return [
       new BABYLON.Vector3(1.25, 0.015, 1.5),
-      new BABYLON.Vector3(7.0, 0.015, -6.0),
+      new BABYLON.Vector3(8.0, 0.015, -6.0),
       new BABYLON.Vector3(8.0, 0.015, -1.0),
       new BABYLON.Vector3(1.25, 0.015, 3.2)
     ];

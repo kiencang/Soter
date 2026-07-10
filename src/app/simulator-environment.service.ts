@@ -56,9 +56,9 @@ export class SimulatorEnvironmentService {
       intersectionMeshes.push(zebra);
     }
 
-    // Solid white stop line (vạch dừng xe) before the zebra crossing (starts at Z = 1.5)
-    const stopLine = BABYLON.MeshBuilder.CreateBox('stopLine', { width: 9.0, height: 0.012, depth: 0.4 }, scene);
-    stopLine.position.set(4.5, 0.011, 0.8);
+    // Solid white stop line (vạch dừng xe) before the zebra crossing, now spanning the entire crosswalk width and positioned further back
+    const stopLine = BABYLON.MeshBuilder.CreateBox('stopLine', { width: 18.0, height: 0.012, depth: 0.45 }, scene);
+    stopLine.position.set(0, 0.011, -1.0);
     stopLine.material = whiteLineMat;
     intersectionMeshes.push(stopLine);
   }
