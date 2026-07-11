@@ -17,7 +17,7 @@ export class SimulatorScenarioRightTurnService {
       setText("Hành trình: Xe container xi-nhan rẽ phải chuẩn bị rẽ ngã tư. Xe máy đang bám sát song song phía bên phải rơ-moóc rọ - đây là vùng tử thần khuất 100% gương lái!");
       ctx.setBlinkerActive(true, 'right');
 
-      const progressZ = -8.0 + t * 2.2;
+      const progressZ = -19.14 + t * 2.2;
       if (ctx.truckNode) {
         ctx.truckNode.position.set(2.25, 0, progressZ);
         ctx.truckNode.rotation.y = 0;
@@ -39,11 +39,11 @@ export class SimulatorScenarioRightTurnService {
       const angle = turnT * (Math.PI / 2.2);
       
       let truckX = 2.25;
-      let truckZ = -1.0;
+      let truckZ = -12.1;
       if (ctx.truckNode) {
         ctx.truckNode.rotation.y = angle;
         const radius = 6.5;
-        truckZ = -1.0 + Math.sin(angle) * radius;
+        truckZ = -12.1 + Math.sin(angle) * radius;
         truckX = 2.25 + radius - Math.cos(angle) * radius;
         ctx.truckNode.position.set(truckX, 0, truckZ);
       }
@@ -70,7 +70,7 @@ export class SimulatorScenarioRightTurnService {
       setText("VA CHẠM: Đuôi rơ-moóc quét sâu ép chặt xe máy vào vỉa hè. Xe máy ngã đổ vào gầm xe tải lớn do đứng trong góc chết rẽ phải.");
       
       const finalTruckX = 7.82;
-      const finalTruckZ = 5.43;
+      const finalTruckZ = -5.67;
       const finalTruckAngle = Math.PI / 2.2;
 
       if (ctx.truckNode) {
@@ -79,7 +79,7 @@ export class SimulatorScenarioRightTurnService {
       }
 
       const finalBikeX = 5.93;
-      const finalBikeZ = 1.32;
+      const finalBikeZ = -9.82;
 
       ctx.motorcycleX.set(finalBikeX);
       ctx.motorcycleZ.set(finalBikeZ);

@@ -16,7 +16,7 @@ export class SimulatorCameraService {
   setupCameras(canvas: HTMLCanvasElement, scene: BABYLON.Scene, truckNode: BABYLON.TransformNode | null) {
     // 1. Orbit overview Camera (default)
     // Replaced with ArcRotateCamera to allow orbiting around the scene
-    this.mainCamera = new BABYLON.ArcRotateCamera('mainCamera', -Math.PI / 3, Math.PI / 4, 25, new BABYLON.Vector3(0, 1.8, -2), scene);
+    this.mainCamera = new BABYLON.ArcRotateCamera('mainCamera', -Math.PI / 3, Math.PI / 4, 25, new BABYLON.Vector3(0, 1.8, -10), scene);
     this.mainCamera.lowerRadiusLimit = 8;
     this.mainCamera.upperRadiusLimit = 55;
     this.mainCamera.attachControl(canvas, true);
@@ -101,12 +101,15 @@ export class SimulatorCameraService {
 
     if (mode === 'orbit') {
       this.mainCamera.parent = null;
-      this.mainCamera.target = new BABYLON.Vector3(0, 1.8, -2);
+      this.mainCamera.target = new BABYLON.Vector3(0, 1.8, -10);
       this.mainCamera.attachControl(canvas, true);
     } else if (mode === 'rider') {
-      this.mainCamera.parent = null;
-      this.mainCamera.target = motorcycleNode.position;
-      this.mainCamera.attachControl(canvas, true);
+      this.mainCamera.detachControl();
+      this.mainCamera.parent = motorcycleNode;
+      this.mainCamera.radius = 0.05;
+      this.mainCamera.alpha = -Math.PI / 2; // look straight forward along +Z local axis
+      this.mainCamera.beta = Math.PI / 2; // level horizon view
+      this.mainCamera.target = new BABYLON.Vector3(0, 1.35, 0.55); // local rider eye level above handlebar, avoiding clipping with helmet
     } else if (mode === 'cabin') {
       // Un-link orbit controller so we can lock look-around inside cabin
       this.mainCamera.detachControl();

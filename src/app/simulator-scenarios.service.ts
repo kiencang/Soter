@@ -45,9 +45,11 @@ export class SimulatorScenarioService {
       const initialTruckX = 2.25;
       let initialTruckZ = 0;
       if (type === 'right_turn') {
-        initialTruckZ = -8.0;
+        initialTruckZ = -19.14;
       } else if (type === 'cut_off') {
-        initialTruckZ = -4.36;
+        initialTruckZ = -19.7;
+      } else if (type === 'free' || type === 'tailgate') {
+        initialTruckZ = -40.0;
       }
       
       ctx.truckNode.position.set(initialTruckX, 0, initialTruckZ);
@@ -59,30 +61,26 @@ export class SimulatorScenarioService {
       ctx.setTrailerRearPos(new BABYLON.Vector3(initialTruckX, 0.6, initialTruckZ - 11.25));
     }
 
-    if (type === 'free' || type === 'tailgate') {
-      ctx.intersectionMeshes.forEach(mesh => mesh.isVisible = false);
-    } else {
-      ctx.intersectionMeshes.forEach(mesh => mesh.isVisible = true);
-    }
+    ctx.intersectionMeshes.forEach(mesh => mesh.isVisible = true);
 
     if (type === 'free') {
       ctx.motorcycleX.set(6.05);
-      ctx.motorcycleZ.set(-5.0);
+      ctx.motorcycleZ.set(-45.0);
       ctx.syncMotorcyclePosition();
       ctx.setViewMode('orbit');
     } else if (type === 'right_turn') {
       ctx.motorcycleX.set(6.05);
-      ctx.motorcycleZ.set(-10.5);
+      ctx.motorcycleZ.set(-21.64);
       ctx.syncMotorcyclePosition();
       ctx.setViewMode('orbit');
     } else if (type === 'cut_off') {
       ctx.motorcycleX.set(6.05);
-      ctx.motorcycleZ.set(-0.15);
+      ctx.motorcycleZ.set(-15.5);
       ctx.syncMotorcyclePosition();
       ctx.setViewMode('orbit');
     } else if (type === 'tailgate') {
       ctx.motorcycleX.set(2.25);
-      ctx.motorcycleZ.set(-15.0);
+      ctx.motorcycleZ.set(-55.0);
       ctx.syncMotorcyclePosition();
       ctx.setViewMode('rider');
     }

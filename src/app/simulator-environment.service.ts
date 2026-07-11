@@ -9,7 +9,7 @@ export class SimulatorEnvironmentService {
     groundMat.diffuseColor = new BABYLON.Color3(0.18, 0.2, 0.22);
     groundMat.specularColor = new BABYLON.Color3(0.05, 0.05, 0.05);
 
-    const ground = BABYLON.MeshBuilder.CreatePlane('ground', { width: 100, height: 100 }, scene);
+    const ground = BABYLON.MeshBuilder.CreatePlane('ground', { width: 200, height: 200 }, scene);
     ground.rotation.x = Math.PI / 2;
     ground.position.y = 0;
     ground.material = groundMat;
@@ -17,49 +17,56 @@ export class SimulatorEnvironmentService {
     // Build single yellow dashed center line (North-South)
     const lineMat = new BABYLON.StandardMaterial('lineMat', scene);
     lineMat.emissiveColor = new BABYLON.Color3(0.9, 0.7, 0.1); // Glowing Yellow
-
-    for (let i = 0; i < 15; i++) {
-      const line = BABYLON.MeshBuilder.CreateBox(`yl_center_${i}`, { width: 0.15, height: 0.01, depth: 3.5 }, scene);
-      line.position.set(0, 0.01, -40 + i * 8.0);
-      line.material = lineMat;
-      laneLines.push({ mesh: line, initialZ: line.position.z });
-    }
-
-    // White dashed lane dividers (left & right lanes)
     const whiteLineMat = new BABYLON.StandardMaterial('whiteLineMat', scene);
     whiteLineMat.emissiveColor = new BABYLON.Color3(0.85, 0.85, 0.85);
 
-    const xOffsets = [-4.5, 4.5];
-    for (const x of xOffsets) {
-      for (let i = 0; i < 15; i++) {
-        const line = BABYLON.MeshBuilder.CreateBox(`wl_${x}_${i}`, { width: 0.15, height: 0.01, depth: 3.5 }, scene);
-        line.position.set(x, 0.01, -40 + i * 8.0);
-        line.material = whiteLineMat;
-        laneLines.push({ mesh: line, initialZ: line.position.z });
+    // --- Road Lines & Crosswalks (4 directions) ---
+    for (let d = 0; d < 4; d++) {
+      const angle = (Math.PI / 2) * d;
+      const cosA = Math.cos(angle);
+      const sinA = Math.sin(angle);
+      const rot = (x: number, z: number) => ({ x: x * cosA + z * sinA, z: -x * sinA + z * cosA });
+
+      // 1. Center Yellow Lines & White Lane Dividers
+      for (let i = 0; i < 14; i++) {
+        const zPos = 17 + i * 6;
+        
+        // Yellow center line
+        const pY = rot(0, zPos);
+        const yLine = BABYLON.MeshBuilder.CreateBox(`yl_${d}_${i}`, { width: 0.15, height: 0.01, depth: 3.5 }, scene);
+        yLine.position.set(pY.x, 0.01, pY.z);
+        yLine.rotation.y = angle;
+        yLine.material = lineMat;
+        intersectionMeshes.push(yLine);
+
+        // White lane dividers
+        for (const x of [-4.5, 4.5]) {
+          const pW = rot(x, zPos);
+          const wLine = BABYLON.MeshBuilder.CreateBox(`wl_${d}_${x}_${i}`, { width: 0.15, height: 0.01, depth: 3.5 }, scene);
+          wLine.position.set(pW.x, 0.01, pW.z);
+          wLine.rotation.y = angle;
+          wLine.material = whiteLineMat;
+          intersectionMeshes.push(wLine);
+        }
       }
+
+      // 2. Zebra Crossings (distance 11 from center)
+      for (let i = -5; i <= 5; i++) {
+        const pZebra = rot(i * 1.5, 11.0);
+        const zebra = BABYLON.MeshBuilder.CreateBox(`zebra_${d}_${i}`, { width: 0.6, height: 0.012, depth: 4.0 }, scene);
+        zebra.position.set(pZebra.x, 0.01, pZebra.z);
+        zebra.rotation.y = angle;
+        zebra.material = whiteLineMat;
+        intersectionMeshes.push(zebra);
+      }
+
+      // 3. Stop Lines (distance 14.5 from center)
+      const pStop = rot(0, 14.5);
+      const stopLine = BABYLON.MeshBuilder.CreateBox(`stopLine_${d}`, { width: 18.0, height: 0.012, depth: 0.45 }, scene);
+      stopLine.position.set(pStop.x, 0.011, pStop.z);
+      stopLine.rotation.y = angle;
+      stopLine.material = whiteLineMat;
+      intersectionMeshes.push(stopLine);
     }
-
-    // East-West Intersection Road (at Z = 10)
-    const crossroadMat = new BABYLON.StandardMaterial('crossroadMat', scene);
-    crossroadMat.diffuseColor = new BABYLON.Color3(0.2, 0.22, 0.25);
-
-    const eastWestRoad = BABYLON.MeshBuilder.CreateBox('ewRoad', { width: 100, height: 0.005, depth: 14 }, scene);
-    eastWestRoad.position.set(0, 0.005, 10);
-    eastWestRoad.material = crossroadMat;
-    intersectionMeshes.push(eastWestRoad);
-
-    // Zebra crossing lines at intersection
-    for (let i = -6; i <= 6; i++) {
-      const zebra = BABYLON.MeshBuilder.CreateBox(`zebra_${i}`, { width: 0.6, height: 0.012, depth: 4.0 }, scene);
-      zebra.position.set(i * 1.5, 0.01, 3.5);
-      zebra.material = whiteLineMat;
-      intersectionMeshes.push(zebra);
-    }
-
-    // Solid white stop line (vạch dừng xe) before the zebra crossing, now spanning the entire crosswalk width and positioned further back
-    const stopLine = BABYLON.MeshBuilder.CreateBox('stopLine', { width: 18.0, height: 0.012, depth: 0.45 }, scene);
-    stopLine.position.set(0, 0.011, -1.0);
-    stopLine.material = whiteLineMat;
-    intersectionMeshes.push(stopLine);
   }
 }

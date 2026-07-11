@@ -21,11 +21,11 @@ export class SimulatorScenarioCutOffService {
       setText("Đèn đỏ: Cả xe tải lớn và xe máy đang dừng chờ đèn đỏ tại ngã tư. Xe máy dừng chếch về phía trước bên phải cabin xe tải.");
       
       if (ctx.truckNode) {
-        ctx.truckNode.position.set(2.25, 0, -6.86);
+        ctx.truckNode.position.set(2.25, 0, -19.7);
       }
       
       const xPos = 6.05;
-      const zPos = -2.65;
+      const zPos = -15.5;
       
       ctx.motorcycleX.set(xPos);
       ctx.motorcycleZ.set(zPos);
@@ -42,27 +42,27 @@ export class SimulatorScenarioCutOffService {
       
       const activeT = t - 1.5; // ranges from 0 to 3.2
       // Truck accelerates slowly
-      const truckZ = -6.86 + activeT * 2.8625; // reaches 2.3 at t=4.7 (activeT=3.2)
+      const truckZ = -19.7 + activeT * 3.125; // reaches -9.7 at t=4.7 (activeT=3.2)
       if (ctx.truckNode) {
         ctx.truckNode.position.set(2.25, 0, truckZ);
       }
 
-      // Motorcycle starts from (6.05, -2.65).
-      // Between activeT = 0 and 1.5: goes straight to z = 6.0
-      // Between activeT = 1.5 and 3.2: cuts left to x = 2.25, z = 7.0
+      // Motorcycle starts from (6.05, -15.5).
+      // Between activeT = 0 and 1.5: goes straight to z = -6.85
+      // Between activeT = 1.5 and 3.2: cuts left to x = 2.25, z = -5.85
       let bikeX = 6.05;
-      let bikeZ = -2.65;
+      let bikeZ = -15.5;
       let bikeRotY = 0;
 
       if (activeT < 1.5) {
         const ratio = activeT / 1.5;
         bikeX = 6.05;
-        bikeZ = -2.65 + ratio * 8.65; // moves to 6.0
+        bikeZ = -15.5 + ratio * 8.65; // moves to -6.85
         bikeRotY = 0;
       } else {
         const ratio = (activeT - 1.5) / 1.7; // 0 to 1
         bikeX = 6.05 - ratio * 3.8; // cuts left to 2.25
-        bikeZ = 6.0 + ratio * 1.0; // moves forward to 7.0
+        bikeZ = -6.85 + ratio * 1.0; // moves forward to -5.85
         bikeRotY = -Math.PI / 3 * ratio; // turn left angle
       }
 
@@ -81,14 +81,14 @@ export class SimulatorScenarioCutOffService {
       
       const activeT = t - 4.7; // 0 to 3.0
       // Truck stops or slows down slightly after collision
-      const truckFinalZ = 2.3 + Math.min(activeT * 0.3, 0.5); 
+      const truckFinalZ = -9.7 + Math.min(activeT * 0.3, 0.5); 
       if (ctx.truckNode) {
         ctx.truckNode.position.set(2.25, 0, truckFinalZ);
       }
 
       // Motorcycle gets knocked down and slides slightly
       const bikeX = 2.25;
-      const bikeZ = 7.0 + Math.min(activeT * 0.4, 0.8);
+      const bikeZ = -5.85 + Math.min(activeT * 0.4, 0.8);
       
       ctx.motorcycleX.set(bikeX);
       ctx.motorcycleZ.set(bikeZ);

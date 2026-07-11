@@ -12,46 +12,85 @@ export class SimulatorScenarioTailgateService {
     setText: (text: string) => void,
     setPlaying: (playing: boolean) => void
   ) {
-    if (ctx.truckNode) {
-      ctx.truckNode.position.set(2.25, 0, 0);
-      ctx.truckNode.rotation.y = 0;
-    }
+    const speed = 12.0;
+    const initialZ = -40.0;
+    
+    // Calculate current positions based on time
+    let truckZ = initialZ;
+    let bikeZ = initialZ - 15.0;
 
-    // Stage 0: 0s to 3s -> Riding close behind
+    // Stage 0: 0s to 3.2s -> Riding close behind
     if (t < 3.2) {
       setStage(0);
       setText("Hành trình: Xe máy bám sát sạt đuôi rơ-moóc thùng container ở khoảng cách 1.5 mét. Người lái xe máy hoàn toàn bị mất tầm nhìn phía trước.");
-      
-      ctx.motorcycleX.set(2.25);
-      ctx.motorcycleZ.set(-15.0);
-      ctx.syncMotorcyclePosition();
-      
-      this.animateRoadLines(dt, 26, ctx.laneLines);
+      truckZ = initialZ + t * speed;
+      bikeZ = truckZ - 15.0;
+      this.updatePositions(ctx, truckZ, bikeZ);
     }
-    // Stage 1: 3.2s to 6.2s -> Still tailgating, completely invisible in mirrors
+    // Stage 1: 3.2s to 6.5s -> Still tailgating, completely invisible in mirrors
     else if (t < 6.5) {
       setStage(1);
       setText("Rủi ro ẩn: Ở vị trí bám sát sạt này, gương chiếu hậu bên hông xe container không thể thu giữ bóng dáng xe máy. Tài xế hoàn toàn mù thông tin sau đuôi.");
-      
-      ctx.motorcycleX.set(2.25);
-      ctx.motorcycleZ.set(-15.0);
-      ctx.syncMotorcyclePosition();
-      
-      this.animateRoadLines(dt, 26, ctx.laneLines);
+      truckZ = initialZ + t * speed;
+      bikeZ = truckZ - 15.0;
+      this.updatePositions(ctx, truckZ, bikeZ);
     }
     // Stage 2: 6.5s to 9.5s -> Sudden emergency brake!
     else if (t < 9.5) {
       setStage(2);
       setText("PHANH GẤP: Gặp vật cản, container phanh gấp. Do bị che khuất tầm nhìn trước hoàn toàn và khoảng cách quá ngắn, xe máy húc thẳng vào đuôi rơ-moóc sắt thép.");
       
-      ctx.motorcycleX.set(2.25);
-      ctx.motorcycleZ.set(-13.5);
-      if (ctx.motorcycleNode) {
-        ctx.motorcycleNode.position.set(2.25, 0.35, -13.5);
-        ctx.motorcycleNode.rotation.x = -Math.PI / 4.5;
+      const activeT = t - 6.5;
+      const truckStartZ = initialZ + 6.5 * speed;
+      const bikeStartZ = truckStartZ - 15.0;
+      
+      // Truck decelerates to stop in 1.5s
+      const truckDecel = speed / 1.5;
+      let truckDist = 0;
+      if (activeT < 1.5) {
+        truckDist = speed * activeT - 0.5 * truckDecel * activeT * activeT;
+      } else {
+        truckDist = speed * 1.5 - 0.5 * truckDecel * 1.5 * 1.5;
+      }
+      truckZ = truckStartZ + truckDist;
+      
+      // Bike has 0.5s reaction time, then brakes but crashes
+      let bikeDist = 0;
+      if (activeT < 0.5) {
+        bikeDist = speed * activeT;
+      } else {
+        const brakeT = activeT - 0.5;
+        const bikeDecel = speed / 1.0;
+        bikeDist = speed * 0.5 + speed * brakeT - 0.5 * bikeDecel * brakeT * brakeT;
+      }
+      bikeZ = bikeStartZ + bikeDist;
+      
+      // Collision happens if bike gets too close to the rear of the trailer
+      const collisionZ = truckZ - 13.5;
+      let crashed = false;
+      if (bikeZ >= collisionZ) {
+        bikeZ = collisionZ;
+        crashed = true;
       }
       
-      this.animateRoadLines(dt, 0, ctx.laneLines);
+      if (ctx.truckNode) {
+        ctx.truckNode.position.set(2.25, 0, truckZ);
+        ctx.setTrailerRearPos(new BABYLON.Vector3(2.25, 0.6, truckZ - 11.25));
+      }
+      
+      ctx.motorcycleX.set(2.25);
+      ctx.motorcycleZ.set(bikeZ);
+      
+      if (ctx.motorcycleNode) {
+        if (crashed) {
+          ctx.motorcycleNode.position.set(2.25, 0.35, bikeZ);
+          ctx.motorcycleNode.rotation.x = -Math.PI / 4.5;
+        } else {
+          ctx.motorcycleNode.position.set(2.25, 0, bikeZ);
+          ctx.motorcycleNode.rotation.x = 0;
+        }
+      }
+      
       ctx.checkBlindSpotState();
     }
     // Stage 3: End of Scenario
@@ -61,12 +100,17 @@ export class SimulatorScenarioTailgateService {
     }
   }
 
-  private animateRoadLines(dt: number, speedMultiplier: number, laneLines: any[]) {
-    laneLines.forEach(line => {
-      line.mesh.position.z -= dt * speedMultiplier;
-      if (line.mesh.position.z < -45) {
-        line.mesh.position.z += 80;
-      }
-    });
+  private updatePositions(ctx: ScenarioContext, truckZ: number, bikeZ: number) {
+    if (ctx.truckNode) {
+      ctx.truckNode.position.set(2.25, 0, truckZ);
+      ctx.setTrailerRearPos(new BABYLON.Vector3(2.25, 0.6, truckZ - 11.25));
+    }
+    ctx.motorcycleX.set(2.25);
+    ctx.motorcycleZ.set(bikeZ);
+    if (ctx.motorcycleNode) {
+      ctx.motorcycleNode.position.set(2.25, 0, bikeZ);
+      ctx.motorcycleNode.rotation.x = 0;
+    }
+    ctx.syncMotorcyclePosition();
   }
 }

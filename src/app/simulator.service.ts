@@ -428,20 +428,23 @@ export class SimulatorService {
     let speed = 9.0; // m/s
     let moved = false;
 
+    const truckZ = this.truckNode?.position.z || -40;
+    const truckX = this.truckNode?.position.x || 2.25;
+
     if (this.keys['w'] || this.keys['arrowup']) {
-      this.motorcycleZ.update(z => Math.min(20, z + dt * speed));
+      this.motorcycleZ.update(z => Math.min(truckZ + 30, z + dt * speed));
       moved = true;
     }
     if (this.keys['s'] || this.keys['arrowdown']) {
-      this.motorcycleZ.update(z => Math.max(-30, z - dt * speed));
+      this.motorcycleZ.update(z => Math.max(truckZ - 30, z - dt * speed));
       moved = true;
     }
     if (this.keys['a'] || this.keys['arrowleft']) {
-      this.motorcycleX.update(x => Math.max(-10, x - dt * speed));
+      this.motorcycleX.update(x => Math.max(truckX - 15, x - dt * speed));
       moved = true;
     }
     if (this.keys['d'] || this.keys['arrowright']) {
-      this.motorcycleX.update(x => Math.min(10, x + dt * speed));
+      this.motorcycleX.update(x => Math.min(truckX + 15, x + dt * speed));
       moved = true;
     }
 
