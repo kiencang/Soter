@@ -60,13 +60,23 @@ export class SimulatorEnvironmentService {
         intersectionMeshes.push(zebra);
       }
 
-      // 3. Stop Lines (distance 14.5 from center)
-      const pStop = rot(0, 14.5);
-      const stopLine = BABYLON.MeshBuilder.CreateBox(`stopLine_${d}`, { width: 18.0, height: 0.012, depth: 0.45 }, scene);
+      // 3. Stop Lines (distance 14.5 from center, only on the inbound lane/right-hand side of the road)
+      const pStop = rot(-4.5, 14.5);
+      const stopLine = BABYLON.MeshBuilder.CreateBox(`stopLine_${d}`, { width: 9.0, height: 0.012, depth: 0.45 }, scene);
       stopLine.position.set(pStop.x, 0.011, pStop.z);
       stopLine.rotation.y = angle;
       stopLine.material = whiteLineMat;
       intersectionMeshes.push(stopLine);
+
+      // 4. Solid road shoulder lines (outer edge lines at x = -9.0 and x = 9.0)
+      for (const x of [-9.0, 9.0]) {
+        const pEdge = rot(x, 57.5);
+        const edgeLine = BABYLON.MeshBuilder.CreateBox(`edgeLine_${d}_${x}`, { width: 0.2, height: 0.01, depth: 85.0 }, scene);
+        edgeLine.position.set(pEdge.x, 0.01, pEdge.z);
+        edgeLine.rotation.y = angle;
+        edgeLine.material = whiteLineMat;
+        intersectionMeshes.push(edgeLine);
+      }
     }
   }
 }

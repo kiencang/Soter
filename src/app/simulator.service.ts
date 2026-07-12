@@ -23,7 +23,7 @@ export class SimulatorService {
   showBlindSpotOverlays = signal<boolean>(true);
 
   // Real-time motorcycle state
-  motorcycleX = signal<number>(4.0);
+  motorcycleX = signal<number>(6.05);
   motorcycleZ = signal<number>(-5.0);
 
   // Status indicators (Vietnamese)
@@ -346,6 +346,15 @@ export class SimulatorService {
       this.blinkerLeft = truckResult.blinkerLeft;
       this.blinkerRight = truckResult.blinkerRight;
       this.motorcycleNode = this.vehiclesService.createMotorcycle(this.scene!);
+
+      // Set initial positions for the MENU state (right-hand traffic lanes)
+      if (this.truckNode) {
+        this.truckNode.position.set(2.25, 0, 0);
+      }
+      if (this.trailerNode) {
+        this.trailerNode.position.set(2.25, 0, 0);
+      }
+      this.trailerRearPos = new BABYLON.Vector3(2.25, 0.6, -11.25);
       this.motoBlinkerLeftMeshes = this.motorcycleNode.getChildMeshes().filter(m => m.name === 'mFrontSignalL' || m.name === 'mRearSignalL') as BABYLON.Mesh[];
       this.motoBlinkerRightMeshes = this.motorcycleNode.getChildMeshes().filter(m => m.name === 'mFrontSignalR' || m.name === 'mRearSignalR') as BABYLON.Mesh[];
 

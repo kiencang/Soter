@@ -5,7 +5,6 @@
           <div class="flex items-center justify-between border-b border-white/5 pb-4">
             <div>
               <h2 class="text-lg font-display font-bold text-white">TRUNG TÂM MÔ PHỎNG</h2>
-              <p class="text-[10px] font-mono text-slate-400">Chọn chế độ và góc nhìn để trải nghiệm</p>
             </div>
             <!-- Sound controller -->
             <button (click)="sim.toggleSound()" class="p-2 rounded-xl border border-white/5 bg-slate-800 text-slate-400 hover:text-white transition-all">
@@ -22,7 +21,7 @@
             <!-- Toggle Blind Spot Overlays (Moved to right column) -->
             @if (sim.viewMode() === 'orbit') {
               <div class="flex items-center justify-between p-3 bg-slate-950/40 border border-white/5 rounded-xl transition-all">
-                <span class="text-xs font-medium text-slate-300">Hiển thị vùng điểm mù</span>
+                <span class="text-sm font-medium text-slate-300">Hiển thị vùng điểm mù</span>
                 <button (click)="sim.toggleBlindSpotOverlays()" class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none cursor-pointer"
                         [class.bg-amber-500]="sim.showBlindSpotOverlays()" [class.bg-slate-700]="!sim.showBlindSpotOverlays()"
                         id="toggle-blindspot-right">
@@ -46,7 +45,7 @@
                         [class.text-slate-400]="sim.activeScenario() !== 'right_turn'"
                         [class.border-white/5]="sim.activeScenario() !== 'right_turn'"
                         id="scenario-turn-btn">
-                  <span>🚗 01</span>
+                  <span>01</span>
                   <span>Rẽ Phải Tử Thần</span>
                 </button>
                 <button (click)="sim.startScenario('cut_off')" 
@@ -58,7 +57,7 @@
                         [class.text-slate-400]="sim.activeScenario() !== 'cut_off'"
                         [class.border-white/5]="sim.activeScenario() !== 'cut_off'"
                         id="scenario-cutoff-btn">
-                  <span>🛑 02</span>
+                  <span>02</span>
                   <span>Tạt Đầu Cabin</span>
                 </button>
                 <button (click)="sim.startScenario('tailgate')" 
@@ -70,7 +69,7 @@
                         [class.text-slate-400]="sim.activeScenario() !== 'tailgate'"
                         [class.border-white/5]="sim.activeScenario() !== 'tailgate'"
                         id="scenario-tailgate-btn">
-                  <span>⚡ 03</span>
+                  <span>03</span>
                   <span>Quá Gần Đuôi Xe</span>
                 </button>
               </div>
@@ -101,11 +100,11 @@
                   <!-- Control triggers -->
                   <div class="flex gap-2 border-t border-white/5 pt-3">
                     @if (!sim.isPlayingScenario()) {
-                      <button (click)="sim.resetScenario()" class="flex-1 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer" id="play-scenario-btn">
+                      <button (click)="sim.resetScenario()" class="flex-1 py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-md shadow-amber-500/10" id="play-scenario-btn">
                         ▶ Chạy lại mô phỏng
                       </button>
                     } @else {
-                      <button (click)="sim.isPlayingScenario.set(false)" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer" id="pause-scenario-btn">
+                      <button (click)="sim.isPlayingScenario.set(false)" class="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl text-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer" id="pause-scenario-btn">
                         ⏸ Tạm dừng
                       </button>
                     }
