@@ -85,7 +85,12 @@ export class SimulatorScenarioRightTurnService {
       setStage(2);
       setText("Bài học: Hiện tượng 'cắt góc' của xe tải lớn/xe container khiến nó quét qua các làn bên trong khi rẽ. TUYỆT ĐỐI không đi song song với xe tải lớn/xe container ở các khúc cua hoặc ngã tư.");
       
-      const activeT = t - 4.0; // time since truck started turning
+      // Implement deceleration after reaction time (starting from t = 5.8)
+      let activeT = t - 4.0; // time since truck started turning
+      if (t > 5.8) {
+        const dt = t - 5.8;
+        activeT = 1.8 + dt - 0.11 * dt * dt;
+      }
       const fallT = t - 5.3; // time since collision
       
       const turnT = activeT / 3.3; 
