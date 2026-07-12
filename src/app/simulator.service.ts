@@ -116,7 +116,11 @@ export class SimulatorService {
   private blinkerTimer = 0;
   private blinkerActive = false;
   private blinkerSide: 'left' | 'right' | 'both' = 'both';
+  private motoBlinkerActive = false;
+  private motoBlinkerSide: 'left' | 'right' | 'both' = 'both';
   private blinkerOn = false;
+  private motoBlinkerLeftMeshes: BABYLON.Mesh[] = [];
+  private motoBlinkerRightMeshes: BABYLON.Mesh[] = [];
 
   // Key states
   private keys: { [key: string]: boolean } = {};
@@ -263,6 +267,10 @@ export class SimulatorService {
         this.blinkerActive = active; 
         this.blinkerSide = side || 'both';
       },
+      setMotoBlinkerActive: (active, side) => {
+        this.motoBlinkerActive = active;
+        this.motoBlinkerSide = side || 'both';
+      },
       getTrailerRearPos: () => this.trailerRearPos,
       setTrailerRearPos: (pos) => { this.trailerRearPos = pos; }
     };
@@ -338,6 +346,8 @@ export class SimulatorService {
       this.blinkerLeft = truckResult.blinkerLeft;
       this.blinkerRight = truckResult.blinkerRight;
       this.motorcycleNode = this.vehiclesService.createMotorcycle(this.scene!);
+      this.motoBlinkerLeftMeshes = this.motorcycleNode.getChildMeshes().filter(m => m.name === 'mFrontSignalL' || m.name === 'mRearSignalL') as BABYLON.Mesh[];
+      this.motoBlinkerRightMeshes = this.motorcycleNode.getChildMeshes().filter(m => m.name === 'mFrontSignalR' || m.name === 'mRearSignalR') as BABYLON.Mesh[];
 
       // Create Blind Spot overlay panels on ground
       const blindSpots = this.vehiclesService.createBlindSpots(this.scene!, this.truckNode!, this.trailerNode!);
@@ -375,26 +385,26 @@ export class SimulatorService {
   // --- Main Update Loop ---
   private updatePhysics(dt: number) {
     // 1. Blinker Flashing
-    if (this.blinkerActive) {
-      this.blinkerTimer += dt;
-      if (this.blinkerTimer >= 0.35) {
-        this.blinkerTimer = 0;
-        this.blinkerOn = !this.blinkerOn;
-        
-        const isLeftOn = this.blinkerOn && (this.blinkerSide === 'left' || this.blinkerSide === 'both');
-        const isRightOn = this.blinkerOn && (this.blinkerSide === 'right' || this.blinkerSide === 'both');
+    this.blinkerTimer += dt;
+    if (this.blinkerTimer >= 0.35) {
+      this.blinkerTimer = 0;
+      this.blinkerOn = !this.blinkerOn;
+    }
 
-        if (this.blinkerLeft) {
-          const mat = this.blinkerLeft.material as BABYLON.StandardMaterial;
-          mat.emissiveColor = isLeftOn ? new BABYLON.Color3(1.0, 0.7, 0.0) : new BABYLON.Color3(0.1, 0.1, 0.0);
-        }
-        if (this.blinkerRight) {
-          const mat = this.blinkerRight.material as BABYLON.StandardMaterial;
-          mat.emissiveColor = isRightOn ? new BABYLON.Color3(1.0, 0.7, 0.0) : new BABYLON.Color3(0.1, 0.1, 0.0);
-        }
+    // Truck Blinker
+    if (this.blinkerActive) {
+      const isLeftOn = this.blinkerOn && (this.blinkerSide === 'left' || this.blinkerSide === 'both');
+      const isRightOn = this.blinkerOn && (this.blinkerSide === 'right' || this.blinkerSide === 'both');
+
+      if (this.blinkerLeft) {
+        const mat = this.blinkerLeft.material as BABYLON.StandardMaterial;
+        mat.emissiveColor = isLeftOn ? new BABYLON.Color3(1.0, 0.7, 0.0) : new BABYLON.Color3(0.1, 0.1, 0.0);
+      }
+      if (this.blinkerRight) {
+        const mat = this.blinkerRight.material as BABYLON.StandardMaterial;
+        mat.emissiveColor = isRightOn ? new BABYLON.Color3(1.0, 0.7, 0.0) : new BABYLON.Color3(0.1, 0.1, 0.0);
       }
     } else {
-      this.blinkerOn = false;
       if (this.blinkerLeft) {
         const mat = this.blinkerLeft.material as BABYLON.StandardMaterial;
         mat.emissiveColor = new BABYLON.Color3(0.1, 0.1, 0.0);
@@ -403,6 +413,30 @@ export class SimulatorService {
         const mat = this.blinkerRight.material as BABYLON.StandardMaterial;
         mat.emissiveColor = new BABYLON.Color3(0.1, 0.1, 0.0);
       }
+    }
+
+    // Moto Blinker
+    if (this.motoBlinkerActive) {
+      const isLeftOn = this.blinkerOn && (this.motoBlinkerSide === 'left' || this.motoBlinkerSide === 'both');
+      const isRightOn = this.blinkerOn && (this.motoBlinkerSide === 'right' || this.motoBlinkerSide === 'both');
+
+      this.motoBlinkerLeftMeshes.forEach(mesh => {
+        const mat = mesh.material as BABYLON.StandardMaterial;
+        mat.emissiveColor = isLeftOn ? new BABYLON.Color3(1.0, 0.5, 0.0) : new BABYLON.Color3(0.1, 0.05, 0.0);
+      });
+      this.motoBlinkerRightMeshes.forEach(mesh => {
+        const mat = mesh.material as BABYLON.StandardMaterial;
+        mat.emissiveColor = isRightOn ? new BABYLON.Color3(1.0, 0.5, 0.0) : new BABYLON.Color3(0.1, 0.05, 0.0);
+      });
+    } else {
+      this.motoBlinkerLeftMeshes.forEach(mesh => {
+        const mat = mesh.material as BABYLON.StandardMaterial;
+        mat.emissiveColor = new BABYLON.Color3(0.1, 0.05, 0.0);
+      });
+      this.motoBlinkerRightMeshes.forEach(mesh => {
+        const mat = mesh.material as BABYLON.StandardMaterial;
+        mat.emissiveColor = new BABYLON.Color3(0.1, 0.05, 0.0);
+      });
     }
 
     // 2. Animate look angle when in Cabin view
@@ -457,6 +491,8 @@ export class SimulatorService {
     this.laneLines = [];
     this.blinkerLeft = null;
     this.blinkerRight = null;
+    this.motoBlinkerLeftMeshes = [];
+    this.motoBlinkerRightMeshes = [];
     
     [
       this.frontBlindSpotMesh, 

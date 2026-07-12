@@ -1,117 +1,14 @@
-          <!-- Section 3: Road Safety Quiz -->
+          <!-- Section 3: Road Safety Information -->
           <div class="border-t border-white/5 pt-5 space-y-3" id="quiz-block">
-            <div class="flex justify-between items-baseline">
-              <h3 class="text-xs font-mono font-bold text-slate-400 uppercase tracking-widest">
-                ĐỐ VUI GIAO THÔNG (ĐIỂM: {{ quizScore() }})
-              </h3>
-              <span class="text-[11px] font-mono text-amber-500 font-bold">Câu {{ quizQuestion() }}/3</span>
-            </div>
-
-            <!-- Quiz content card -->
+            <h3 class="text-xs font-mono font-bold text-slate-400 uppercase tracking-widest">
+              Thông tin quan trọng cần biết
+            </h3>
+            
             <div class="bg-slate-950/50 border border-white/5 rounded-2xl p-4 space-y-3">
-              <p class="text-xs font-semibold text-white leading-snug">
-                @if (quizQuestion() === 1) {
-                  1. Đâu là điểm mù (vùng khuất tầm nhìn) có bán kính quét rộng và nguy hiểm bậc nhất của xe container?
-                } @else if (quizQuestion() === 2) {
-                  2. Cách đơn giản nhất để biết bạn có đang nằm trong điểm mù nguy hiểm của xe container là gì?
-                } @else if (quizQuestion() === 3) {
-                  3. Khoảng cách an toàn tối thiểu khuyên dùng khi chạy xe máy bám sau đuôi xe rơ-moóc lớn là bao nhiêu?
-                }
-              </p>
-
-              <!-- Option list -->
-              <div class="space-y-2">
-                @if (quizQuestion() === 1) {
-                  <button (click)="selectQuizOption(0)" 
-                          class="w-full text-left p-2.5 rounded-xl text-xs border transition-all"
-                          [class.bg-slate-900]="quizSelectedOption() !== 0"
-                          [class.border-white/5]="quizSelectedOption() !== 0"
-                          [class.bg-red-500/10]="quizSelectedOption() === 0 && !quizIsCorrect()"
-                          [class.border-red-500/30]="quizSelectedOption() === 0 && !quizIsCorrect()"
-                          [class.text-red-300]="quizSelectedOption() === 0 && !quizIsCorrect()">
-                    A. Ở hông TRÁI (bên tài xế ngồi)
-                  </button>
-                  <button (click)="selectQuizOption(1)" 
-                          class="w-full text-left p-2.5 rounded-xl text-xs border transition-all"
-                          [class.bg-slate-900]="quizSelectedOption() !== 1"
-                          [class.border-white/5]="quizSelectedOption() !== 1"
-                          [class.bg-emerald-500/10]="quizSelectedOption() === 1 && quizIsCorrect()"
-                          [class.border-emerald-500/30]="quizSelectedOption() === 1 && quizIsCorrect()"
-                          [class.text-emerald-300]="quizSelectedOption() === 1 && quizIsCorrect()">
-                    B. Ở hông PHẢI (bên phụ lái dải quét rẽ phải)
-                  </button>
-                  <button (click)="selectQuizOption(2)" 
-                          class="w-full text-left p-2.5 rounded-xl text-xs border transition-all"
-                          [class.bg-slate-900]="quizSelectedOption() !== 2"
-                          [class.border-white/5]="quizSelectedOption() !== 2">
-                    C. Sát đầu xe cabin
-                  </button>
-                } @else if (quizQuestion() === 2) {
-                  <button (click)="selectQuizOption(0)" 
-                          class="w-full text-left p-2.5 rounded-xl text-xs border transition-all"
-                          [class.bg-slate-900]="quizSelectedOption() !== 0"
-                          [class.border-white/5]="quizSelectedOption() !== 0"
-                          [class.bg-emerald-500/10]="quizSelectedOption() === 0 && quizIsCorrect()"
-                          [class.border-emerald-500/30]="quizSelectedOption() === 0 && quizIsCorrect()"
-                          [class.text-emerald-300]="quizSelectedOption() === 0 && quizIsCorrect()">
-                    A. Nếu bạn thấy rõ gương chiếu hậu của cabin hoặc thấy mặt tài xế qua gương.
-                  </button>
-                  <button (click)="selectQuizOption(1)" 
-                          class="w-full text-left p-2.5 rounded-xl text-xs border transition-all"
-                          [class.bg-slate-900]="quizSelectedOption() !== 1"
-                          [class.border-white/5]="quizSelectedOption() !== 1"
-                          [class.bg-red-500/10]="quizSelectedOption() === 1 && !quizIsCorrect()"
-                          [class.border-red-500/30]="quizSelectedOption() === 1 && !quizIsCorrect()"
-                          [class.text-red-300]="quizSelectedOption() === 1 && !quizIsCorrect()">
-                    B. Chỉ cần bạn nghe thấy tiếng động cơ gầm rú to rõ ràng.
-                  </button>
-                } @else if (quizQuestion() === 3) {
-                  <button (click)="selectQuizOption(0)" 
-                          class="w-full text-left p-2.5 rounded-xl text-xs border transition-all"
-                          [class.bg-slate-900]="quizSelectedOption() !== 0"
-                          [class.border-white/5]="quizSelectedOption() !== 0"
-                          [class.bg-red-500/10]="quizSelectedOption() === 0 && !quizIsCorrect()"
-                          [class.border-red-500/30]="quizSelectedOption() === 0 && !quizIsCorrect()"
-                          [class.text-red-300]="quizSelectedOption() === 0 && !quizIsCorrect()">
-                    A. Khoảng 2 - 3 mét.
-                  </button>
-                  <button (click)="selectQuizOption(1)" 
-                          class="w-full text-left p-2.5 rounded-xl text-xs border transition-all"
-                          [class.bg-slate-900]="quizSelectedOption() !== 1"
-                          [class.border-white/5]="quizSelectedOption() !== 1">
-                    B. Khoảng 5 mét.
-                  </button>
-                  <button (click)="selectQuizOption(2)" 
-                          class="w-full text-left p-2.5 rounded-xl text-xs border transition-all"
-                          [class.bg-slate-900]="quizSelectedOption() !== 2"
-                          [class.border-white/5]="quizSelectedOption() !== 2"
-                          [class.bg-emerald-500/10]="quizSelectedOption() === 2 && quizIsCorrect()"
-                          [class.border-emerald-500/30]="quizSelectedOption() === 2 && quizIsCorrect()"
-                          [class.text-emerald-300]="quizSelectedOption() === 2 && quizIsCorrect()">
-                    C. Khoảng 15 - 20 mét (Tương đương chiều dài 1 xe lớn).
-                  </button>
-                }
-              </div>
-
-              <!-- Explanation result -->
-              @if (quizAnswered()) {
-                <div class="mt-3 p-3 rounded-xl border text-xs leading-relaxed"
-                     [class.bg-emerald-500/10]="quizIsCorrect()"
-                     [class.border-emerald-500/20]="quizIsCorrect()"
-                     [class.text-emerald-300]="quizIsCorrect()"
-                     [class.bg-red-500/10]="!quizIsCorrect()"
-                     [class.border-red-500/20]="!quizIsCorrect()"
-                     [class.text-red-300]="!quizIsCorrect()">
-                  <p class="font-bold">
-                    {{ quizIsCorrect() ? '🎉 Chính xác!' : '❌ Chưa đúng rồi!' }}
-                  </p>
-                  <p class="mt-1">{{ quizExplanation() }}</p>
-                  
-                  <button (click)="nextQuizQuestion()" class="mt-3 w-full py-1.5 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-lg text-xs transition-all cursor-pointer">
-                    Câu tiếp theo →
-                  </button>
-                </div>
-              }
+              <ul class="space-y-2.5 text-xs text-slate-300 list-disc list-inside leading-relaxed">
+                <li>Xe tải càng lớn, không gian điểm mù có xu hướng càng lớn hơn;</li>
+                <li>Điểm mù nguy hiểm bậc nhất nằm ở hông phải của xe tải;</li>
+                <li>Nếu bạn không nhìn thấy gương chiếu hậu của xe tải, hoặc không nhìn thấy tài xế qua gương chiếu hậu, bạn đang nằm trong vùng điểm mù nguy hiểm;</li>
+              </ul>
             </div>
           </div>
-

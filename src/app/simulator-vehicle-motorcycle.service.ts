@@ -87,13 +87,62 @@ export class SimulatorVehicleMotorcycleService {
     fender.material = fenderMat;
     fender.parent = motorcycleNode;
 
-    const licensePlate = BABYLON.MeshBuilder.CreateBox('mPlate', { width: 0.22, height: 0.18, depth: 0.02 }, scene);
-    licensePlate.position.set(0, 0.4, -0.98);
+    // License Plate (Biển số xe Việt Nam)
+    const licensePlate = BABYLON.MeshBuilder.CreatePlane('mPlate', { width: 0.22, height: 0.16 }, scene);
+    licensePlate.position.set(0, 0.38, -0.96);
     licensePlate.rotation.x = 0.25;
+    licensePlate.rotation.y = Math.PI; // Face backwards
+    
+    // Create a dynamic texture for the license plate text
+    const plateTexture = new BABYLON.DynamicTexture('plateTexture', {width: 256, height: 200}, scene, false);
     const plateMat = new BABYLON.StandardMaterial('plateMat', scene);
-    plateMat.diffuseColor = new BABYLON.Color3(0.9, 0.9, 0.9);
+    plateMat.diffuseTexture = plateTexture;
+    plateMat.specularColor = new BABYLON.Color3(0, 0, 0);
+    plateMat.emissiveColor = new BABYLON.Color3(0.5, 0.5, 0.5); // make it slightly bright
     licensePlate.material = plateMat;
     licensePlate.parent = motorcycleNode;
+
+    // Draw text on the license plate
+    const plateContext = plateTexture.getContext() as any;
+    plateContext.fillStyle = 'white';
+    plateContext.fillRect(0, 0, 256, 200);
+    plateContext.fillStyle = 'black';
+    plateContext.font = 'bold 50px monospace';
+    plateContext.textAlign = 'center';
+    plateContext.fillText('29-A1', 128, 80);
+    plateContext.fillText('123.45', 128, 150);
+    plateContext.lineWidth = 5;
+    plateContext.strokeRect(5, 5, 246, 190);
+    plateTexture.update();
+
+    // Turn Signals (Xi nhan)
+    const turnSignalMat = new BABYLON.StandardMaterial('turnSignalMat', scene);
+    turnSignalMat.emissiveColor = new BABYLON.Color3(1, 0.5, 0); // Orange/Amber
+    turnSignalMat.diffuseColor = new BABYLON.Color3(1, 0.5, 0);
+
+    // Rear Turn Signals (Xi nhan sau)
+    const rearSignalL = BABYLON.MeshBuilder.CreateBox('mRearSignalL', { width: 0.06, height: 0.04, depth: 0.04 }, scene);
+    rearSignalL.position.set(-0.16, 0.45, -0.90);
+    rearSignalL.material = turnSignalMat;
+    rearSignalL.parent = motorcycleNode;
+
+    const rearSignalR = BABYLON.MeshBuilder.CreateBox('mRearSignalR', { width: 0.06, height: 0.04, depth: 0.04 }, scene);
+    rearSignalR.position.set(0.16, 0.45, -0.90);
+    rearSignalR.material = turnSignalMat;
+    rearSignalR.parent = motorcycleNode;
+
+    // Front Turn Signals (Xi nhan trước)
+    const frontSignalL = BABYLON.MeshBuilder.CreateBox('mFrontSignalL', { width: 0.06, height: 0.04, depth: 0.04 }, scene);
+    frontSignalL.position.set(-0.25, 0.85, 0.62);
+    frontSignalL.rotation.y = -0.2;
+    frontSignalL.material = turnSignalMat;
+    frontSignalL.parent = motorcycleNode;
+
+    const frontSignalR = BABYLON.MeshBuilder.CreateBox('mFrontSignalR', { width: 0.06, height: 0.04, depth: 0.04 }, scene);
+    frontSignalR.position.set(0.25, 0.85, 0.62);
+    frontSignalR.rotation.y = 0.2;
+    frontSignalR.material = turnSignalMat;
+    frontSignalR.parent = motorcycleNode;
 
     // Handlebar (Ghi-đông)
     const handlebar = BABYLON.MeshBuilder.CreateCylinder('mBar', { diameter: 0.06, height: 0.85 }, scene);

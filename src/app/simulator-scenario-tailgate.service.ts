@@ -12,8 +12,8 @@ export class SimulatorScenarioTailgateService {
     setText: (text: string) => void,
     setPlaying: (playing: boolean) => void
   ) {
-    const speed = 12.0;
-    const initialZ = -40.0;
+    const speed = 10.0;
+    const initialZ = -50.0;
     
     // Khoảng cách bám đuôi 1.5 mét:
     // Distance = (truckZ - 11.25) - (bikeZ + 1.1) = 1.5
@@ -23,29 +23,29 @@ export class SimulatorScenarioTailgateService {
     let truckZ = initialZ;
     let bikeZ = initialZ + bikeOffset;
 
-    // Stage 0: 0s to 3.2s -> Riding close behind
-    if (t < 3.2) {
+    // Stage 0: 0s to 2.5s -> Riding close behind
+    if (t < 2.5) {
       setStage(0);
       setText("Hành trình: Xe máy bám sát sạt đuôi rơ-moóc thùng container ở khoảng cách 1.5 mét. Người lái xe máy hoàn toàn bị mất tầm nhìn phía trước.");
       truckZ = initialZ + t * speed;
       bikeZ = truckZ + bikeOffset;
       this.updatePositions(ctx, truckZ, bikeZ);
     }
-    // Stage 1: 3.2s to 6.0s -> Still tailgating, completely invisible in mirrors
-    else if (t < 6.0) {
+    // Stage 1: 2.5s to 5.0s -> Still tailgating, completely invisible in mirrors
+    else if (t < 5.0) {
       setStage(1);
       setText("Rủi ro ẩn: Ở vị trí bám sát sạt này, gương chiếu hậu bên hông xe container không thể thu giữ bóng dáng xe máy. Tài xế hoàn toàn mù thông tin sau đuôi.");
       truckZ = initialZ + t * speed;
       bikeZ = truckZ + bikeOffset;
       this.updatePositions(ctx, truckZ, bikeZ);
     }
-    // Stage 2: 6.0s to 9.5s -> Sudden emergency brake!
-    else if (t < 9.5) {
+    // Stage 2: 5.0s to 8.5s -> Sudden emergency brake!
+    else if (t < 8.5) {
       setStage(2);
       setText("PHANH GẤP: Gặp chướng ngại vật, container phanh gấp. Do khoảng cách quá ngắn không đủ thời gian phản xạ, xe máy húc thẳng vào đuôi rơ-moóc sắt thép.");
       
-      const activeT = t - 6.0;
-      const truckStartZ = initialZ + 6.0 * speed;
+      const activeT = t - 5.0;
+      const truckStartZ = initialZ + 5.0 * speed;
       const bikeStartZ = truckStartZ + bikeOffset;
       
       // Truck decelerates to stop in 1.5s

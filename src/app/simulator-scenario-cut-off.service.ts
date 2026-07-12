@@ -41,7 +41,8 @@ export class SimulatorScenarioCutOffService {
     // Stage 1: 1.5s to 4.38s -> Đèn xanh, cả hai cùng khởi hành, xe máy tạt đầu
     else if (t < 4.38) {
       setStage(1);
-      setText("Đèn xanh: Cả hai di chuyển. Xe máy tăng tốc nhanh hơn và đột ngột rẽ trái tạt đầu ngay sát mũi cabin xe tải để chuyển làn.");
+      setText("Đèn xanh: Cả hai di chuyển. Xe máy bật xi nhan trái, tăng tốc nhanh hơn và đột ngột rẽ tạt đầu ngay sát mũi cabin xe tải.");
+      ctx.setMotoBlinkerActive(true, 'left');
       
       const activeT = t - 1.5; 
 
@@ -87,6 +88,7 @@ export class SimulatorScenarioCutOffService {
     else if (t < 7.7) {
       setStage(2);
       setText("CẢNH BÁO TAI NẠN: Do nằm trong góc khuất, tài xế không thấy xe máy tạt đầu. Xe máy bị húc văng, ngã xuống và bị cuốn thẳng vào gầm!");
+      ctx.setMotoBlinkerActive(false);
       
       const activeT = t - 1.5; // for truck movement
       const fallT = t - 4.38; // for bike falling and crushing
