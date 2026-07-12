@@ -9,11 +9,11 @@ Người lái các phương tiện nhỏ (như xe máy, xe đạp) hoặc đi b�
 Ứng dụng này bên cạnh điểm nhìn toàn cảnh, nó mô phỏng điểm nhìn của tài xế xe tải, giúp người lái xe nhỏ, người đi bộ ý thức được tốt hơn điểm mù của xe tải lớn.
 
 ## Lưu ý
-Mặc dù ứng dụng này có tham khảo các tài liệu mô tả về điểm mù xe tải, cũng như tham khảo nhiều video tai nạn do điểm mù để mô phỏng được chính xác. Nó không đảm bảo rằng việc mô phỏng là chính xác 100%.
+Mặc dù người phát triển ứng dụng này có tham khảo các tài liệu về điểm mù xe tải, cũng như khảo sát nhiều video tai nạn do điểm mù để mô phỏng được chính xác. Nó không đảm bảo rằng việc mô phỏng là chính xác 100%.
 
-Diện tích điểm mù thay đổi khá nhiều tùy thuộc vào nhiều yếu tố khác nhau, chẳng hạn như: kích cỡ xe tải, chiều cao xe, kích cỡ gương, và góc gương. Do vậy bạn không nên mặc định mô phỏng điểm mù trên ứng dụng khớp chính xác với mọi loại xe tải mà bạn thấy.
+Diện tích điểm mù thay đổi khá nhiều tùy thuộc vào nhiều yếu tố khác nhau, chẳng hạn như: kích cỡ xe tải, chiều cao xe, kích cỡ gương, và góc gương. Do vậy bạn không nên mặc định mô phỏng điểm mù trên ứng dụng khớp chính xác với mọi loại xe tải mà bạn thấy ngoài đời thực. **Xe tải ngoài đời thực có thể có điểm mù lớn hơn ứng dụng này mô phỏng**.
 
 ## Tuyên bố từ chối trách nhiệm
-Ứng dụng này chỉ là một mô phỏng, nó không khớp 100% thực tế, chỉ dùng nó như công cụ tham khảo.
+Ứng dụng này chỉ là một mô phỏng, nó **không khớp 100% thực tế**, chỉ dùng nó như công cụ tham khảo.
 
-Ứng dụng này và người phát triển nó không đưa ra bất kỳ bảo đảm rõ ràng hay ngụ ý nào, cũng như không tuyên bố rằng công cụ sẽ vận hành hoàn hảo, chính xác hoặc cập nhật. Người phát triển sẽ không chịu trách nhiệm cho bất kỳ tổn thất hay thiệt hại nào phát sinh trực tiếp hoặc gián tiếp liên quan đến hoặc phát sinh từ việc sử dụng công cụ này.
+Soter và người phát triển nó không đưa ra bất kỳ bảo đảm rõ ràng hay ngụ ý nào, cũng như không tuyên bố rằng công cụ sẽ vận hành hoàn hảo, chính xác hoặc cập nhật. Người phát triển sẽ không chịu trách nhiệm cho bất kỳ tổn thất hay thiệt hại nào phát sinh trực tiếp hoặc gián tiếp liên quan đến hoặc phát sinh từ việc sử dụng công cụ này.
