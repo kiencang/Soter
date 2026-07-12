@@ -1,2 +1,19 @@
 # Soter
 Ứng dụng mô phỏng điểm mù của xe tải, container. Dự án đang trong giai đoạn phát triển thử nghiệm.
+
+## Mô tả
+Xe tải lớn, xe container có những điểm mù khiến cho người lái xe không thể quan sát các phương tiện khác ngay cả khi nhìn qua gương chiếu hậu.
+
+Người lái các phương tiện nhỏ (như xe máy, xe đạp) hoặc đi bộ nếu không nhận thức được các điểm mù này có thể đi vào các điểm mù đó nhưng lại giả định sai lầm rằng tài xế xe tải lớn nhìn thấy mình. Điều này có thể dẫn đến nguy cơ tai nạn nghiêm trọng trong một số tình huống.
+
+Ứng dụng này bên cạnh điểm nhìn toàn cảnh, nó mô phỏng điểm nhìn của tài xế xe tải, giúp người lái xe nhỏ, người đi bộ ý thức được tốt hơn điểm mù của xe tải lớn.
+
+## Lưu ý
+Mặc dù ứng dụng này có tham khảo các tài liệu mô tả về điểm mù xe tải, cũng như tham khảo nhiều video tai nạn do điểm mù để mô phỏng được chính xác. Nó không đảm bảo rằng việc mô phỏng là chính xác 100%.
+
+Diện tích điểm mù thay đổi khá nhiều tùy thuộc vào nhiều yếu tố khác nhau, chẳng hạn như: kích cỡ xe tải, chiều cao xe, kích cỡ gương, và góc gương. Do vậy bạn không nên mặc định mô phỏng điểm mù trên ứng dụng khớp chính xác với mọi loại xe tải mà bạn thấy.
+
+## Tuyên bố từ chối trách nhiệm
+Ứng dụng này chỉ là một mô phỏng, nó không khớp 100% thực tế, chỉ dùng nó như công cụ tham khảo.
+
+Ứng dụng này và người phát triển nó không đưa ra bất kỳ bảo đảm rõ ràng hay ngụ ý nào, cũng như không tuyên bố rằng công cụ sẽ vận hành hoàn hảo, chính xác hoặc cập nhật. Người phát triển sẽ không chịu trách nhiệm cho bất kỳ tổn thất hay thiệt hại nào phát sinh trực tiếp hoặc gián tiếp liên quan đến hoặc phát sinh từ việc sử dụng công cụ này.
