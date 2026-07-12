@@ -40,13 +40,13 @@ export class SimulatorCameraService {
     // Mounted on the front-right corner of the cabin roof/visor pointing straight down & forward
     this.frontMirrorCamera = new BABYLON.FreeCamera('frontMirrorCamera', new BABYLON.Vector3(1.1, 3.4, 4.8), scene);
     // Convex mirror has a wide field of view (approx 85 degrees)
-    this.frontMirrorCamera.fov = 1.5;
+    this.frontMirrorCamera.fov = 0.8;
     // Set parent first, then set local rotation to avoid coordinate system and gimbal flip bugs.
     this.frontMirrorCamera.parent = truckNode;
     // Pitch (rotation around X) = 1.15 rad (approx 66 degrees down)
     // Yaw (rotation around Y) = -0.3 rad (approx 17 degrees left, across front bumper)
     // Roll (rotation around Z) = 0 rad (keep viewport parallel to front bumper)
-    this.frontMirrorCamera.rotation.set(1.15, -0.3, 0);
+    this.frontMirrorCamera.rotation.set(1.4, -0.3, 0);
 
     // Use RenderTargetTexture for perfect circular masking in WebGL
     this.frontMirrorRTT = new BABYLON.RenderTargetTexture('frontMirrorRTT', 512, scene);

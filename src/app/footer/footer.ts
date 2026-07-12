@@ -3,7 +3,7 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
 @Component({
   selector: 'app-footer',
   template: `
-    <p class="text-[10px] text-slate-500 font-mono">Soter • v1.0.6 • Dự án An toàn Giao thông</p>
+    <p class="text-[10px] text-slate-500 font-mono">Soter • v1.0.7 • Dự án An toàn Giao thông</p>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush
 })
