@@ -21,6 +21,7 @@ export class SimulatorService {
   get viewMode() { return this.cameraService.viewMode; }
   get lookDirection() { return this.cameraService.lookDirection; }
   showBlindSpotOverlays = signal<boolean>(true);
+  webGlSupported = signal<boolean>(true);
 
   // Real-time motorcycle state
   motorcycleX = signal<number>(6.05);
@@ -313,6 +314,7 @@ export class SimulatorService {
 
   // --- Real-time Blind Spot Logic ---
   private checkBlindSpotState() {
+    if (!this.truckNode || !this.trailerNode || !this.motorcycleNode) return;
     const res = this.logicService.checkBlindSpot(this.truckNode, this.trailerNode, this.motorcycleNode);
     this.currentZone.set(res.zone);
     this.isBlindSpot.set(res.isBlind);
@@ -385,7 +387,8 @@ export class SimulatorService {
       this.syncMotorcyclePosition();
 
     } catch (e) {
-      console.error('Failed to boot Babylon simulator', e);
+      console.warn('WebGL or Babylon.js init failed (graceful fallback):', e);
+      this.webGlSupported.set(false);
     }
   }
 
@@ -393,6 +396,8 @@ export class SimulatorService {
 
   // --- Main Update Loop ---
   private updatePhysics(dt: number) {
+    if (!this.scene || !this.truckNode || !this.motorcycleNode) return;
+
     // 1. Blinker Flashing
     this.blinkerTimer += dt;
     if (this.blinkerTimer >= 0.35) {

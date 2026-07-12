@@ -44,14 +44,14 @@ export class SimulatorVehicleMotorcycleService {
     tank.parent = motorcycleNode;
 
     // Front shield (yếm xe máy) typical of Honda Wave / Vision
-    const shield = BABYLON.MeshBuilder.CreateBox('mShield', { width: 0.6, height: 0.75, depth: 0.08 }, scene);
-    shield.position.set(0, 0.90, 0.62);
+    const shield = BABYLON.MeshBuilder.CreateBox('mShield', { width: 0.6, height: 0.65, depth: 0.08 }, scene);
+    shield.position.set(0, 0.82, 0.62);
     shield.rotation.x = -0.22; // slanted back
     shield.material = frameMat;
     shield.parent = motorcycleNode;
 
-    const shieldInner = BABYLON.MeshBuilder.CreateBox('mShieldInner', { width: 0.5, height: 0.65, depth: 0.08 }, scene);
-    shieldInner.position.set(0, 0.88, 0.64);
+    const shieldInner = BABYLON.MeshBuilder.CreateBox('mShieldInner', { width: 0.5, height: 0.55, depth: 0.08 }, scene);
+    shieldInner.position.set(0, 0.80, 0.64);
     shieldInner.rotation.x = -0.22;
     const darkGreyMat = new BABYLON.StandardMaterial('darkGrey', scene);
     darkGreyMat.diffuseColor = new BABYLON.Color3(0.15, 0.15, 0.15);
@@ -116,32 +116,36 @@ export class SimulatorVehicleMotorcycleService {
     plateTexture.update();
 
     // Turn Signals (Xi nhan)
-    const turnSignalMat = new BABYLON.StandardMaterial('turnSignalMat', scene);
-    turnSignalMat.emissiveColor = new BABYLON.Color3(1, 0.5, 0); // Orange/Amber
-    turnSignalMat.diffuseColor = new BABYLON.Color3(1, 0.5, 0);
+    const turnSignalLMat = new BABYLON.StandardMaterial('turnSignalLMat', scene);
+    turnSignalLMat.emissiveColor = new BABYLON.Color3(0.1, 0.05, 0); // Orange/Amber off
+    turnSignalLMat.diffuseColor = new BABYLON.Color3(1, 0.5, 0);
+
+    const turnSignalRMat = new BABYLON.StandardMaterial('turnSignalRMat', scene);
+    turnSignalRMat.emissiveColor = new BABYLON.Color3(0.1, 0.05, 0); // Orange/Amber off
+    turnSignalRMat.diffuseColor = new BABYLON.Color3(1, 0.5, 0);
 
     // Rear Turn Signals (Xi nhan sau)
     const rearSignalL = BABYLON.MeshBuilder.CreateBox('mRearSignalL', { width: 0.06, height: 0.04, depth: 0.04 }, scene);
     rearSignalL.position.set(-0.16, 0.45, -0.90);
-    rearSignalL.material = turnSignalMat;
+    rearSignalL.material = turnSignalLMat;
     rearSignalL.parent = motorcycleNode;
 
     const rearSignalR = BABYLON.MeshBuilder.CreateBox('mRearSignalR', { width: 0.06, height: 0.04, depth: 0.04 }, scene);
     rearSignalR.position.set(0.16, 0.45, -0.90);
-    rearSignalR.material = turnSignalMat;
+    rearSignalR.material = turnSignalRMat;
     rearSignalR.parent = motorcycleNode;
 
     // Front Turn Signals (Xi nhan trước)
-    const frontSignalL = BABYLON.MeshBuilder.CreateBox('mFrontSignalL', { width: 0.06, height: 0.04, depth: 0.04 }, scene);
-    frontSignalL.position.set(-0.25, 0.85, 0.62);
+    const frontSignalL = BABYLON.MeshBuilder.CreateBox('mFrontSignalL', { width: 0.08, height: 0.06, depth: 0.06 }, scene);
+    frontSignalL.position.set(-0.33, 0.88, 0.68);
     frontSignalL.rotation.y = -0.2;
-    frontSignalL.material = turnSignalMat;
+    frontSignalL.material = turnSignalLMat;
     frontSignalL.parent = motorcycleNode;
 
-    const frontSignalR = BABYLON.MeshBuilder.CreateBox('mFrontSignalR', { width: 0.06, height: 0.04, depth: 0.04 }, scene);
-    frontSignalR.position.set(0.25, 0.85, 0.62);
+    const frontSignalR = BABYLON.MeshBuilder.CreateBox('mFrontSignalR', { width: 0.08, height: 0.06, depth: 0.06 }, scene);
+    frontSignalR.position.set(0.33, 0.88, 0.68);
     frontSignalR.rotation.y = 0.2;
-    frontSignalR.material = turnSignalMat;
+    frontSignalR.material = turnSignalRMat;
     frontSignalR.parent = motorcycleNode;
 
     // Handlebar (Ghi-đông)
@@ -175,44 +179,44 @@ export class SimulatorVehicleMotorcycleService {
     mirrorGlassMat.emissiveColor = new BABYLON.Color3(0.15, 0.15, 0.2);
 
     // Left Mirror
-    const stemL = BABYLON.MeshBuilder.CreateCylinder('mStemL', { diameter: 0.02, height: 0.25 }, scene);
-    stemL.position.set(-0.3, 1.15, 0.58);
+    const stemL = BABYLON.MeshBuilder.CreateCylinder('mStemL', { diameter: 0.02, height: 0.32 }, scene);
+    stemL.position.set(-0.3, 1.20, 0.58);
     stemL.rotation.z = 0.25; // tilted out
     stemL.rotation.x = -0.15; // tilted forward
     stemL.material = mirrorStemMat;
     stemL.parent = motorcycleNode;
 
     const mirrorL = BABYLON.MeshBuilder.CreateCylinder('mMirrorL', { diameter: 0.18, height: 0.04 }, scene);
-    mirrorL.position.set(-0.34, 1.25, 0.6);
+    mirrorL.position.set(-0.36, 1.34, 0.6);
     mirrorL.rotation.x = Math.PI / 2 - 0.1; // facing back
     mirrorL.rotation.y = 0.15;
     mirrorL.material = frameMat; // back is body color
     mirrorL.parent = motorcycleNode;
 
     const glassL = BABYLON.MeshBuilder.CreateCylinder('mGlassL', { diameter: 0.16, height: 0.01 }, scene);
-    glassL.position.set(-0.34, 1.25, 0.58);
+    glassL.position.set(-0.36, 1.34, 0.58);
     glassL.rotation.x = Math.PI / 2 - 0.1;
     glassL.rotation.y = 0.15;
     glassL.material = mirrorGlassMat;
     glassL.parent = motorcycleNode;
 
     // Right Mirror
-    const stemR = BABYLON.MeshBuilder.CreateCylinder('mStemR', { diameter: 0.02, height: 0.25 }, scene);
-    stemR.position.set(0.3, 1.15, 0.58);
+    const stemR = BABYLON.MeshBuilder.CreateCylinder('mStemR', { diameter: 0.02, height: 0.32 }, scene);
+    stemR.position.set(0.3, 1.20, 0.58);
     stemR.rotation.z = -0.25; // tilted out
     stemR.rotation.x = -0.15; // tilted forward
     stemR.material = mirrorStemMat;
     stemR.parent = motorcycleNode;
 
     const mirrorR = BABYLON.MeshBuilder.CreateCylinder('mMirrorR', { diameter: 0.18, height: 0.04 }, scene);
-    mirrorR.position.set(0.34, 1.25, 0.6);
+    mirrorR.position.set(0.36, 1.34, 0.6);
     mirrorR.rotation.x = Math.PI / 2 - 0.1; // facing back
     mirrorR.rotation.y = -0.15;
     mirrorR.material = frameMat; // back is body color
     mirrorR.parent = motorcycleNode;
 
     const glassR = BABYLON.MeshBuilder.CreateCylinder('mGlassR', { diameter: 0.16, height: 0.01 }, scene);
-    glassR.position.set(0.34, 1.25, 0.58);
+    glassR.position.set(0.36, 1.34, 0.58);
     glassR.rotation.x = Math.PI / 2 - 0.1;
     glassR.rotation.y = -0.15;
     glassR.material = mirrorGlassMat;
