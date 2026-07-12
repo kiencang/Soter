@@ -84,17 +84,31 @@ export class SimulatorScenarioCutOffService {
         ctx.motorcycleNode.scaling.set(1, 1, 1);
       }
     }
-    // Stage 2: 4.38s to 7.7s -> Va chạm do rơi vào vùng mù
-    else if (t < 7.7) {
+    // Stage 2: 4.38s to 8.0s -> Va chạm do rơi vào vùng mù
+    else if (t < 8.0) {
       setStage(2);
       setText("Bài học: Tuyệt đối không bao giờ tạt đầu đột ngột ngay sát mũi xe tải lớn hoặc xe container.");
       ctx.setMotoBlinkerActive(false);
       
-      const activeT = t - 1.5; // for truck movement
       const fallT = t - 4.38; // for bike falling and crushing
 
-      // Truck continues moving forward
-      const truckZ = -19.7 + activeT * 3.125; 
+      // Truck moves forward and brakes smoothly
+      let truckZ = -10.7; // Position at t = 4.38
+      if (t < 5.5) {
+        // Constant speed
+        const activeT = t - 1.5;
+        truckZ = -19.7 + activeT * 3.125;
+      } else if (t < 6.8) {
+        // Smooth braking
+        const s = t - 5.5;
+        const T = 1.3;
+        const v0 = 3.125;
+        truckZ = -7.2 + v0 * (s - (s * s) / (2 * T));
+      } else {
+        // Fully stopped
+        truckZ = -5.16875;
+      }
+
       if (ctx.truckNode) {
         ctx.truckNode.position.set(2.25, 0, truckZ);
       }

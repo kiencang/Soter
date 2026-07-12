@@ -12,9 +12,9 @@ export class SimulatorLogicService {
   getLeftBlindSpotVerticesLocal(): BABYLON.Vector3[] {
     return [
       new BABYLON.Vector3(-8.0, 0.015, -4.0),
-      new BABYLON.Vector3(0.0, 0.015, 1.5),
-      new BABYLON.Vector3(0.0, 0.015, 3.2),
-      new BABYLON.Vector3(-8.0, 0.015, 1.0)
+      new BABYLON.Vector3(0.0, 0.015, 2.5),
+      new BABYLON.Vector3(0.0, 0.015, 4.85),
+      new BABYLON.Vector3(-8.0, 0.015, 2.65)
     ];
   }
 
@@ -22,8 +22,8 @@ export class SimulatorLogicService {
     return [
       new BABYLON.Vector3(0.0, 0.015, 1.5),
       new BABYLON.Vector3(8.0, 0.015, -6.0),
-      new BABYLON.Vector3(8.0, 0.015, -1.0),
-      new BABYLON.Vector3(0.0, 0.015, 3.2)
+      new BABYLON.Vector3(8.0, 0.015, 0.65),
+      new BABYLON.Vector3(0.0, 0.015, 4.85)
     ];
   }
 
