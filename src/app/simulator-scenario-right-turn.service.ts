@@ -22,7 +22,7 @@ export class SimulatorScenarioRightTurnService {
     // Stage 0: 0s to 4.0s -> Moving straight forward together, signaling
     if (t < 4.0) {
       setStage(0);
-      setText("Hành trình: Xe container xi-nhan rẽ phải chuẩn bị rẽ ngã tư. Xe máy đang đi thẳng ở làn số 1 (bên phải) - hoàn toàn lọt thỏm trong vùng mù của gương!");
+      setText("Bài học: Hiện tượng 'cắt góc' của xe tải lớn/xe container khiến nó quét qua các làn bên trong khi rẽ. TUYỆT ĐỐI không đi song song với xe tải lớn/xe container ở các khúc cua hoặc ngã tư.");
       ctx.setBlinkerActive(true, 'right');
 
       const progressZ = startZ + t * speed;
@@ -49,7 +49,7 @@ export class SimulatorScenarioRightTurnService {
     // Stage 1: 4.0s to 5.3s -> Truck turns into Lane 2, motorcycle goes straight, collision!
     else if (t < 5.3) {
       setStage(1);
-      setText("Tình huống rẽ: Xe tải bẻ lái rẽ phải vào làn số 2. Xe máy ở làn số 1 vẫn tiếp tục đi thẳng. Quỹ đạo của rơ-moóc sẽ cắt ngang qua làn số 1.");
+      setText("Bài học: Hiện tượng 'cắt góc' của xe tải lớn/xe container khiến nó quét qua các làn bên trong khi rẽ. TUYỆT ĐỐI không đi song song với xe tải lớn/xe container ở các khúc cua hoặc ngã tư.");
       
       const activeT = t - 4.0; // 0 to 1.3
       const turnT = activeT / 3.3; // Proportion of the 90-degree turn
@@ -83,7 +83,7 @@ export class SimulatorScenarioRightTurnService {
     // Stage 2: 5.3s to 9.8s -> Collision and roll over
     else if (t < 9.8) {
       setStage(2);
-      setText("VA CHẠM: Điểm mù và góc khuất off-tracking của rơ-moóc đã quệt vào xe máy. Xe máy bị đẩy ngã, không thể thoát ra và bị cuốn vào gầm.");
+      setText("Bài học: Hiện tượng 'cắt góc' của xe tải lớn/xe container khiến nó quét qua các làn bên trong khi rẽ. TUYỆT ĐỐI không đi song song với xe tải lớn/xe container ở các khúc cua hoặc ngã tư.");
       
       const activeT = t - 4.0; // time since truck started turning
       const fallT = t - 5.3; // time since collision
@@ -148,7 +148,7 @@ export class SimulatorScenarioRightTurnService {
     else {
       setPlaying(false);
       ctx.setBlinkerActive(false);
-      setText("Bài học sống sót: Hiện tượng 'cắt góc' của rơ-moóc khiến nó quét qua các làn bên trong khi rẽ. TUYỆT ĐỐI không đi song song với xe tải ở các khúc cua hoặc ngã tư.");
+      setText("Bài học: Hiện tượng 'cắt góc' của xe tải lớn/xe container khiến nó quét qua các làn bên trong khi rẽ. TUYỆT ĐỐI không đi song song với xe tải lớn/xe container ở các khúc cua hoặc ngã tư.");
     }
   }
 }

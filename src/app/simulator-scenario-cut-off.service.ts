@@ -18,7 +18,7 @@ export class SimulatorScenarioCutOffService {
     // Stage 0: 0s to 1.5s -> Dừng chờ đèn đỏ
     if (t < 1.5) {
       setStage(0);
-      setText("Đèn đỏ: Cả xe tải lớn và xe máy đang dừng chờ đèn đỏ tại ngã tư. Xe máy dừng chếch về phía trước bên phải cabin xe tải.");
+      setText("Bài học: Tuyệt đối không bao giờ tạt đầu đột ngột ngay sát mũi xe tải lớn hoặc xe container.");
       
       if (ctx.truckNode) {
         ctx.truckNode.position.set(2.25, 0, -19.7);
@@ -41,7 +41,7 @@ export class SimulatorScenarioCutOffService {
     // Stage 1: 1.5s to 4.38s -> Đèn xanh, cả hai cùng khởi hành, xe máy tạt đầu
     else if (t < 4.38) {
       setStage(1);
-      setText("Đèn xanh: Cả hai di chuyển. Xe máy bật xi nhan trái, tăng tốc nhanh hơn và đột ngột rẽ tạt đầu ngay sát mũi cabin xe tải.");
+      setText("Bài học: Tuyệt đối không bao giờ tạt đầu đột ngột ngay sát mũi xe tải lớn hoặc xe container.");
       ctx.setMotoBlinkerActive(true, 'left');
       
       const activeT = t - 1.5; 
@@ -87,7 +87,7 @@ export class SimulatorScenarioCutOffService {
     // Stage 2: 4.38s to 7.7s -> Va chạm do rơi vào vùng mù
     else if (t < 7.7) {
       setStage(2);
-      setText("CẢNH BÁO TAI NẠN: Do nằm trong góc khuất, tài xế không thấy xe máy tạt đầu. Xe máy bị húc văng, ngã xuống và bị cuốn thẳng vào gầm!");
+      setText("Bài học: Tuyệt đối không bao giờ tạt đầu đột ngột ngay sát mũi xe tải lớn hoặc xe container.");
       ctx.setMotoBlinkerActive(false);
       
       const activeT = t - 1.5; // for truck movement
@@ -146,7 +146,7 @@ export class SimulatorScenarioCutOffService {
     // Stage 3: End of Scenario
     else {
       setPlaying(false);
-      setText("Bài học sinh tồn: Tuyệt đối không bao giờ tạt đầu đột ngột ngay sát mũi xe tải lớn hoặc xe container. Hãy vượt bên trái với khoảng cách xa an toàn ít nhất 5 mét trước khi nhập làn.");
+      setText("Bài học: Tuyệt đối không bao giờ tạt đầu đột ngột ngay sát mũi xe tải lớn hoặc xe container.");
     }
   }
 }

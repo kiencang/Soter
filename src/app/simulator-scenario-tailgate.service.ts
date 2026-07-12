@@ -26,7 +26,7 @@ export class SimulatorScenarioTailgateService {
     // Stage 0: 0s to 2.5s -> Riding close behind
     if (t < 2.5) {
       setStage(0);
-      setText("Hành trình: Xe máy bám sát sạt đuôi rơ-moóc thùng container ở khoảng cách 1.5 mét. Người lái xe máy hoàn toàn bị mất tầm nhìn phía trước.");
+      setText("Bài học: Luôn giữ khoảng cách an toàn tối thiểu (quy tắc 3 giây) khi chạy sau xe tải lớn. Giúp bạn luôn có tầm nhìn thoáng và đủ thời gian phản ứng khi xe trước phanh gấp.");
       truckZ = initialZ + t * speed;
       bikeZ = truckZ + bikeOffset;
       this.updatePositions(ctx, truckZ, bikeZ);
@@ -34,7 +34,7 @@ export class SimulatorScenarioTailgateService {
     // Stage 1: 2.5s to 5.0s -> Still tailgating, completely invisible in mirrors
     else if (t < 5.0) {
       setStage(1);
-      setText("Rủi ro ẩn: Ở vị trí bám sát sạt này, gương chiếu hậu bên hông xe container không thể thu giữ bóng dáng xe máy. Tài xế hoàn toàn mù thông tin sau đuôi.");
+      setText("Bài học: Luôn giữ khoảng cách an toàn tối thiểu (quy tắc 3 giây) khi chạy sau xe tải lớn. Giúp bạn luôn có tầm nhìn thoáng và đủ thời gian phản ứng khi xe trước phanh gấp.");
       truckZ = initialZ + t * speed;
       bikeZ = truckZ + bikeOffset;
       this.updatePositions(ctx, truckZ, bikeZ);
@@ -42,7 +42,7 @@ export class SimulatorScenarioTailgateService {
     // Stage 2: 5.0s to 8.5s -> Sudden emergency brake!
     else if (t < 8.5) {
       setStage(2);
-      setText("PHANH GẤP: Gặp chướng ngại vật, container phanh gấp. Do khoảng cách quá ngắn không đủ thời gian phản xạ, xe máy húc thẳng vào đuôi rơ-moóc sắt thép.");
+      setText("Bài học: Luôn giữ khoảng cách an toàn tối thiểu (quy tắc 3 giây) khi chạy sau xe tải lớn. Giúp bạn luôn có tầm nhìn thoáng và đủ thời gian phản ứng khi xe trước phanh gấp.");
       
       const activeT = t - 5.0;
       const truckStartZ = initialZ + 5.0 * speed;
@@ -119,7 +119,7 @@ export class SimulatorScenarioTailgateService {
     // Stage 3: End of Scenario
     else {
       setPlaying(false);
-      setText("Bài học sống sót: Luôn giữ khoảng cách an toàn tối thiểu (quy tắc 3 giây) khi chạy sau xe tải lớn. Giúp bạn luôn có tầm nhìn thoáng và đủ thời gian phản ứng khi xe trước phanh gấp.");
+      setText("Bài học: Luôn giữ khoảng cách an toàn tối thiểu (quy tắc 3 giây) khi chạy sau xe tải lớn. Giúp bạn luôn có tầm nhìn thoáng và đủ thời gian phản ứng khi xe trước phanh gấp.");
     }
   }
 
