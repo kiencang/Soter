@@ -14,7 +14,7 @@ Nếu bạn nhận được thông báo này:
 
 > Trình duyệt hoặc phần cứng của bạn hiện tại không hỗ trợ WebGL đồ họa 3D (hoặc tính năng tăng tốc phần cứng bị tắt). Để có thể trải nghiệm đầy đủ mô phỏng 3D trực quan này, vui lòng bật 'Tăng tốc phần cứng' trong cài đặt trình duyệt hoặc sử dụng một trình duyệt hiện đại khác.
 
-Thì có thể do trình duyệt đang quản lý hoặc hạn chế dùng GPU của ứng dụng (ví dụ do các tab khác đang bật đang sử dụng GPU tương đối nhiều). Cách đơn giản nhất là tắt các tab trình duyệt khác đi, và tải lại trang web của ứng dụng Soter.
+Thì có thể do trình duyệt đang hạn chế khả năng dùng GPU của ứng dụng (ví dụ do các tab khác đang bật đang sử dụng GPU tương đối nhiều). Cách đơn giản nhất là tắt các tab trình duyệt khác đi, và tải lại trang web của ứng dụng Soter.
 
 ## Lưu ý
 Mặc dù người phát triển ứng dụng này có tham khảo các tài liệu về điểm mù xe tải, cũng như khảo sát nhiều video tai nạn do điểm mù để mô phỏng được chính xác. Nó không đảm bảo rằng việc mô phỏng là chính xác 100%.
