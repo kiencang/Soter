@@ -17,41 +17,8 @@
             </button>
           </div>
 
-          <!-- Section 1: POV Choice -->
+          <!-- Section 1: POV Choice removed -->
           <div class="space-y-2">
-            <div class="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider block">
-              CHỌN GÓC NHÌN (POV)
-            </div>
-            <div class="grid grid-cols-3 gap-2 p-1 bg-slate-950/80 border border-white/5 rounded-xl">
-              <button (click)="sim.setViewMode('orbit')" 
-                      class="py-2.5 px-2 rounded-lg text-xs font-semibold font-display transition-all"
-                      [class.bg-amber-500]="sim.viewMode() === 'orbit'"
-                      [class.text-slate-950]="sim.viewMode() === 'orbit'"
-                      [class.text-slate-400]="sim.viewMode() !== 'orbit'"
-                      [class.hover:text-white]="sim.viewMode() !== 'orbit'"
-                      id="view-orbit-btn">
-                Toàn Cảnh 3D
-              </button>
-              <button (click)="sim.setViewMode('cabin')" 
-                      class="py-2.5 px-2 rounded-lg text-xs font-semibold font-display transition-all"
-                      [class.bg-amber-500]="sim.viewMode() === 'cabin'"
-                      [class.text-slate-950]="sim.viewMode() === 'cabin'"
-                      [class.text-slate-400]="sim.viewMode() !== 'cabin'"
-                      [class.hover:text-white]="sim.viewMode() !== 'cabin'"
-                      id="view-cabin-btn">
-                Cabin Tài Xế
-              </button>
-              <button (click)="sim.setViewMode('rider')" 
-                      class="py-2.5 px-2 rounded-lg text-xs font-semibold font-display transition-all"
-                      [class.bg-amber-500]="sim.viewMode() === 'rider'"
-                      [class.text-slate-950]="sim.viewMode() === 'rider'"
-                      [class.text-slate-400]="sim.viewMode() !== 'rider'"
-                      [class.hover:text-white]="sim.viewMode() !== 'rider'"
-                      id="view-rider-btn">
-                Góc Xe Máy
-              </button>
-            </div>
-
             <!-- Toggle Blind Spot Overlays (Moved to right column) -->
             @if (sim.viewMode() === 'orbit') {
               <div class="flex items-center justify-between p-3 bg-slate-950/40 border border-white/5 rounded-xl transition-all">
@@ -66,100 +33,8 @@
             }
           </div>
 
-          <!-- Section 2: Mode Tabs -->
-          <div class="space-y-2">
-            <div class="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider block">
-              CHẾ ĐỘ TRẢI NGHIỆM
-            </div>
-            <div class="grid grid-cols-2 gap-2 p-1 bg-slate-950/80 border border-white/5 rounded-xl">
-              <button (click)="sim.startScenario('free')" 
-                      class="py-2 px-1 rounded-lg text-xs font-medium transition-all"
-                      [class.bg-slate-800]="sim.activeScenario() === 'free'"
-                      [class.text-amber-400]="sim.activeScenario() === 'free'"
-                      [class.text-slate-400]="sim.activeScenario() !== 'free'"
-                      [class.hover:text-white]="sim.activeScenario() !== 'free'"
-                      id="mode-sandbox-btn">
-                🔬 Khám Phá Tự Do
-              </button>
-              <button (click)="sim.startScenario('right_turn')" 
-                      class="py-2 px-1 rounded-lg text-xs font-medium transition-all"
-                      [class.bg-slate-800]="sim.activeScenario() !== 'free'"
-                      [class.text-amber-400]="sim.activeScenario() !== 'free'"
-                      [class.text-slate-400]="sim.activeScenario() === 'free'"
-                      [class.hover:text-white]="sim.activeScenario() === 'free'"
-                      id="mode-scenarios-btn">
-                🎬 Bài Học Tình Huống
-              </button>
-            </div>
-          </div>
-
-          <!-- Sandbox Content -->
-          @if (sim.activeScenario() === 'free') {
-            <div class="space-y-4 bg-slate-950/40 border border-white/5 rounded-2xl p-4" id="sandbox-controls">
-              <div>
-                <h3 class="text-xs font-mono font-bold text-slate-300 uppercase">🔬 ĐIỀU CHỈNH VỊ TRÍ XE MÁY</h3>
-                <p class="text-[11px] text-slate-400 mt-1">Sử dụng thanh kéo hoặc các phím WASD để dịch chuyển xe máy xung quanh container.</p>
-              </div>
-
-              <!-- Z position slider (Trước/Sau) -->
-              <div class="space-y-1">
-                <div class="flex justify-between text-xs font-mono text-slate-400">
-                  <span>Trục Z (Trước/Sau):</span>
-                  <span class="text-amber-500 font-bold">{{ sim.motorcycleZ() | number:'1.1-1' }}m</span>
-                </div>
-                <input type="range" 
-                       [value]="sim.motorcycleZ()" 
-                       (input)="sim.setMotorcycleCoords(sim.motorcycleX(), +$any($event.target).value)"
-                       min="-25" max="15" step="0.5" 
-                       class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-amber-500">
-                <div class="flex justify-between text-[10px] text-slate-500 font-mono">
-                  <span>Sau đuôi (-25m)</span>
-                  <span>Đầu cabin (+15m)</span>
-                </div>
-              </div>
-
-              <!-- X position slider (Trái/Phải) -->
-              <div class="space-y-1">
-                <div class="flex justify-between text-xs font-mono text-slate-400">
-                  <span>Trục X (Trái/Phải):</span>
-                  <span class="text-amber-500 font-bold">{{ sim.motorcycleX() | number:'1.1-1' }}m</span>
-                </div>
-                <input type="range" 
-                       [value]="sim.motorcycleX()" 
-                       (input)="sim.setMotorcycleCoords(+$any($event.target).value, sim.motorcycleZ())"
-                       min="-8" max="8" step="0.5" 
-                       class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-amber-500">
-                <div class="flex justify-between text-[10px] text-slate-500 font-mono">
-                  <span>Bên trái (-8m)</span>
-                  <span>Bên phải (+8m)</span>
-                </div>
-              </div>
-
-            </div>
-
-            <!-- Detail Explanation card (Zonewise feedback) -->
-            <div class="bg-slate-950/80 border border-white/10 rounded-2xl p-4 space-y-2" id="detail-card">
-              <h4 class="text-xs font-mono font-bold text-amber-400 uppercase tracking-wide">
-                BẢN CHẤT GÓC KHUẤT VÙNG NÀY:
-              </h4>
-              <p class="text-xs text-slate-300 leading-relaxed">
-                {{ sim.currentDetail() }}
-              </p>
-              @if (sim.isBlindSpot()) {
-                <div class="bg-red-500/10 border border-red-500/20 rounded-xl p-2.5 text-[11px] text-red-300 leading-tight">
-                  🚨 <strong>CHÚ Ý:</strong> Tài xế không thể thấy bạn trong các gương! Bạn hoàn toàn vô hình đối với họ vào lúc này.
-                </div>
-              } @else {
-                <div class="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-2.5 text-[11px] text-emerald-300 leading-tight">
-                  ✓ <strong>AN TOÀN:</strong> Ở khoảng cách này, xe máy của bạn đã lọt vào tầm quét gương hoặc trực diện của lái xe.
-                </div>
-              }
-            </div>
-          }
-
           <!-- Scenarios Content -->
-          @if (sim.activeScenario() !== 'free') {
-            <div class="space-y-4" id="scenarios-center">
+          <div class="space-y-4" id="scenarios-center">
               <!-- Select Scenarios Column -->
               <div class="grid grid-cols-3 gap-2">
                 <button (click)="sim.startScenario('right_turn')" 
@@ -238,7 +113,6 @@
                 </div>
               </div>
             </div>
-          }
 
         <app-quiz></app-quiz>
         </div>

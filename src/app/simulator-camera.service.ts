@@ -118,15 +118,16 @@ export class SimulatorCameraService {
     }
   }
 
-  updateCabinLookAngle() {
-    if (this.viewMode() === 'cabin' && this.mainCamera) {
-      let targetLook = new BABYLON.Vector3(-0.6, 2.3, 30.0); // look front
+  updateCabinLookAngle(truckNode: BABYLON.TransformNode | null) {
+    if (this.viewMode() === 'cabin' && this.mainCamera && truckNode) {
+      let targetLookLocal = new BABYLON.Vector3(-0.6, 2.3, 30.0); // look front
       if (this.lookDirection() === 'left') {
-        targetLook = new BABYLON.Vector3(-10.0, 2.1, 4.0); // look left window
+        targetLookLocal = new BABYLON.Vector3(-10.0, 2.1, 4.0); // look left window
       } else if (this.lookDirection() === 'right') {
-        targetLook = new BABYLON.Vector3(10.0, 1.9, 2.0); // look right passenger door
+        targetLookLocal = new BABYLON.Vector3(10.0, 1.9, 2.0); // look right passenger door
       }
-      this.mainCamera.setTarget(targetLook);
+      const targetLookWorld = BABYLON.Vector3.TransformCoordinates(targetLookLocal, truckNode.getWorldMatrix());
+      this.mainCamera.setTarget(targetLookWorld);
     }
   }
 
@@ -143,17 +144,11 @@ export class SimulatorCameraService {
 
     // 2. Update left mirror camera
     if (this.leftMirrorCamera) {
-      const leftTargetLocal = new BABYLON.Vector3(-1.9, 0.8, -25.0);
-      const leftTargetWorld = BABYLON.Vector3.TransformCoordinates(leftTargetLocal, truckNode.getWorldMatrix());
-      this.leftMirrorCamera.setTarget(leftTargetWorld);
       this.leftMirrorCamera.update();
     }
 
     // 3. Update right mirror camera
     if (this.rightMirrorCamera) {
-      const rightTargetLocal = new BABYLON.Vector3(1.9, 0.8, -25.0);
-      const rightTargetWorld = BABYLON.Vector3.TransformCoordinates(rightTargetLocal, truckNode.getWorldMatrix());
-      this.rightMirrorCamera.setTarget(rightTargetWorld);
       this.rightMirrorCamera.update();
     }
 

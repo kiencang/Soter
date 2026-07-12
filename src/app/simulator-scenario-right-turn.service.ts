@@ -14,88 +14,132 @@ export class SimulatorScenarioRightTurnService {
     // Stage 0: 0s to 3.2s -> Moving straight forward together, signaling
     if (t < 3.2) {
       setStage(0);
-      setText("Hành trình: Xe container xi-nhan rẽ phải chuẩn bị rẽ ngã tư. Xe máy đang bám sát song song phía bên phải rơ-moóc rọ - đây là vùng tử thần khuất 100% gương lái!");
+      setText("Hành trình: Xe container xi-nhan rẽ phải chuẩn bị rẽ ngã tư. Xe máy đang đi thẳng ở làn số 1 (bên phải) - hoàn toàn lọt thỏm trong vùng mù của gương!");
       ctx.setBlinkerActive(true, 'right');
 
       const progressZ = -19.14 + t * 2.2;
+
       if (ctx.truckNode) {
         ctx.truckNode.position.set(2.25, 0, progressZ);
         ctx.truckNode.rotation.y = 0;
       }
-      ctx.motorcycleX.set(6.05);
-      ctx.motorcycleZ.set(progressZ - 2.5);
+
+      // Motorcycle is in Lane 1 (X = 6.05), completely in the blind spot
+      ctx.motorcycleX.set(6.05); 
+      ctx.motorcycleZ.set(progressZ + 1.0); 
       ctx.syncMotorcyclePosition();
+
       if (ctx.motorcycleNode) {
         ctx.motorcycleNode.rotation.y = 0;
+        ctx.motorcycleNode.rotation.x = 0;
         ctx.motorcycleNode.rotation.z = 0;
+        ctx.motorcycleNode.scaling.set(1, 1, 1);
+        ctx.motorcycleNode.position.y = 0; // reset y
       }
     }
-    // Stage 1: 3.2s to 6.5s -> Truck swings out left and sweeps sharp right
-    else if (t < 6.5) {
+    // Stage 1: 3.2s to 4.5s -> Truck turns into Lane 2, motorcycle goes straight, collision!
+    else if (t < 4.5) {
       setStage(1);
-      setText("Tình huống rẽ: Xe container bẻ lái rẽ phải. Phần rơ-moóc hông sau quét sát góc đường tạo ra góc quét hẹp. Tài xế không hề thấy chiếc xe máy trong hông phụ.");
+      setText("Tình huống rẽ: Xe tải bẻ lái rẽ phải vào làn số 2. Xe máy ở làn số 1 vẫn tiếp tục đi thẳng. Quỹ đạo của rơ-moóc sẽ cắt ngang qua làn số 1.");
       
-      const turnT = (t - 3.2) / 3.3;
-      const angle = turnT * (Math.PI / 2.2);
+      const activeT = t - 3.2; // 0 to 1.3
+      const turnT = activeT / 3.3; // Proportion of the 90-degree turn
+      const angle = turnT * (Math.PI / 2);
       
-      let truckX = 2.25;
-      let truckZ = -12.1;
+      // Radius to end up in Lane 2 (Z = -2.25) from X = 2.25, Z = -12.1
+      const R = 9.85; 
+      const truckX = (2.25 + R) - R * Math.cos(angle);
+      const truckZ = -12.1 + R * Math.sin(angle);
+
       if (ctx.truckNode) {
         ctx.truckNode.rotation.y = angle;
-        const radius = 6.5;
-        truckZ = -12.1 + Math.sin(angle) * radius;
-        truckX = 2.25 + radius - Math.cos(angle) * radius;
         ctx.truckNode.position.set(truckX, 0, truckZ);
       }
 
-      // Motorcycle rides parallel to the truck in its right blind spot!
-      // Local position relative to the truck: localX = 3.8, localZ = -2.46
-      const localX = 3.8;
-      const localZ = -2.46;
+      // Motorcycle continues STRAIGHT at original speed
+      const bikeZ = -12.1 + 1.0 + activeT * 2.2;
       
-      const bikeX = truckX + localX * Math.cos(angle) + localZ * Math.sin(angle);
-      const bikeZ = truckZ - localX * Math.sin(angle) + localZ * Math.cos(angle);
-
-      ctx.motorcycleX.set(bikeX);
+      ctx.motorcycleX.set(6.05);
       ctx.motorcycleZ.set(bikeZ);
       ctx.syncMotorcyclePosition();
+
       if (ctx.motorcycleNode) {
-        ctx.motorcycleNode.rotation.y = angle;
+        ctx.motorcycleNode.rotation.y = 0;
+        ctx.motorcycleNode.rotation.x = 0;
         ctx.motorcycleNode.rotation.z = 0;
+        ctx.motorcycleNode.scaling.set(1, 1, 1);
+        ctx.motorcycleNode.position.y = 0;
       }
     }
-    // Stage 2: 6.5s to 9.5s -> Collision sweep!
-    else if (t < 9.5) {
+    // Stage 2: 4.5s to 9.0s -> Collision and roll over
+    else if (t < 9.0) {
       setStage(2);
-      setText("VA CHẠM: Đuôi rơ-moóc quét sâu ép chặt xe máy vào vỉa hè. Xe máy ngã đổ vào gầm xe tải lớn do đứng trong góc chết rẽ phải.");
+      setText("VA CHẠM: Điểm mù và góc khuất off-tracking của rơ-moóc đã quệt vào xe máy. Xe máy bị đẩy ngã, không thể thoát ra và bị cuốn vào gầm.");
       
-      const finalTruckX = 7.82;
-      const finalTruckZ = -5.67;
-      const finalTruckAngle = Math.PI / 2.2;
+      const activeT = t - 3.2; // time since truck started turning
+      const fallT = t - 4.5; // time since collision
+      
+      const turnT = activeT / 3.3; 
+      let angle = turnT * (Math.PI / 2);
+      const R = 9.85; 
+      
+      let currentTruckX, currentTruckZ;
+
+      if (angle > Math.PI / 2) {
+        angle = Math.PI / 2;
+        const extraT = activeT - 3.3; 
+        const straightSpeed = (R * Math.PI / 2) / 3.3; 
+        currentTruckX = (2.25 + R) + extraT * straightSpeed;
+        currentTruckZ = -12.1 + R;
+      } else {
+        currentTruckX = (2.25 + R) - R * Math.cos(angle);
+        currentTruckZ = -12.1 + R * Math.sin(angle);
+      }
 
       if (ctx.truckNode) {
-        ctx.truckNode.rotation.y = finalTruckAngle;
-        ctx.truckNode.position.set(finalTruckX, 0, finalTruckZ);
+        ctx.truckNode.rotation.y = angle;
+        ctx.truckNode.position.set(currentTruckX, 0, currentTruckZ);
       }
 
-      const finalBikeX = 5.93;
-      const finalBikeZ = -9.82;
-
-      ctx.motorcycleX.set(finalBikeX);
-      ctx.motorcycleZ.set(finalBikeZ);
+      // Bike position at collision (t=4.5)
+      const collisionActiveT = 4.5 - 3.2; // 1.3
+      const collisionBikeZ = -12.1 + 1.0 + collisionActiveT * 2.2; 
+      const collisionBikeX = 6.05;
+      
+      const pushFactor = Math.min(fallT / 0.5, 1.0);
+      
+      const currentBikeX = collisionBikeX + pushFactor * 0.8; 
+      const currentBikeZ = collisionBikeZ + pushFactor * 0.5; 
+      
+      ctx.motorcycleX.set(currentBikeX);
+      ctx.motorcycleZ.set(currentBikeZ);
       ctx.syncMotorcyclePosition();
+
       if (ctx.motorcycleNode) {
-        ctx.motorcycleNode.position.set(finalBikeX, 0.2, finalBikeZ);
-        ctx.motorcycleNode.rotation.y = finalTruckAngle;
-        ctx.motorcycleNode.rotation.z = Math.PI / 2.5;
+        ctx.motorcycleNode.position.set(currentBikeX, 0.015, currentBikeZ);
+        
+        // Ngã đổ: Bị tạt từ bên trái nên ngã sang phải
+        ctx.motorcycleNode.rotation.z = pushFactor * (-Math.PI / 2.2); 
+        ctx.motorcycleNode.rotation.x = pushFactor * 0.2; 
+        ctx.motorcycleNode.rotation.y = pushFactor * 0.5; 
+        
+        const crushStartT = 0.5; 
+        if (fallT > crushStartT) {
+           const crushProgress = (fallT - crushStartT) * 1.5; 
+           const crushFactor = Math.max(1.0 - crushProgress, 0.05);
+           ctx.motorcycleNode.scaling.set(crushFactor, 1.2, 1.2); 
+        } else {
+           ctx.motorcycleNode.scaling.set(1, 1, 1);
+        }
       }
+      
       ctx.checkBlindSpotState();
     }
     // Stage 3: End of Scenario
     else {
       setPlaying(false);
       ctx.setBlinkerActive(false);
-      setText("Bài học sống sót: Khi thấy xe container lớn xi-nhan rẽ phải, TUYỆT ĐỐI không đi chen vào khe hẹp bên phải xe. Hãy giảm tốc độ, dừng lại nhường đường cách xa ít nhất 10 mét.");
+      setText("Bài học sống sót: Hiện tượng 'cắt góc' của rơ-moóc khiến nó quét qua các làn bên trong khi rẽ. TUYỆT ĐỐI không đi song song với xe tải ở các khúc cua hoặc ngã tư.");
     }
   }
 }

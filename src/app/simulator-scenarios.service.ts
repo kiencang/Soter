@@ -26,7 +26,7 @@ export class SimulatorScenarioService {
   private cutOffScenario = inject(SimulatorScenarioCutOffService);
   private tailgateScenario = inject(SimulatorScenarioTailgateService);
 
-  activeScenario = signal<'free' | 'right_turn' | 'cut_off' | 'tailgate'>('free');
+  activeScenario = signal<'free' | 'right_turn' | 'cut_off' | 'tailgate'>('right_turn');
   isPlayingScenario = signal<boolean>(false);
   scenarioStage = signal<number>(0);
   scenarioText = signal<string>('');
@@ -82,7 +82,7 @@ export class SimulatorScenarioService {
       ctx.motorcycleX.set(2.25);
       ctx.motorcycleZ.set(-55.0);
       ctx.syncMotorcyclePosition();
-      ctx.setViewMode('rider');
+      ctx.setViewMode('orbit');
     }
   }
 

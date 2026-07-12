@@ -15,34 +15,38 @@ export class SimulatorScenarioTailgateService {
     const speed = 12.0;
     const initialZ = -40.0;
     
-    // Calculate current positions based on time
+    // Khoảng cách bám đuôi 1.5 mét:
+    // Distance = (truckZ - 11.25) - (bikeZ + 1.1) = 1.5
+    // -> bikeZ = truckZ - 13.85
+    const bikeOffset = -13.85; 
+    
     let truckZ = initialZ;
-    let bikeZ = initialZ - 15.0;
+    let bikeZ = initialZ + bikeOffset;
 
     // Stage 0: 0s to 3.2s -> Riding close behind
     if (t < 3.2) {
       setStage(0);
       setText("Hành trình: Xe máy bám sát sạt đuôi rơ-moóc thùng container ở khoảng cách 1.5 mét. Người lái xe máy hoàn toàn bị mất tầm nhìn phía trước.");
       truckZ = initialZ + t * speed;
-      bikeZ = truckZ - 15.0;
+      bikeZ = truckZ + bikeOffset;
       this.updatePositions(ctx, truckZ, bikeZ);
     }
-    // Stage 1: 3.2s to 6.5s -> Still tailgating, completely invisible in mirrors
-    else if (t < 6.5) {
+    // Stage 1: 3.2s to 6.0s -> Still tailgating, completely invisible in mirrors
+    else if (t < 6.0) {
       setStage(1);
       setText("Rủi ro ẩn: Ở vị trí bám sát sạt này, gương chiếu hậu bên hông xe container không thể thu giữ bóng dáng xe máy. Tài xế hoàn toàn mù thông tin sau đuôi.");
       truckZ = initialZ + t * speed;
-      bikeZ = truckZ - 15.0;
+      bikeZ = truckZ + bikeOffset;
       this.updatePositions(ctx, truckZ, bikeZ);
     }
-    // Stage 2: 6.5s to 9.5s -> Sudden emergency brake!
+    // Stage 2: 6.0s to 9.5s -> Sudden emergency brake!
     else if (t < 9.5) {
       setStage(2);
-      setText("PHANH GẤP: Gặp vật cản, container phanh gấp. Do bị che khuất tầm nhìn trước hoàn toàn và khoảng cách quá ngắn, xe máy húc thẳng vào đuôi rơ-moóc sắt thép.");
+      setText("PHANH GẤP: Gặp chướng ngại vật, container phanh gấp. Do khoảng cách quá ngắn không đủ thời gian phản xạ, xe máy húc thẳng vào đuôi rơ-moóc sắt thép.");
       
-      const activeT = t - 6.5;
-      const truckStartZ = initialZ + 6.5 * speed;
-      const bikeStartZ = truckStartZ - 15.0;
+      const activeT = t - 6.0;
+      const truckStartZ = initialZ + 6.0 * speed;
+      const bikeStartZ = truckStartZ + bikeOffset;
       
       // Truck decelerates to stop in 1.5s
       const truckDecel = speed / 1.5;
@@ -59,19 +63,14 @@ export class SimulatorScenarioTailgateService {
       if (activeT < 0.5) {
         bikeDist = speed * activeT;
       } else {
-        const brakeT = activeT - 0.5;
+        const brakeT = Math.min(activeT - 0.5, 1.0);
         const bikeDecel = speed / 1.0;
         bikeDist = speed * 0.5 + speed * brakeT - 0.5 * bikeDecel * brakeT * brakeT;
       }
       bikeZ = bikeStartZ + bikeDist;
       
       // Collision happens if bike gets too close to the rear of the trailer
-      const collisionZ = truckZ - 13.5;
-      let crashed = false;
-      if (bikeZ >= collisionZ) {
-        bikeZ = collisionZ;
-        crashed = true;
-      }
+      const collisionLimitZ = truckZ - 12.35;
       
       if (ctx.truckNode) {
         ctx.truckNode.position.set(2.25, 0, truckZ);
@@ -79,15 +78,39 @@ export class SimulatorScenarioTailgateService {
       }
       
       ctx.motorcycleX.set(2.25);
-      ctx.motorcycleZ.set(bikeZ);
       
-      if (ctx.motorcycleNode) {
-        if (crashed) {
-          ctx.motorcycleNode.position.set(2.25, 0.35, bikeZ);
-          ctx.motorcycleNode.rotation.x = -Math.PI / 4.5;
-        } else {
-          ctx.motorcycleNode.position.set(2.25, 0, bikeZ);
+      if (bikeZ >= collisionLimitZ) {
+        // Crashed
+        bikeZ = collisionLimitZ; 
+        ctx.motorcycleZ.set(bikeZ);
+        
+        if (ctx.motorcycleNode) {
+          ctx.motorcycleNode.position.set(2.25, 0.015, bikeZ);
+          
+          const crashActiveT = Math.max(0, activeT - 0.3);
+          const crushFactor = Math.min(crashActiveT / 0.5, 1.0);
+          
+          // Xe húc vào đít xe tải: bốc đuôi lên một chút rồi đổ
+          const pitchAngle = Math.sin(crushFactor * Math.PI) * (Math.PI / 6); 
+          const fallAngle = crushFactor * (Math.PI / 2.2); 
+          
+          ctx.motorcycleNode.rotation.x = pitchAngle; 
+          ctx.motorcycleNode.rotation.y = crushFactor * 0.3; 
+          ctx.motorcycleNode.rotation.z = -fallAngle; 
+          
+          // Bẹp đầu xe
+          const scalingFactor = Math.max(1.0 - crushFactor * 0.3, 0.7);
+          ctx.motorcycleNode.scaling.set(1.0, 1.0, scalingFactor);
+        }
+      } else {
+        // Not crashed yet
+        ctx.motorcycleZ.set(bikeZ);
+        if (ctx.motorcycleNode) {
+          ctx.motorcycleNode.position.set(2.25, 0.015, bikeZ);
           ctx.motorcycleNode.rotation.x = 0;
+          ctx.motorcycleNode.rotation.y = 0;
+          ctx.motorcycleNode.rotation.z = 0;
+          ctx.motorcycleNode.scaling.set(1, 1, 1);
         }
       }
       
@@ -96,7 +119,7 @@ export class SimulatorScenarioTailgateService {
     // Stage 3: End of Scenario
     else {
       setPlaying(false);
-      setText("Bài học sống sót: Luôn giữ khoảng cách an toàn ít nhất 20 mét (bằng một thân xe lớn) khi bám đuôi xe tải rơ-moóc. Giúp bạn luôn có tầm quan sát mở và thời gian tránh khẩn cấp.");
+      setText("Bài học sống sót: Luôn giữ khoảng cách an toàn tối thiểu (quy tắc 3 giây) khi chạy sau xe tải lớn. Giúp bạn luôn có tầm nhìn thoáng và đủ thời gian phản ứng khi xe trước phanh gấp.");
     }
   }
 
@@ -108,9 +131,13 @@ export class SimulatorScenarioTailgateService {
     ctx.motorcycleX.set(2.25);
     ctx.motorcycleZ.set(bikeZ);
     if (ctx.motorcycleNode) {
-      ctx.motorcycleNode.position.set(2.25, 0, bikeZ);
+      ctx.motorcycleNode.position.set(2.25, 0.015, bikeZ);
       ctx.motorcycleNode.rotation.x = 0;
+      ctx.motorcycleNode.rotation.y = 0;
+      ctx.motorcycleNode.rotation.z = 0;
+      ctx.motorcycleNode.scaling.set(1, 1, 1);
     }
     ctx.syncMotorcyclePosition();
   }
 }
+

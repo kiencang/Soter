@@ -293,7 +293,7 @@ export class SimulatorService {
   startSimulation() {
     this.gameState.set('SIMULATION');
     this.cameraService.setFrontMirrorVisible(true);
-    this.startScenario('free');
+    this.startScenario('right_turn');
   }
 
   goToMenu() {
@@ -406,7 +406,7 @@ export class SimulatorService {
     }
 
     // 2. Animate look angle when in Cabin view
-    this.cameraService.updateCabinLookAngle();
+    this.cameraService.updateCabinLookAngle(this.truckNode);
     this.cameraService.update(this.truckNode);
 
     // 3. Dispatch Scenario / Sandbox Update
