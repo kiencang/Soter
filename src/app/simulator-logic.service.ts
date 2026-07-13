@@ -81,8 +81,8 @@ export class SimulatorLogicService {
     const qRear = [
       { x: -1.25, z: -20.0 },
       { x: 1.25, z: -20.0 },
-      { x: 1.25, z: -10.7 },
-      { x: -1.25, z: -10.7 }
+      { x: 1.25, z: -10.5 },
+      { x: -1.25, z: -10.5 }
     ];
 
     // 1. Front Blind Spot (Local to Truck)
@@ -112,7 +112,7 @@ export class SimulatorLogicService {
     // 5. Collision Zone (Touch cabin or trailer)
     else if (
       (tx >= -1.25 && tx <= 1.25 && tz >= 1.15 && tz <= 4.85) ||
-      (rx >= -1.25 && rx <= 1.25 && rz >= -10.7 && rz <= 1.5)
+      (rx >= -1.25 && rx <= 1.25 && rz >= -10.5 && rz <= 0.5)
     ) {
       zone = 'VÙNG VA CHẠM (NGUY HIỂM CHẾT NGƯỜI)';
       isBlind = true;

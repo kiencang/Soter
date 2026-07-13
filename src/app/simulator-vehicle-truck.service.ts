@@ -127,22 +127,47 @@ export class SimulatorVehicleTruckService {
     frontPlateFrame.material = tireMat;
     frontPlateFrame.parent = truckNode;
 
-    // 2. Large Rear Trailer Container (Cargo box)
-    const trailer = BABYLON.MeshBuilder.CreateBox('trailer', { width: 2.5, height: 3.0, depth: 12.2 }, scene);
-    trailer.position.set(0, 2.2, -4.6);
+    // 2. Large Rear Trailer Container (Cargo box) with realistic gap from the cabin
+    const trailer = BABYLON.MeshBuilder.CreateBox('trailer', { width: 2.5, height: 3.0, depth: 11.0 }, scene);
+    trailer.position.set(0, 2.2, -5.0);
     trailer.material = trailerMat;
     trailer.parent = trailerNode;
 
     // Add some orange safety stripes mesh on trailer side to look realistic
-    const stripeLeft = BABYLON.MeshBuilder.CreateBox('stripeL', { width: 0.02, height: 0.3, depth: 12.2 }, scene);
-    stripeLeft.position.set(-1.26, 1.2, -4.6);
+    const stripeLeft = BABYLON.MeshBuilder.CreateBox('stripeL', { width: 0.02, height: 0.3, depth: 11.0 }, scene);
+    stripeLeft.position.set(-1.26, 1.2, -5.0);
     stripeLeft.material = yellowLightMat;
     stripeLeft.parent = trailerNode;
 
-    const stripeRight = BABYLON.MeshBuilder.CreateBox('stripeR', { width: 0.02, height: 0.3, depth: 12.2 }, scene);
-    stripeRight.position.set(1.26, 1.2, -4.6);
+    const stripeRight = BABYLON.MeshBuilder.CreateBox('stripeR', { width: 0.02, height: 0.3, depth: 11.0 }, scene);
+    stripeRight.position.set(1.26, 1.2, -5.0);
     stripeRight.material = yellowLightMat;
     stripeRight.parent = trailerNode;
+
+    // 2b. Fifth Wheel and Kingpin Coupling Mechanism (Mâm xoay và trục khớp nối cabin - rơ-moóc)
+    // Heavy chassis rail block on tractor head
+    const tractorChassis = BABYLON.MeshBuilder.CreateBox('tractorChassis', { width: 0.9, height: 0.18, depth: 4.2 }, scene);
+    tractorChassis.position.set(0, 0.72, 1.6);
+    tractorChassis.material = tireMat;
+    tractorChassis.parent = truckNode;
+
+    // Fifth Wheel coupling plate on tractor chassis centered at pivot rotation origin
+    const fifthWheel = BABYLON.MeshBuilder.CreateCylinder('fifthWheel', { diameter: 0.95, height: 0.12 }, scene);
+    fifthWheel.position.set(0, 0.75, 0.0);
+    fifthWheel.material = chromeMat;
+    fifthWheel.parent = truckNode;
+
+    // Heavy steel support plate on bottom of trailer nose
+    const trailerPinPlate = BABYLON.MeshBuilder.CreateBox('trailerPinPlate', { width: 1.5, height: 0.06, depth: 1.5 }, scene);
+    trailerPinPlate.position.set(0, 0.71, 0.0);
+    trailerPinPlate.material = chromeMat;
+    trailerPinPlate.parent = trailerNode;
+
+    // Kingpin (Coupling Joint / Trục xoay kết nối) connecting them physically
+    const couplingJoint = BABYLON.MeshBuilder.CreateCylinder('couplingJoint', { diameter: 0.32, height: 0.32 }, scene);
+    couplingJoint.position.set(0, 0.85, 0.0);
+    couplingJoint.material = chromeMat;
+    couplingJoint.parent = trailerNode;
 
     // 3. Mirror Bracket Wings
     // Shared Mirror Glass reflective material
@@ -194,19 +219,25 @@ export class SimulatorVehicleTruckService {
     frontMirrorBase.material = tireMat;
     frontMirrorBase.parent = truckNode;
 
-    // Bracket arm extending forward-upward from the cabin
-    const frontMirrorArm = BABYLON.MeshBuilder.CreateCylinder('fmArm', { diameter: 0.05, height: 1.3 }, scene);
-    frontMirrorArm.position.set(1.1, 3.15, 4.2);
-    frontMirrorArm.rotation.x = 1.2; // slanted forward-upward
-    frontMirrorArm.material = tireMat;
-    frontMirrorArm.parent = truckNode;
-
     // The circular convex mirror casing (back)
     const frontMirrorPlate = BABYLON.MeshBuilder.CreateCylinder('fmPlate', { diameter: 0.45, height: 0.05 }, scene);
     frontMirrorPlate.position.set(1.1, 3.38, 4.8);
     frontMirrorPlate.rotation.x = 0.4; // tilted downward to monitor the front bumper
     frontMirrorPlate.material = tireMat;
     frontMirrorPlate.parent = truckNode;
+
+    // A beautiful black mounting bracket/hinge on the back of the mirror plate to receive the arm cleanly
+    const mirrorBracket = BABYLON.MeshBuilder.CreateBox('mBracket', { width: 0.12, height: 0.08, depth: 0.12 }, scene);
+    mirrorBracket.position.set(0, 0.03, 0); // centered on the back face of the mirror plate
+    mirrorBracket.material = tireMat;
+    mirrorBracket.parent = frontMirrorPlate;
+
+    // Bracket arm extending forward-upward from the cabin - adjusted length and rotation to plug into the bracket on the back
+    const frontMirrorArm = BABYLON.MeshBuilder.CreateCylinder('fmArm', { diameter: 0.05, height: 1.18 }, scene);
+    frontMirrorArm.position.set(1.1, 3.18, 4.18);
+    frontMirrorArm.rotation.x = 1.236; // slanted forward-upward
+    frontMirrorArm.material = tireMat;
+    frontMirrorArm.parent = truckNode;
 
     // The mirror reflective surface (lens)
     const frontMirrorGlass = BABYLON.MeshBuilder.CreateCylinder('fmGlass', { diameter: 0.41, height: 0.01 }, scene);
@@ -218,10 +249,10 @@ export class SimulatorVehicleTruckService {
     const tirePositions = [
       { x: -1.2, y: 0.6, z: 4.0 },  { x: 1.2, y: 0.6, z: 4.0 },
       { x: -1.2, y: 0.6, z: 1.5 },  { x: 1.2, y: 0.6, z: 1.5 },
-      { x: -1.2, y: 0.6, z: -3.5 }, { x: 1.2, y: 0.6, z: -3.5 },
+      { x: -1.2, y: 0.6, z: -3.8 }, { x: 1.2, y: 0.6, z: -3.8 },
       { x: -1.2, y: 0.6, z: -7.5 }, { x: 1.2, y: 0.6, z: -7.5 },
       { x: -1.2, y: 0.6, z: -8.7 }, { x: 1.2, y: 0.6, z: -8.7 },
-      { x: -1.2, y: 0.6, z: -9.9 }, { x: 1.2, y: 0.6, z: -9.9 }
+      { x: -1.2, y: 0.6, z: -9.7 }, { x: 1.2, y: 0.6, z: -9.7 }
     ];
 
     tirePositions.forEach((pos, idx) => {
@@ -279,18 +310,18 @@ export class SimulatorVehicleTruckService {
     bumperMat.diffuseColor = new BABYLON.Color3(0.12, 0.12, 0.14);
     
     const rearBumper = BABYLON.MeshBuilder.CreateBox('rearBumper', { width: 2.45, height: 0.35, depth: 0.15 }, scene);
-    rearBumper.position.set(0, 0.8, -10.75);
+    rearBumper.position.set(0, 0.8, -10.55);
     rearBumper.material = bumperMat;
     rearBumper.parent = trailerNode;
 
     // Rear License Plate (Biển số xe màu vàng phản quang - Rear)
     const rearPlate = BABYLON.MeshBuilder.CreateBox('rearPlate', { width: 0.55, height: 0.14, depth: 0.02 }, scene);
-    rearPlate.position.set(0, 0.8, -10.84);
+    rearPlate.position.set(0, 0.8, -10.64);
     rearPlate.material = licensePlateMat;
     rearPlate.parent = trailerNode;
 
     const rearPlateFrame = BABYLON.MeshBuilder.CreateBox('rearPlateFrame', { width: 0.58, height: 0.17, depth: 0.015 }, scene);
-    rearPlateFrame.position.set(0, 0.8, -10.83);
+    rearPlateFrame.position.set(0, 0.8, -10.63);
     rearPlateFrame.material = tireMat;
     rearPlateFrame.parent = trailerNode;
 
@@ -333,23 +364,23 @@ export class SimulatorVehicleTruckService {
 
     // Rear taillights on the rear bumper
     const tailL = BABYLON.MeshBuilder.CreateBox('tailL', { width: 0.5, height: 0.18, depth: 0.1 }, scene);
-    tailL.position.set(-0.7, 0.8, -10.90);
+    tailL.position.set(-0.7, 0.8, -10.70);
     tailL.material = redLightMat;
     tailL.parent = trailerNode;
 
     const tailR = BABYLON.MeshBuilder.CreateBox('tailR', { width: 0.5, height: 0.18, depth: 0.1 }, scene);
-    tailR.position.set(0.7, 0.8, -10.90);
+    tailR.position.set(0.7, 0.8, -10.70);
     tailR.material = redLightMat;
     tailR.parent = trailerNode;
 
     // Rear blinkers (Xi-nhan sau) on the rear bumper
     const rearBlinkerLeft = BABYLON.MeshBuilder.CreateBox('rearBlinkL', { width: 0.35, height: 0.18, depth: 0.1 }, scene);
-    rearBlinkerLeft.position.set(-1.15, 0.8, -10.90);
+    rearBlinkerLeft.position.set(-1.15, 0.8, -10.70);
     rearBlinkerLeft.material = blinkerLeftMat;
     rearBlinkerLeft.parent = trailerNode;
 
     const rearBlinkerRight = BABYLON.MeshBuilder.CreateBox('rearBlinkR', { width: 0.35, height: 0.18, depth: 0.1 }, scene);
-    rearBlinkerRight.position.set(1.15, 0.8, -10.90);
+    rearBlinkerRight.position.set(1.15, 0.8, -10.70);
     rearBlinkerRight.material = blinkerRightMat;
     rearBlinkerRight.parent = trailerNode;
 

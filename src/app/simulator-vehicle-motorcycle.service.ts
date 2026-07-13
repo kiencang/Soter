@@ -23,14 +23,14 @@ export class SimulatorVehicleMotorcycleService {
     const jacketMat = new BABYLON.StandardMaterial('jacketMat', scene);
     jacketMat.diffuseColor = new BABYLON.Color3(0.15, 0.65, 0.35); // Safety green jacket
 
-    // 1. Two wheels
-    const wheelF = BABYLON.MeshBuilder.CreateCylinder('mWheelF', { diameter: 0.6, height: 0.16 }, scene);
+    // 1. Two wheels (thinner profile: height 0.07)
+    const wheelF = BABYLON.MeshBuilder.CreateCylinder('mWheelF', { diameter: 0.6, height: 0.07 }, scene);
     wheelF.rotation.z = Math.PI / 2;
     wheelF.position.set(0, 0.3, 0.8);
     wheelF.material = tireMat;
     wheelF.parent = motorcycleNode;
 
-    const wheelR = BABYLON.MeshBuilder.CreateCylinder('mWheelR', { diameter: 0.6, height: 0.16 }, scene);
+    const wheelR = BABYLON.MeshBuilder.CreateCylinder('mWheelR', { diameter: 0.6, height: 0.07 }, scene);
     wheelR.rotation.z = Math.PI / 2;
     wheelR.position.set(0, 0.3, -0.8);
     wheelR.material = tireMat;
@@ -38,41 +38,35 @@ export class SimulatorVehicleMotorcycleService {
 
     // Helper to add rim and spokes to a motorcycle wheel
     const addMotorcycleRim = (wheel: BABYLON.Mesh) => {
-      const mRim = BABYLON.MeshBuilder.CreateCylinder(wheel.name + '_rim', { diameter: 0.42, height: 0.162 }, scene);
+      // Silver metallic rim band inside the tire
+      const mRim = BABYLON.MeshBuilder.CreateCylinder(wheel.name + '_rim', { diameter: 0.45, height: 0.072 }, scene);
       mRim.material = mRimMat;
       mRim.parent = wheel;
 
-      // Hubcaps
-      const hubTop = BABYLON.MeshBuilder.CreateCylinder(wheel.name + '_hubTop', { diameter: 0.15, height: 0.02 }, scene);
-      hubTop.position.set(0, 0.082, 0);
-      hubTop.material = tireMat;
-      hubTop.parent = wheel;
+      // Darker inner rim well to give depth
+      const mRimInner = BABYLON.MeshBuilder.CreateCylinder(wheel.name + '_rim_inner', { diameter: 0.42, height: 0.074 }, scene);
+      mRimInner.material = tireMat;
+      mRimInner.parent = wheel;
 
-      const hubBot = BABYLON.MeshBuilder.CreateCylinder(wheel.name + '_hubBot', { diameter: 0.15, height: 0.02 }, scene);
-      hubBot.position.set(0, -0.082, 0);
-      hubBot.material = tireMat;
-      hubBot.parent = wheel;
+      // Central metallic hub
+      const hub = BABYLON.MeshBuilder.CreateCylinder(wheel.name + '_hub', { diameter: 0.12, height: 0.076 }, scene);
+      hub.material = mRimMat;
+      hub.parent = wheel;
 
-      // Spoke Bars
-      const spTop1 = BABYLON.MeshBuilder.CreateBox(wheel.name + '_spTop1', { width: 0.4, height: 0.015, depth: 0.04 }, scene);
-      spTop1.position.set(0, 0.081, 0);
-      spTop1.material = tireMat;
-      spTop1.parent = wheel;
-
-      const spTop2 = BABYLON.MeshBuilder.CreateBox(wheel.name + '_spTop2', { width: 0.04, height: 0.015, depth: 0.4 }, scene);
-      spTop2.position.set(0, 0.081, 0);
-      spTop2.material = tireMat;
-      spTop2.parent = wheel;
-
-      const spBot1 = BABYLON.MeshBuilder.CreateBox(wheel.name + '_spBot1', { width: 0.4, height: 0.015, depth: 0.04 }, scene);
-      spBot1.position.set(0, -0.081, 0);
-      spBot1.material = tireMat;
-      spBot1.parent = wheel;
-
-      const spBot2 = BABYLON.MeshBuilder.CreateBox(wheel.name + '_spBot2', { width: 0.04, height: 0.015, depth: 0.4 }, scene);
-      spBot2.position.set(0, -0.081, 0);
-      spBot2.material = tireMat;
-      spBot2.parent = wheel;
+      // Elegant alloy/wire spokes radiating from the central hub to the rim
+      const spokeCount = 12;
+      for (let i = 0; i < spokeCount; i++) {
+        const angle = (i * 2 * Math.PI) / spokeCount;
+        const spoke = BABYLON.MeshBuilder.CreateCylinder(wheel.name + '_spoke_' + i, { diameter: 0.012, height: 0.35 }, scene);
+        spoke.material = mRimMat;
+        spoke.parent = wheel;
+        spoke.position.set(0, 0, 0);
+        
+        // Orient the spoke: cylinder is along local Y-axis, so rotate Z by Math.PI/2 to lay flat in XZ,
+        // then rotate around Y-axis by the respective radial angle
+        spoke.rotation.z = Math.PI / 2;
+        spoke.rotation.y = angle;
+      }
     };
 
     addMotorcycleRim(wheelF);
@@ -148,17 +142,13 @@ export class SimulatorVehicleMotorcycleService {
     licensePlate.material = plateMat;
     licensePlate.parent = motorcycleNode;
 
-    // Draw text on the license plate
+    // Draw a Viet Nam style yellow-bordered license plate without specific text as requested
     const plateContext = plateTexture.getContext() as any;
     plateContext.fillStyle = 'white';
     plateContext.fillRect(0, 0, 256, 200);
-    plateContext.fillStyle = 'black';
-    plateContext.font = 'bold 50px monospace';
-    plateContext.textAlign = 'center';
-    plateContext.fillText('29-A1', 128, 80);
-    plateContext.fillText('123.45', 128, 150);
-    plateContext.lineWidth = 5;
-    plateContext.strokeRect(5, 5, 246, 190);
+    plateContext.strokeStyle = '#eab308'; // Bold yellow/amber border
+    plateContext.lineWidth = 16;
+    plateContext.strokeRect(8, 8, 240, 184);
     plateTexture.update();
 
     // Turn Signals (Xi nhan)
@@ -170,26 +160,26 @@ export class SimulatorVehicleMotorcycleService {
     turnSignalRMat.emissiveColor = new BABYLON.Color3(0.1, 0.05, 0); // Orange/Amber off
     turnSignalRMat.diffuseColor = new BABYLON.Color3(1, 0.5, 0);
 
-    // Rear Turn Signals (Xi nhan sau)
-    const rearSignalL = BABYLON.MeshBuilder.CreateBox('mRearSignalL', { width: 0.06, height: 0.04, depth: 0.04 }, scene);
-    rearSignalL.position.set(-0.16, 0.45, -0.90);
+    // Rear Turn Signals (Xi nhan sau) - Made larger for better visibility
+    const rearSignalL = BABYLON.MeshBuilder.CreateBox('mRearSignalL', { width: 0.12, height: 0.08, depth: 0.08 }, scene);
+    rearSignalL.position.set(-0.18, 0.45, -0.90);
     rearSignalL.material = turnSignalLMat;
     rearSignalL.parent = motorcycleNode;
 
-    const rearSignalR = BABYLON.MeshBuilder.CreateBox('mRearSignalR', { width: 0.06, height: 0.04, depth: 0.04 }, scene);
-    rearSignalR.position.set(0.16, 0.45, -0.90);
+    const rearSignalR = BABYLON.MeshBuilder.CreateBox('mRearSignalR', { width: 0.12, height: 0.08, depth: 0.08 }, scene);
+    rearSignalR.position.set(0.18, 0.45, -0.90);
     rearSignalR.material = turnSignalRMat;
     rearSignalR.parent = motorcycleNode;
 
-    // Front Turn Signals (Xi nhan trước)
-    const frontSignalL = BABYLON.MeshBuilder.CreateBox('mFrontSignalL', { width: 0.08, height: 0.06, depth: 0.06 }, scene);
-    frontSignalL.position.set(-0.33, 0.88, 0.68);
+    // Front Turn Signals (Xi nhan trước) - Made larger for better visibility
+    const frontSignalL = BABYLON.MeshBuilder.CreateBox('mFrontSignalL', { width: 0.15, height: 0.10, depth: 0.10 }, scene);
+    frontSignalL.position.set(-0.35, 0.88, 0.68);
     frontSignalL.rotation.y = -0.2;
     frontSignalL.material = turnSignalLMat;
     frontSignalL.parent = motorcycleNode;
 
-    const frontSignalR = BABYLON.MeshBuilder.CreateBox('mFrontSignalR', { width: 0.08, height: 0.06, depth: 0.06 }, scene);
-    frontSignalR.position.set(0.33, 0.88, 0.68);
+    const frontSignalR = BABYLON.MeshBuilder.CreateBox('mFrontSignalR', { width: 0.15, height: 0.10, depth: 0.10 }, scene);
+    frontSignalR.position.set(0.35, 0.88, 0.68);
     frontSignalR.rotation.y = 0.2;
     frontSignalR.material = turnSignalRMat;
     frontSignalR.parent = motorcycleNode;
@@ -224,11 +214,11 @@ export class SimulatorVehicleMotorcycleService {
     mirrorGlassMat.diffuseColor = new BABYLON.Color3(0.85, 0.88, 0.9);
     mirrorGlassMat.emissiveColor = new BABYLON.Color3(0.15, 0.15, 0.2);
 
-    // Left Mirror
+    // Left Mirror - stem adjusted to plug into the back of the mirror housing
     const stemL = BABYLON.MeshBuilder.CreateCylinder('mStemL', { diameter: 0.02, height: 0.32 }, scene);
-    stemL.position.set(-0.3, 1.20, 0.58);
+    stemL.position.set(-0.33, 1.20, 0.585);
     stemL.rotation.z = 0.25; // tilted out
-    stemL.rotation.x = -0.15; // tilted forward
+    stemL.rotation.x = 0.15; // tilted forward so it plugs into the back of the housing
     stemL.material = mirrorStemMat;
     stemL.parent = motorcycleNode;
 
@@ -246,11 +236,11 @@ export class SimulatorVehicleMotorcycleService {
     glassL.material = mirrorGlassMat;
     glassL.parent = motorcycleNode;
 
-    // Right Mirror
+    // Right Mirror - stem adjusted to plug into the back of the mirror housing
     const stemR = BABYLON.MeshBuilder.CreateCylinder('mStemR', { diameter: 0.02, height: 0.32 }, scene);
-    stemR.position.set(0.3, 1.20, 0.58);
+    stemR.position.set(0.33, 1.20, 0.585);
     stemR.rotation.z = -0.25; // tilted out
-    stemR.rotation.x = -0.15; // tilted forward
+    stemR.rotation.x = 0.15; // tilted forward so it plugs into the back of the housing
     stemR.material = mirrorStemMat;
     stemR.parent = motorcycleNode;
 

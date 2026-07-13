@@ -87,8 +87,8 @@ export class SimulatorVehiclesService {
     const rearVerts = [
       new BABYLON.Vector3(-1.25, 0.015, -20.0),
       new BABYLON.Vector3(1.25, 0.015, -20.0),
-      new BABYLON.Vector3(1.25, 0.015, -10.7),
-      new BABYLON.Vector3(-1.25, 0.015, -10.7)
+      new BABYLON.Vector3(1.25, 0.015, -10.5),
+      new BABYLON.Vector3(-1.25, 0.015, -10.5)
     ];
     rearBlindSpotMesh = this.createFlatPolygon('rearBS', rearVerts, scene, yellowMat);
     rearBlindSpotMesh.parent = trailerNode;
