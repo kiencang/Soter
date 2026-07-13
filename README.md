@@ -10,7 +10,7 @@ Người lái các phương tiện nhỏ (như xe máy, xe đạp) hoặc đi b�
 
 ## Thông báo lỗi `Không Hỗ Trợ WebGL`
 
-Nếu bạn nhận được thông báo này:
+Nếu bạn nhận được thông báo này khi chạy ứng dụng:
 
 > Trình duyệt hoặc phần cứng của bạn hiện tại không hỗ trợ WebGL đồ họa 3D (hoặc tính năng tăng tốc phần cứng bị tắt). Để có thể trải nghiệm đầy đủ mô phỏng 3D trực quan này, vui lòng bật 'Tăng tốc phần cứng' trong cài đặt trình duyệt hoặc sử dụng một trình duyệt hiện đại khác.
 
