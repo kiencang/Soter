@@ -1,5 +1,5 @@
 # Soter
-Ứng dụng mô phỏng điểm mù của xe tải, container. Dự án đang trong giai đoạn phát triển thử nghiệm.
+Ứng dụng mô phỏng điểm mù của xe tải, container. Dự án đang trong giai đoạn **phát triển & thử nghiệm**.
 
 ## Mô tả
 Xe tải lớn, xe container có những điểm mù khiến cho người lái xe không thể quan sát các phương tiện khác ngay cả khi nhìn qua gương chiếu hậu.
