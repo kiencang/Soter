@@ -79,4 +79,69 @@ export class SimulatorEnvironmentService {
       }
     }
   }
+
+  createTrafficLight(scene: BABYLON.Scene) {
+    // 1. Pole (Trụ cột đèn)
+    const poleMat = new BABYLON.StandardMaterial('poleMat', scene);
+    poleMat.diffuseColor = new BABYLON.Color3(0.18, 0.2, 0.22);
+    poleMat.specularColor = new BABYLON.Color3(0.1, 0.1, 0.1);
+
+    const pole = BABYLON.MeshBuilder.CreateCylinder('tlPole', { diameter: 0.16, height: 5.5 }, scene);
+    pole.position.set(8.8, 2.75, -13.5); // x = 8.8 (phía phải ngoài cùng), z = -13.5 (nằm trên vạch dừng z = -14.5 một chút, sát vạch đi bộ)
+    pole.material = poleMat;
+
+    // 2. Traffic light housing (Hộp đèn)
+    const boxMat = new BABYLON.StandardMaterial('tlBoxMat', scene);
+    boxMat.diffuseColor = new BABYLON.Color3(0.1, 0.1, 0.12);
+    boxMat.specularColor = new BABYLON.Color3(0.05, 0.05, 0.05);
+
+    const housing = BABYLON.MeshBuilder.CreateBox('tlHousing', { width: 0.45, height: 1.3, depth: 0.45 }, scene);
+    housing.position.set(8.8, 4.6, -13.5); // Gắn gần đỉnh cột
+    housing.material = boxMat;
+
+    // Back cover or visors material
+    const visorMat = new BABYLON.StandardMaterial('tlVisorMat', scene);
+    visorMat.diffuseColor = new BABYLON.Color3(0.05, 0.05, 0.05);
+
+    // 3. Bulbs (Bóng đèn) - quay về phía Nam (z âm) để luồng xe từ Nam tiến lên nhìn rõ
+    // Vị trí z của các bóng đèn nhô ra một chút về phía Nam
+    const bulbRed = BABYLON.MeshBuilder.CreateCylinder('bulbRed', { diameter: 0.24, height: 0.06 }, scene);
+    bulbRed.position.set(8.8, 4.95, -13.73);
+    bulbRed.rotation.x = Math.PI / 2;
+
+    const bulbYellow = BABYLON.MeshBuilder.CreateCylinder('bulbYellow', { diameter: 0.24, height: 0.06 }, scene);
+    bulbYellow.position.set(8.8, 4.6, -13.73);
+    bulbYellow.rotation.x = Math.PI / 2;
+
+    const bulbGreen = BABYLON.MeshBuilder.CreateCylinder('bulbGreen', { diameter: 0.24, height: 0.06 }, scene);
+    bulbGreen.position.set(8.8, 4.25, -13.73);
+    bulbGreen.rotation.x = Math.PI / 2;
+
+    // Create small visors (vành che đèn) to make the traffic light look professional
+    for (const y of [4.95, 4.6, 4.25]) {
+      const visor = BABYLON.MeshBuilder.CreateCylinder(`visor_${y}`, { diameter: 0.28, height: 0.1, arc: 0.5 }, scene);
+      visor.position.set(8.8, y + 0.12, -13.73);
+      visor.rotation.x = Math.PI / 2;
+      visor.rotation.z = Math.PI; // quay nửa vòng tròn lên trên để che đèn
+      visor.material = visorMat;
+    }
+
+    // Set default materials for the bulbs (off state)
+    const redMat = new BABYLON.StandardMaterial('tlRedMat', scene);
+    redMat.diffuseColor = new BABYLON.Color3(0.2, 0.05, 0.05);
+    redMat.emissiveColor = new BABYLON.Color3(0.05, 0, 0);
+    bulbRed.material = redMat;
+
+    const yellowMat = new BABYLON.StandardMaterial('tlYellowMat', scene);
+    yellowMat.diffuseColor = new BABYLON.Color3(0.2, 0.16, 0.05);
+    yellowMat.emissiveColor = new BABYLON.Color3(0.05, 0.04, 0);
+    bulbYellow.material = yellowMat;
+
+    const greenMat = new BABYLON.StandardMaterial('tlGreenMat', scene);
+    greenMat.diffuseColor = new BABYLON.Color3(0.05, 0.2, 0.05);
+    greenMat.emissiveColor = new BABYLON.Color3(0, 0.05, 0);
+    bulbGreen.material = greenMat;
+
+    return { red: bulbRed, yellow: bulbYellow, green: bulbGreen };
+  }
 }

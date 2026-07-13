@@ -33,6 +33,7 @@ export class SimulatorScenarioService {
   isCompleted = signal<boolean>(false);
   scenarioStage = signal<number>(0);
   scenarioText = signal<string>('');
+  trafficLightColor = signal<'red' | 'yellow' | 'green'>('green');
   
   scenarioTimer = 0;
 
@@ -43,6 +44,17 @@ export class SimulatorScenarioService {
     this.isCompleted.set(false);
     this.scenarioTimer = 0;
     this.scenarioStage.set(0);
+
+    // Thiết lập màu đèn tín hiệu riêng cho từng kịch bản (hiện tại cả 3 kịch bản là xanh, riêng cut_off ban đầu là đỏ)
+    if (type === 'right_turn') {
+      this.trafficLightColor.set('green');
+    } else if (type === 'cut_off') {
+      this.trafficLightColor.set('red');
+    } else if (type === 'tailgate') {
+      this.trafficLightColor.set('green');
+    } else {
+      this.trafficLightColor.set('green');
+    }
 
     // Set initial text based on the scenario
     if (type === 'right_turn') {
@@ -132,7 +144,7 @@ export class SimulatorScenarioService {
     if (scenario === 'right_turn') {
       this.rightTurnScenario.animate(t, ctx, setStage, setText, setPlaying);
     } else if (scenario === 'cut_off') {
-      this.cutOffScenario.animate(t, ctx, setStage, setText, setPlaying);
+      this.cutOffScenario.animate(t, ctx, setStage, setText, setPlaying, (color) => this.trafficLightColor.set(color));
     } else if (scenario === 'tailgate') {
       this.tailgateScenario.animate(t, dt, ctx, setStage, setText, setPlaying);
     }

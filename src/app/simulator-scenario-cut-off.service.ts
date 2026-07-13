@@ -9,14 +9,24 @@ export class SimulatorScenarioCutOffService {
     ctx: ScenarioContext,
     setStage: (stage: number) => void,
     setText: (text: string) => void,
-    setPlaying: (playing: boolean) => void
+    setPlaying: (playing: boolean) => void,
+    setTrafficLightColor?: (color: 'red' | 'yellow' | 'green') => void
   ) {
     if (ctx.truckNode) {
       ctx.truckNode.rotation.y = 0;
     }
 
-    // Stage 0: 0s to 1.5s -> Dừng chờ đèn đỏ
-    if (t < 1.5) {
+    // Đèn giao thông chuyển từ đỏ sang xanh ở giây thứ 2.1 (0.4 giây trước khi di chuyển ở 2.5s)
+    if (setTrafficLightColor) {
+      if (t < 2.1) {
+        setTrafficLightColor('red');
+      } else {
+        setTrafficLightColor('green');
+      }
+    }
+
+    // Stage 0: 0s to 2.5s -> Dừng chờ đèn đỏ
+    if (t < 2.5) {
       setStage(0);
       setText("Bài học: Tuyệt đối không bao giờ tạt đầu đột ngột ngay sát mũi xe tải lớn hoặc xe container.");
       ctx.setMotoBlinkerActive(true, 'left');
@@ -39,13 +49,13 @@ export class SimulatorScenarioCutOffService {
         ctx.motorcycleNode.scaling.set(1, 1, 1);
       }
     }
-    // Stage 1: 1.5s to 4.38s -> Đèn xanh, cả hai cùng khởi hành, xe máy tạt đầu
-    else if (t < 4.38) {
+    // Stage 1: 2.5s to 5.38s -> Đèn xanh, cả hai cùng khởi hành, xe máy tạt đầu
+    else if (t < 5.38) {
       setStage(1);
       setText("Bài học: Tuyệt đối không bao giờ tạt đầu đột ngột ngay sát mũi xe tải lớn hoặc xe container.");
       ctx.setMotoBlinkerActive(true, 'left');
       
-      const activeT = t - 1.5; 
+      const activeT = t - 2.5; 
 
       // Truck accelerates slowly
       const truckZ = -19.7 + activeT * 3.125; 
@@ -97,23 +107,23 @@ export class SimulatorScenarioCutOffService {
         ctx.motorcycleNode.scaling.set(1, 1, 1);
       }
     }
-    // Stage 2: 4.38s to 8.0s -> Va chạm do rơi vào vùng mù
-    else if (t < 8.0) {
+    // Stage 2: 5.38s to 9.0s -> Va chạm do rơi vào vùng mù
+    else if (t < 9.0) {
       setStage(2);
       setText("Bài học: Tuyệt đối không bao giờ tạt đầu đột ngột ngay sát mũi xe tải lớn hoặc xe container.");
       ctx.setMotoBlinkerActive(false);
       
-      const fallT = t - 4.38; // for bike falling and crushing
+      const fallT = t - 5.38; // for bike falling and crushing
 
       // Truck moves forward and brakes smoothly
-      let truckZ = -10.7; // Position at t = 4.38
-      if (t < 5.5) {
+      let truckZ = -10.7; // Position at t = 5.38
+      if (t < 6.5) {
         // Constant speed
-        const activeT = t - 1.5;
+        const activeT = t - 2.5;
         truckZ = -19.7 + activeT * 3.125;
-      } else if (t < 6.8) {
+      } else if (t < 7.8) {
         // Smooth braking
-        const s = t - 5.5;
+        const s = t - 6.5;
         const T = 1.3;
         const v0 = 3.125;
         truckZ = -7.2 + v0 * (s - (s * s) / (2 * T));
@@ -127,7 +137,7 @@ export class SimulatorScenarioCutOffService {
       }
 
       // Vị trí lúc va chạm (đã đồng bộ khớp 100% với đường cong Bezier ở Stage 1)
-      const ratioC = (4.38 - 1.5 - 1.5) / 1.4; // = 1.38/1.4 = 0.9857
+      const ratioC = (5.38 - 2.5 - 1.5) / 1.4; // = 1.38/1.4 = 0.9857
       const t2_c = ratioC;
       const p0_x = 6.05;
       const p1_x = 6.05;
@@ -151,7 +161,7 @@ export class SimulatorScenarioCutOffService {
         currentBikeZ = Math.max(collisionBikeZ, truckZ + 4.15 + 0.3); 
       } else {
         // Nằm yên
-        const fallEndTruckZ = -19.7 + ((4.38 + 0.5) - 1.5) * 3.125; 
+        const fallEndTruckZ = -19.7 + ((5.38 + 0.5) - 2.5) * 3.125; 
         currentBikeZ = fallEndTruckZ + 4.15 + 0.3;
       }
       

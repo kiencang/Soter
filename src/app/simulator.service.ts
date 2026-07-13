@@ -121,6 +121,10 @@ export class SimulatorService {
   private intersectionMeshes: BABYLON.Mesh[] = [];
   private blinkerLeft: BABYLON.Mesh | null = null;
   private blinkerRight: BABYLON.Mesh | null = null;
+  private trafficLightRed: BABYLON.Mesh | null = null;
+  private trafficLightYellow: BABYLON.Mesh | null = null;
+  private trafficLightGreen: BABYLON.Mesh | null = null;
+  private lastTrafficLightColor: 'red' | 'yellow' | 'green' | null = null;
   private blinkerTimer = 0;
   private blinkerActive = false;
   private blinkerSide: 'left' | 'right' | 'both' = 'both';
@@ -362,6 +366,12 @@ export class SimulatorService {
       // Build Road and Environment
       this.environmentService.createRoadGrid(this.scene!, this.laneLines, this.intersectionMeshes);
 
+      // Build Traffic Light (Cột đèn giao thông mô phỏng)
+      const tl = this.environmentService.createTrafficLight(this.scene!);
+      this.trafficLightRed = tl.red;
+      this.trafficLightYellow = tl.yellow;
+      this.trafficLightGreen = tl.green;
+
       // Build 3D Models
       const truckResult = this.vehiclesService.createTruck(this.scene!);
       this.truckNode = truckResult.truckNode;
@@ -494,6 +504,49 @@ export class SimulatorService {
 
     // 5. Spin wheels in motion
     this.spinWheelsInMotion(dt);
+
+    // 6. Update Traffic Light
+    this.updateTrafficLight();
+  }
+
+  private updateTrafficLight() {
+    if (!this.trafficLightRed || !this.trafficLightYellow || !this.trafficLightGreen) return;
+    const color = this.scenarioService.trafficLightColor();
+    if (color === this.lastTrafficLightColor) return;
+    this.lastTrafficLightColor = color;
+
+    const redMat = this.trafficLightRed.material as BABYLON.StandardMaterial;
+    const yellowMat = this.trafficLightYellow.material as BABYLON.StandardMaterial;
+    const greenMat = this.trafficLightGreen.material as BABYLON.StandardMaterial;
+
+    if (color === 'red') {
+      redMat.diffuseColor = new BABYLON.Color3(1.0, 0.2, 0.2);
+      redMat.emissiveColor = new BABYLON.Color3(0.9, 0.1, 0.1);
+      
+      yellowMat.diffuseColor = new BABYLON.Color3(0.2, 0.16, 0.05);
+      yellowMat.emissiveColor = new BABYLON.Color3(0.05, 0.04, 0);
+
+      greenMat.diffuseColor = new BABYLON.Color3(0.05, 0.2, 0.05);
+      greenMat.emissiveColor = new BABYLON.Color3(0, 0.05, 0);
+    } else if (color === 'yellow') {
+      redMat.diffuseColor = new BABYLON.Color3(0.2, 0.05, 0.05);
+      redMat.emissiveColor = new BABYLON.Color3(0.05, 0, 0);
+
+      yellowMat.diffuseColor = new BABYLON.Color3(1.0, 0.8, 0.2);
+      yellowMat.emissiveColor = new BABYLON.Color3(0.9, 0.7, 0.1);
+
+      greenMat.diffuseColor = new BABYLON.Color3(0.05, 0.2, 0.05);
+      greenMat.emissiveColor = new BABYLON.Color3(0, 0.05, 0);
+    } else if (color === 'green') {
+      redMat.diffuseColor = new BABYLON.Color3(0.2, 0.05, 0.05);
+      redMat.emissiveColor = new BABYLON.Color3(0.05, 0, 0);
+
+      yellowMat.diffuseColor = new BABYLON.Color3(0.2, 0.16, 0.05);
+      yellowMat.emissiveColor = new BABYLON.Color3(0.05, 0.04, 0);
+
+      greenMat.diffuseColor = new BABYLON.Color3(0.2, 1.0, 0.2);
+      greenMat.emissiveColor = new BABYLON.Color3(0.1, 0.9, 0.1);
+    }
   }
 
   private spinWheelsInMotion(dt: number) {
@@ -623,7 +676,10 @@ export class SimulatorService {
       this.rearBlindSpotMesh,
       this.truckNode,
       this.trailerNode,
-      this.motorcycleNode
+      this.motorcycleNode,
+      this.trafficLightRed,
+      this.trafficLightYellow,
+      this.trafficLightGreen
     ].forEach(mesh => {
       if (mesh) {
         mesh.dispose();
@@ -637,6 +693,10 @@ export class SimulatorService {
     this.truckNode = null;
     this.trailerNode = null;
     this.motorcycleNode = null;
+    this.trafficLightRed = null;
+    this.trafficLightYellow = null;
+    this.trafficLightGreen = null;
+    this.lastTrafficLightColor = null;
 
     if (this.scene) {
       this.scene.dispose();
