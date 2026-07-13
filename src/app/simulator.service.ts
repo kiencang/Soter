@@ -84,6 +84,8 @@ export class SimulatorService {
   // Scenario states
   get activeScenario() { return this.scenarioService.activeScenario; }
   get isPlayingScenario() { return this.scenarioService.isPlayingScenario; }
+  get isAtStart() { return this.scenarioService.isAtStart; }
+  get isCompleted() { return this.scenarioService.isCompleted; }
   get scenarioStage() { return this.scenarioService.scenarioStage; }
   get scenarioText() { return this.scenarioService.scenarioText; }
 
@@ -102,6 +104,11 @@ export class SimulatorService {
   private trailerNode: BABYLON.TransformNode | null = null;
   private trailerRearPos: BABYLON.Vector3 | null = null;
   private motorcycleNode: BABYLON.TransformNode | null = null;
+
+  // Track positions for wheel rotation physics
+  private lastTruckPos: BABYLON.Vector3 | null = null;
+  private lastTrailerPos: BABYLON.Vector3 | null = null;
+  private lastMotorcyclePos: BABYLON.Vector3 | null = null;
   
   // Blind Spot indicator meshes on the ground
   private frontBlindSpotMesh: BABYLON.Mesh | null = null;
@@ -279,18 +286,32 @@ export class SimulatorService {
 
   // --- Scenario handling ---
   startScenario(type: 'free' | 'right_turn' | 'cut_off' | 'tailgate') {
+    this.lastTruckPos = null;
+    this.lastTrailerPos = null;
+    this.lastMotorcyclePos = null;
     this.scenarioService.startScenario(type, this.getScenarioContext());
     this.updateAudioForScenario(type);
   }
 
   resetScenario() {
+    this.lastTruckPos = null;
+    this.lastTrailerPos = null;
+    this.lastMotorcyclePos = null;
     this.scenarioService.resetScenario(this.getScenarioContext());
+    this.updateAudioForScenario(this.activeScenario());
+  }
+
+  playScenario() {
+    if (this.isCompleted()) {
+      this.resetScenario();
+    }
+    this.scenarioService.isPlayingScenario.set(true);
     this.updateAudioForScenario(this.activeScenario());
   }
 
   private updateAudioForScenario(type: 'free' | 'right_turn' | 'cut_off' | 'tailgate') {
     if (type !== 'free') {
-      if (this.soundEnabled()) {
+      if (this.soundEnabled() && this.isPlayingScenario()) {
         this.audioService.initAudio();
       }
     } else {
@@ -470,6 +491,93 @@ export class SimulatorService {
 
     // 4. Update articulated trailer physics
     this.trailerRearPos = this.vehiclesService.updateTrailerPhysics(this.truckNode, this.trailerNode, this.trailerRearPos);
+
+    // 5. Spin wheels in motion
+    this.spinWheelsInMotion(dt);
+  }
+
+  private spinWheelsInMotion(dt: number) {
+    if (!this.scene) return;
+
+    // 1. Initialize last positions on first run or when reset
+    if (this.truckNode && !this.lastTruckPos) {
+      this.lastTruckPos = this.truckNode.position.clone();
+    }
+    if (this.trailerNode && !this.lastTrailerPos) {
+      this.lastTrailerPos = this.trailerNode.position.clone();
+    }
+    if (this.motorcycleNode && !this.lastMotorcyclePos) {
+      this.lastMotorcyclePos = this.motorcycleNode.position.clone();
+    }
+
+    // 2. Calculate displacements
+    let truckDistance = 0;
+    if (this.truckNode && this.lastTruckPos) {
+      const currentPos = this.truckNode.position;
+      truckDistance = BABYLON.Vector3.Distance(currentPos, this.lastTruckPos);
+      const forward = this.truckNode.forward || this.truckNode.getDirection(BABYLON.Axis.Z);
+      const direction = currentPos.subtract(this.lastTruckPos);
+      const dot = BABYLON.Vector3.Dot(direction, forward);
+      if (dot < 0) {
+        truckDistance = -truckDistance;
+      }
+      this.lastTruckPos.copyFrom(currentPos);
+    }
+
+    let trailerDistance = 0;
+    if (this.trailerNode && this.lastTrailerPos) {
+      const currentPos = this.trailerNode.position;
+      trailerDistance = BABYLON.Vector3.Distance(currentPos, this.lastTrailerPos);
+      const forward = this.trailerNode.forward || this.trailerNode.getDirection(BABYLON.Axis.Z);
+      const direction = currentPos.subtract(this.lastTrailerPos);
+      const dot = BABYLON.Vector3.Dot(direction, forward);
+      if (dot < 0) {
+        trailerDistance = -trailerDistance;
+      }
+      this.lastTrailerPos.copyFrom(currentPos);
+    }
+
+    let motorcycleDistance = 0;
+    if (this.motorcycleNode && this.lastMotorcyclePos) {
+      const currentPos = this.motorcycleNode.position;
+      motorcycleDistance = BABYLON.Vector3.Distance(currentPos, this.lastMotorcyclePos);
+      const forward = this.motorcycleNode.forward || this.motorcycleNode.getDirection(BABYLON.Axis.Z);
+      const direction = currentPos.subtract(this.lastMotorcyclePos);
+      const dot = BABYLON.Vector3.Dot(direction, forward);
+      if (dot < 0) {
+        motorcycleDistance = -motorcycleDistance;
+      }
+      this.lastMotorcyclePos.copyFrom(currentPos);
+    }
+
+    // 3. Apply rotation to Truck and Trailer Tires
+    // Tire diameter is ~1.2m, radius is ~0.6m. Rotation angle = distance / radius.
+    // Negative sign because Y rotation axis of cylinder aligns with global movement.
+    const truckTires = this.truckNode?.getChildMeshes(false, (mesh) => mesh.name.startsWith('tire_')) || [];
+    if (truckTires.length > 0 && Math.abs(truckDistance) > 0.0001) {
+      const truckRotDelta = -truckDistance / 0.6;
+      truckTires.forEach(tire => {
+        tire.rotate(BABYLON.Axis.Y, truckRotDelta, BABYLON.Space.LOCAL);
+      });
+    }
+
+    const trailerTires = this.trailerNode?.getChildMeshes(false, (mesh) => mesh.name.startsWith('tire_')) || [];
+    if (trailerTires.length > 0 && Math.abs(trailerDistance) > 0.0001) {
+      const trailerRotDelta = -trailerDistance / 0.6;
+      trailerTires.forEach(tire => {
+        tire.rotate(BABYLON.Axis.Y, trailerRotDelta, BABYLON.Space.LOCAL);
+      });
+    }
+
+    // 4. Apply rotation to Motorcycle Wheels
+    // Wheel diameter is ~0.55m, radius is ~0.275m. Rotation angle = distance / radius.
+    const motoWheels = this.motorcycleNode?.getChildMeshes(false, (mesh) => mesh.name === 'mWheelF' || mesh.name === 'mWheelR') || [];
+    if (motoWheels.length > 0 && Math.abs(motorcycleDistance) > 0.0001) {
+      const motoRotDelta = -motorcycleDistance / 0.275;
+      motoWheels.forEach(wheel => {
+        wheel.rotate(BABYLON.Axis.Y, motoRotDelta, BABYLON.Space.LOCAL);
+      });
+    }
   }
 
   private updateSandboxMovement(dt: number) {

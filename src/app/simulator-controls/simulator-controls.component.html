@@ -99,14 +99,23 @@
 
                   <!-- Control triggers -->
                   <div class="flex gap-2 border-t border-white/5 pt-3">
-                    @if (!sim.isPlayingScenario()) {
-                      <button (click)="sim.resetScenario()" class="flex-1 py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-md shadow-amber-500/10" id="play-scenario-btn">
-                        ▶ Chạy lại mô phỏng
-                      </button>
-                    } @else {
+                    @if (sim.isPlayingScenario()) {
                       <button (click)="sim.isPlayingScenario.set(false)" class="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl text-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer" id="pause-scenario-btn">
                         ⏸ Tạm dừng
                       </button>
+                    } @else {
+                      @if (sim.isAtStart() || sim.isCompleted()) {
+                        <button (click)="sim.playScenario()" class="flex-1 py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-md shadow-amber-500/10" id="play-scenario-btn">
+                          ▶ Chạy mô phỏng
+                        </button>
+                      } @else {
+                        <button (click)="sim.resetScenario()" class="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl text-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer" id="reset-scenario-btn">
+                          ↺ Chạy lại từ đầu
+                        </button>
+                        <button (click)="sim.playScenario()" class="flex-1 py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-md shadow-amber-500/10" id="resume-scenario-btn">
+                          ▶ Tiếp tục
+                        </button>
+                      }
                     }
                   </div>
                 </div>

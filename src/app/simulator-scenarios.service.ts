@@ -29,6 +29,8 @@ export class SimulatorScenarioService {
 
   activeScenario = signal<'free' | 'right_turn' | 'cut_off' | 'tailgate'>('right_turn');
   isPlayingScenario = signal<boolean>(false);
+  isAtStart = signal<boolean>(true);
+  isCompleted = signal<boolean>(false);
   scenarioStage = signal<number>(0);
   scenarioText = signal<string>('');
   
@@ -36,9 +38,22 @@ export class SimulatorScenarioService {
 
   startScenario(type: 'free' | 'right_turn' | 'cut_off' | 'tailgate', ctx: ScenarioContext) {
     this.activeScenario.set(type);
-    this.isPlayingScenario.set(type !== 'free');
+    this.isPlayingScenario.set(false);
+    this.isAtStart.set(true);
+    this.isCompleted.set(false);
     this.scenarioTimer = 0;
     this.scenarioStage.set(0);
+
+    // Set initial text based on the scenario
+    if (type === 'right_turn') {
+      this.scenarioText.set("Bài học: Hiện tượng 'cắt góc' của xe tải lớn/xe container khiến nó quét qua các làn bên trong khi rẽ. TUYỆT ĐỐI không đi song song với xe tải lớn/xe container ở các khúc cua hoặc ngã tư.");
+    } else if (type === 'cut_off') {
+      this.scenarioText.set("Bài học: Tuyệt đối không bao giờ tạt đầu đột ngột ngay sát mũi xe tải lớn hoặc xe container.");
+    } else if (type === 'tailgate') {
+      this.scenarioText.set("Bài học: Luôn giữ khoảng cách an toàn tối thiểu (quy tắc 3 giây) khi chạy sau xe tải lớn. Giúp bạn luôn có tầm nhìn thoáng và đủ thời gian phản ứng khi xe trước phanh gấp.");
+    } else {
+      this.scenarioText.set("");
+    }
     ctx.setBlinkerActive(false);
     ctx.setMotoBlinkerActive(false);
 
@@ -47,10 +62,12 @@ export class SimulatorScenarioService {
       const initialTruckX = 2.25;
       let initialTruckZ = 0;
       if (type === 'right_turn') {
-        initialTruckZ = -19.14;
+        initialTruckZ = -34.1;
       } else if (type === 'cut_off') {
         initialTruckZ = -19.7;
-      } else if (type === 'free' || type === 'tailgate') {
+      } else if (type === 'tailgate') {
+        initialTruckZ = -50.0;
+      } else {
         initialTruckZ = -40.0;
       }
       
@@ -63,6 +80,12 @@ export class SimulatorScenarioService {
       ctx.setTrailerRearPos(new BABYLON.Vector3(initialTruckX, 0.6, initialTruckZ - 11.25));
     }
 
+    if (ctx.motorcycleNode) {
+      ctx.motorcycleNode.rotation.set(0, 0, 0);
+      ctx.motorcycleNode.scaling.set(1, 1, 1);
+      ctx.motorcycleNode.position.y = (type === 'tailgate') ? 0.015 : 0;
+    }
+
     ctx.intersectionMeshes.forEach(mesh => mesh.isVisible = true);
 
     if (type === 'free') {
@@ -72,17 +95,17 @@ export class SimulatorScenarioService {
       ctx.setViewMode('orbit');
     } else if (type === 'right_turn') {
       ctx.motorcycleX.set(6.05);
-      ctx.motorcycleZ.set(-21.64);
+      ctx.motorcycleZ.set(-33.1);
       ctx.syncMotorcyclePosition();
       ctx.setViewMode('orbit');
     } else if (type === 'cut_off') {
       ctx.motorcycleX.set(6.05);
-      ctx.motorcycleZ.set(-15.5);
+      ctx.motorcycleZ.set(-18.0);
       ctx.syncMotorcyclePosition();
       ctx.setViewMode('orbit');
     } else if (type === 'tailgate') {
       ctx.motorcycleX.set(2.25);
-      ctx.motorcycleZ.set(-55.0);
+      ctx.motorcycleZ.set(-63.85);
       ctx.syncMotorcyclePosition();
       ctx.setViewMode('orbit');
     }
@@ -95,6 +118,9 @@ export class SimulatorScenarioService {
   updateScenario(dt: number, ctx: ScenarioContext) {
     if (!this.isPlayingScenario()) return;
 
+    if (this.scenarioTimer === 0 && dt > 0) {
+      this.isAtStart.set(false);
+    }
     this.scenarioTimer += dt;
     const t = this.scenarioTimer;
     const scenario = this.activeScenario();
@@ -109,6 +135,10 @@ export class SimulatorScenarioService {
       this.cutOffScenario.animate(t, ctx, setStage, setText, setPlaying);
     } else if (scenario === 'tailgate') {
       this.tailgateScenario.animate(t, dt, ctx, setStage, setText, setPlaying);
+    }
+
+    if (!this.isPlayingScenario()) {
+      this.isCompleted.set(true);
     }
   }
 }

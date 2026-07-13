@@ -214,7 +214,7 @@ export class SimulatorVehicleTruckService {
     frontMirrorGlass.material = mirrorGlassMat;
     frontMirrorGlass.parent = frontMirrorPlate;
 
-    // 4. Heavy Truck Wheels (Black tires)
+    // 4. Heavy Truck Wheels (Black tires with silver rims and spokes)
     const tirePositions = [
       { x: -1.2, y: 0.6, z: 4.0 },  { x: 1.2, y: 0.6, z: 4.0 },
       { x: -1.2, y: 0.6, z: 1.5 },  { x: 1.2, y: 0.6, z: 1.5 },
@@ -229,6 +229,44 @@ export class SimulatorVehicleTruckService {
       tire.rotation.z = Math.PI / 2;
       tire.position.set(pos.x, pos.y, pos.z);
       tire.material = tireMat;
+
+      // Silver alloy rim
+      const rim = BABYLON.MeshBuilder.CreateCylinder(`rim_${idx}`, { diameter: 0.85, height: 0.505 }, scene);
+      rim.material = chromeMat;
+      rim.parent = tire;
+
+      // Black hubcaps/center caps on both flat sides of the tire cylinder
+      const hubcapTop = BABYLON.MeshBuilder.CreateCylinder(`hubcapTop_${idx}`, { diameter: 0.28, height: 0.04 }, scene);
+      hubcapTop.position.set(0, 0.252, 0);
+      hubcapTop.material = tireMat;
+      hubcapTop.parent = tire;
+
+      const hubcapBot = BABYLON.MeshBuilder.CreateCylinder(`hubcapBot_${idx}`, { diameter: 0.28, height: 0.04 }, scene);
+      hubcapBot.position.set(0, -0.252, 0);
+      hubcapBot.material = tireMat;
+      hubcapBot.parent = tire;
+
+      // 4-spoke structural black lines on both sides to show rotating movement instantly
+      const spokeTop1 = BABYLON.MeshBuilder.CreateBox(`spokeTop1_${idx}`, { width: 0.8, height: 0.03, depth: 0.08 }, scene);
+      spokeTop1.position.set(0, 0.251, 0);
+      spokeTop1.material = tireMat;
+      spokeTop1.parent = tire;
+
+      const spokeTop2 = BABYLON.MeshBuilder.CreateBox(`spokeTop2_${idx}`, { width: 0.08, height: 0.03, depth: 0.8 }, scene);
+      spokeTop2.position.set(0, 0.251, 0);
+      spokeTop2.material = tireMat;
+      spokeTop2.parent = tire;
+
+      const spokeBot1 = BABYLON.MeshBuilder.CreateBox(`spokeBot1_${idx}`, { width: 0.8, height: 0.03, depth: 0.08 }, scene);
+      spokeBot1.position.set(0, -0.251, 0);
+      spokeBot1.material = tireMat;
+      spokeBot1.parent = tire;
+
+      const spokeBot2 = BABYLON.MeshBuilder.CreateBox(`spokeBot2_${idx}`, { width: 0.08, height: 0.03, depth: 0.8 }, scene);
+      spokeBot2.position.set(0, -0.251, 0);
+      spokeBot2.material = tireMat;
+      spokeBot2.parent = tire;
+
       if (pos.z > 0) {
         tire.parent = truckNode;
       } else {

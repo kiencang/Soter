@@ -13,6 +13,10 @@ export class SimulatorVehicleMotorcycleService {
     const tireMat = new BABYLON.StandardMaterial('tMat', scene);
     tireMat.diffuseColor = new BABYLON.Color3(0.1, 0.1, 0.1);
 
+    const mRimMat = new BABYLON.StandardMaterial('mRimMat', scene);
+    mRimMat.diffuseColor = new BABYLON.Color3(0.7, 0.73, 0.75);
+    mRimMat.specularColor = new BABYLON.Color3(0.8, 0.8, 0.8);
+
     const helmetMat = new BABYLON.StandardMaterial('helmetMat', scene);
     helmetMat.diffuseColor = new BABYLON.Color3(0.95, 0.8, 0.0); // Hi-vis yellow helmet
 
@@ -31,6 +35,48 @@ export class SimulatorVehicleMotorcycleService {
     wheelR.position.set(0, 0.3, -0.8);
     wheelR.material = tireMat;
     wheelR.parent = motorcycleNode;
+
+    // Helper to add rim and spokes to a motorcycle wheel
+    const addMotorcycleRim = (wheel: BABYLON.Mesh) => {
+      const mRim = BABYLON.MeshBuilder.CreateCylinder(wheel.name + '_rim', { diameter: 0.42, height: 0.162 }, scene);
+      mRim.material = mRimMat;
+      mRim.parent = wheel;
+
+      // Hubcaps
+      const hubTop = BABYLON.MeshBuilder.CreateCylinder(wheel.name + '_hubTop', { diameter: 0.15, height: 0.02 }, scene);
+      hubTop.position.set(0, 0.082, 0);
+      hubTop.material = tireMat;
+      hubTop.parent = wheel;
+
+      const hubBot = BABYLON.MeshBuilder.CreateCylinder(wheel.name + '_hubBot', { diameter: 0.15, height: 0.02 }, scene);
+      hubBot.position.set(0, -0.082, 0);
+      hubBot.material = tireMat;
+      hubBot.parent = wheel;
+
+      // Spoke Bars
+      const spTop1 = BABYLON.MeshBuilder.CreateBox(wheel.name + '_spTop1', { width: 0.4, height: 0.015, depth: 0.04 }, scene);
+      spTop1.position.set(0, 0.081, 0);
+      spTop1.material = tireMat;
+      spTop1.parent = wheel;
+
+      const spTop2 = BABYLON.MeshBuilder.CreateBox(wheel.name + '_spTop2', { width: 0.04, height: 0.015, depth: 0.4 }, scene);
+      spTop2.position.set(0, 0.081, 0);
+      spTop2.material = tireMat;
+      spTop2.parent = wheel;
+
+      const spBot1 = BABYLON.MeshBuilder.CreateBox(wheel.name + '_spBot1', { width: 0.4, height: 0.015, depth: 0.04 }, scene);
+      spBot1.position.set(0, -0.081, 0);
+      spBot1.material = tireMat;
+      spBot1.parent = wheel;
+
+      const spBot2 = BABYLON.MeshBuilder.CreateBox(wheel.name + '_spBot2', { width: 0.04, height: 0.015, depth: 0.4 }, scene);
+      spBot2.position.set(0, -0.081, 0);
+      spBot2.material = tireMat;
+      spBot2.parent = wheel;
+    };
+
+    addMotorcycleRim(wheelF);
+    addMotorcycleRim(wheelR);
 
     // 2. Honda scooter style body, seat, exhaust pipe, and shields
     const frame = BABYLON.MeshBuilder.CreateBox('mFrame', { width: 0.25, height: 0.55, depth: 1.3 }, scene);
