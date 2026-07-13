@@ -46,12 +46,12 @@ export class SimulatorScenarioRightTurnService {
         ctx.motorcycleNode.position.y = 0; // reset y
       }
     }
-    // Stage 1: 4.0s to 5.3s -> Truck turns into Lane 2, motorcycle goes straight, collision!
-    else if (t < 5.3) {
+    // Stage 1: 4.0s to 5.1s -> Truck turns into Lane 2, motorcycle goes straight, collision!
+    else if (t < 5.1) {
       setStage(1);
       setText("Bài học: Hiện tượng 'cắt góc' của xe tải lớn/xe container khiến nó quét qua các làn bên trong khi rẽ. TUYỆT ĐỐI không đi song song với xe tải lớn/xe container ở các khúc cua hoặc ngã tư.");
       
-      const activeT = t - 4.0; // 0 to 1.3
+      const activeT = t - 4.0; // 0 to 1.1
       const turnT = activeT / 3.3; // Proportion of the 90-degree turn
       const angle = turnT * (Math.PI / 2);
       
@@ -80,7 +80,7 @@ export class SimulatorScenarioRightTurnService {
         ctx.motorcycleNode.position.y = 0;
       }
     }
-    // Stage 2: 5.3s to 9.8s -> Collision and roll over
+    // Stage 2: 5.1s to 9.8s -> Collision, roll over, and trailer rear wheels crush
     else if (t < 9.8) {
       setStage(2);
       setText("Bài học: Hiện tượng 'cắt góc' của xe tải lớn/xe container khiến nó quét qua các làn bên trong khi rẽ. TUYỆT ĐỐI không đi song song với xe tải lớn/xe container ở các khúc cua hoặc ngã tư.");
@@ -91,7 +91,7 @@ export class SimulatorScenarioRightTurnService {
         const dt = t - 5.8;
         activeT = 1.8 + dt - 0.11 * dt * dt;
       }
-      const fallT = t - 5.3; // time since collision
+      const fallT = t - 5.1; // time since collision
       
       const turnT = activeT / 3.3; 
       let angle = turnT * (Math.PI / 2);
@@ -115,15 +115,18 @@ export class SimulatorScenarioRightTurnService {
         ctx.truckNode.position.set(currentTruckX, 0, currentTruckZ);
       }
 
-      // Bike position at collision (t=5.3)
-      const collisionActiveT = 5.3 - 4.0; // 1.3
+      // Bike position at collision (t=5.1)
+      const collisionActiveT = 5.1 - 4.0; // 1.1
       const collisionBikeZ = endStraightZ + 1.0 + collisionActiveT * speed; 
       const collisionBikeX = 6.05;
       
-      const pushFactor = Math.min(fallT / 0.5, 1.0);
+      const pushDuration = 0.5;
+      const pushFactor = Math.min(fallT / pushDuration, 1.0);
       
-      const currentBikeX = collisionBikeX + pushFactor * 0.8; 
-      const currentBikeZ = collisionBikeZ + pushFactor * 0.5; 
+      // Knock the motorcycle to the right (X increases) to represent being brushed/pushed by the side body
+      // This pushes the motorcycle out of the truck's body so it falls on the road side, rather than penetrating the cabin
+      const currentBikeX = collisionBikeX + pushFactor * 1.45; 
+      const currentBikeZ = collisionBikeZ + pushFactor * 0.7; 
       
       ctx.motorcycleX.set(currentBikeX);
       ctx.motorcycleZ.set(currentBikeZ);
@@ -132,12 +135,15 @@ export class SimulatorScenarioRightTurnService {
       if (ctx.motorcycleNode) {
         ctx.motorcycleNode.position.set(currentBikeX, 0.015, currentBikeZ);
         
-        // Ngã đổ: Bị tạt từ bên trái nên ngã sang phải
-        ctx.motorcycleNode.rotation.z = pushFactor * (-Math.PI / 2.2); 
-        ctx.motorcycleNode.rotation.x = pushFactor * 0.2; 
-        ctx.motorcycleNode.rotation.y = pushFactor * 0.5; 
+        // Ngã đổ: Bị tạt từ bên trái nên ngã sang phải nằm phẳng trên đường
+        ctx.motorcycleNode.rotation.z = pushFactor * (-Math.PI / 2); 
+        // Pitch/Chúi đầu nhẹ khi đổ ngã rồi nằm phẳng
+        ctx.motorcycleNode.rotation.x = -0.3 * pushFactor * (1 - pushFactor); 
+        // Yaw/Xoay nghiêng góc xe trượt trên đường
+        ctx.motorcycleNode.rotation.y = pushFactor * 0.45; 
         
-        const crushStartT = 0.5; 
+        // Crushing starts when the trailer's rear wheels actually sweep over the fallen bike (around t = 7.1, fallT = 2.0)
+        const crushStartT = 2.0; 
         if (fallT > crushStartT) {
            const crushProgress = (fallT - crushStartT) * 1.5; 
            const crushFactor = Math.max(1.0 - crushProgress, 0.05);

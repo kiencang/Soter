@@ -171,10 +171,17 @@ export class SimulatorScenarioCutOffService {
       if (ctx.motorcycleNode) {
         ctx.motorcycleNode.position.set(collisionBikeX, 0.015, currentBikeZ); 
         
-        // Ngã đổ: Bị húc từ sau nên văng tới trước và ngã sang phải
-        ctx.motorcycleNode.rotation.z = pushFactor * (-Math.PI / 2.2); // ngã sang phải
-        ctx.motorcycleNode.rotation.x = pushFactor * 0.2; // chúi tới
-        ctx.motorcycleNode.rotation.y = pushFactor * 0.5; // xoay ngang 
+        // Tính góc xoay mượt mà theo tiếp tuyến của đường Bezier tại thời điểm va chạm để tránh nhảy góc xoay đột ngột (snap)
+        const dx_c = 3 * Math.pow(1 - t2_c, 2) * (p1_x - p0_x) + 6 * (1 - t2_c) * t2_c * (p2_x - p1_x) + 3 * t2_c * t2_c * (p3_x - p2_x);
+        const dz_c = 3 * Math.pow(1 - t2_c, 2) * (p1_z - p0_z) + 6 * (1 - t2_c) * t2_c * (p2_z - p1_z) + 3 * t2_c * t2_c * (p3_z - p2_z);
+        const collisionBikeRotY = Math.atan2(dx_c, dz_c);
+
+        // Ngã đổ: Bị húc từ sau nên văng tới trước và ngã sang phải nằm phẳng trên đường
+        ctx.motorcycleNode.rotation.z = pushFactor * (-Math.PI / 2); // ngã sang phải tuyệt đối (nằm phẳng trên đường)
+        // Khi bị đâm từ phía sau, đầu xe máy sẽ chúi/ngã về phía trước (pitch âm: rotation.x < 0), sau khi ngã phẳng thì về 0
+        ctx.motorcycleNode.rotation.x = -1.2 * pushFactor * (1 - pushFactor); 
+        // Xoay góc mượt mà từ góc rẽ lúc va chạm sang góc trượt ngang trên đường
+        ctx.motorcycleNode.rotation.y = (1 - pushFactor) * collisionBikeRotY + pushFactor * (-1.2); 
         
         // Cán nát sau khi ngã
         const crushStartT = 0.5; 
