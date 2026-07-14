@@ -1,14 +1,21 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import * as BABYLON from '@babylonjs/core';
 import { ScenarioContext } from './simulator-scenarios.service';
+import { SimulatorAudioService } from './simulator-audio.service';
 
 @Injectable({ providedIn: 'root' })
 export class SimulatorScenarioCutOffService {
+  private audioService = inject(SimulatorAudioService);
+  private hasCrashed = false;
+
+  reset() {
+    this.hasCrashed = false;
+  }
+
   animate(
     t: number,
     ctx: ScenarioContext,
     setStage: (stage: number) => void,
-    setText: (text: string) => void,
     setPlaying: (playing: boolean) => void,
     setTrafficLightColor?: (color: 'red' | 'yellow' | 'green') => void
   ) {
@@ -28,7 +35,6 @@ export class SimulatorScenarioCutOffService {
     // Stage 0: 0s to 2.5s -> Dừng chờ đèn đỏ
     if (t < 2.5) {
       setStage(0);
-      setText("Bài học: Tuyệt đối không bao giờ tạt đầu đột ngột ngay sát mũi xe tải lớn hoặc xe container.");
       ctx.setMotoBlinkerActive(true, 'left');
       
       if (ctx.truckNode) {
@@ -52,7 +58,6 @@ export class SimulatorScenarioCutOffService {
     // Stage 1: 2.5s to 5.38s -> Đèn xanh, cả hai cùng khởi hành, xe máy tạt đầu
     else if (t < 5.38) {
       setStage(1);
-      setText("Bài học: Tuyệt đối không bao giờ tạt đầu đột ngột ngay sát mũi xe tải lớn hoặc xe container.");
       ctx.setMotoBlinkerActive(true, 'left');
       
       const activeT = t - 2.5; 
@@ -109,8 +114,11 @@ export class SimulatorScenarioCutOffService {
     }
     // Stage 2: 5.38s to 9.0s -> Va chạm do rơi vào vùng mù
     else if (t < 9.0) {
+      if (!this.hasCrashed) {
+        this.audioService.playCrashSound();
+        this.hasCrashed = true;
+      }
       setStage(2);
-      setText("Bài học: Tuyệt đối không bao giờ tạt đầu đột ngột ngay sát mũi xe tải lớn hoặc xe container.");
       ctx.setMotoBlinkerActive(false);
       
       const fallT = t - 5.38; // for bike falling and crushing
@@ -200,7 +208,6 @@ export class SimulatorScenarioCutOffService {
     // Stage 3: End of Scenario
     else {
       setPlaying(false);
-      setText("Bài học: Tuyệt đối không bao giờ tạt đầu đột ngột ngay sát mũi xe tải lớn hoặc xe container.");
     }
   }
 }

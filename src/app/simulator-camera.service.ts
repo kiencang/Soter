@@ -86,6 +86,24 @@ export class SimulatorCameraService {
     this.frontMirrorDisc.setEnabled(false);
 
     scene.activeCameras = [this.mainCamera, this.leftMirrorCamera, this.rightMirrorCamera];
+
+    // Clear background for left and right mirror viewports before rendering to prevent main camera background bleed-through
+    scene.onBeforeCameraRenderObservable.add((camera) => {
+      if (camera === this.leftMirrorCamera || camera === this.rightMirrorCamera) {
+        const engine = scene.getEngine() as any;
+        const w = engine.getRenderWidth();
+        const h = engine.getRenderHeight();
+
+        const x = camera.viewport.x * w;
+        const y = camera.viewport.y * h;
+        const width = camera.viewport.width * w;
+        const height = camera.viewport.height * h;
+
+        engine.enableScissor(x, y, width, height);
+        engine.clear(new BABYLON.Color4(0.0588, 0.0902, 0.1647, 1.0), true, true, true);
+        engine.disableScissor();
+      }
+    });
   }
 
   setFrontMirrorVisible(visible: boolean) {

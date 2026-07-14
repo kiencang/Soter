@@ -1,14 +1,21 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import * as BABYLON from '@babylonjs/core';
 import { ScenarioContext } from './simulator-scenarios.service';
+import { SimulatorAudioService } from './simulator-audio.service';
 
 @Injectable({ providedIn: 'root' })
 export class SimulatorScenarioRightTurnService {
+  private audioService = inject(SimulatorAudioService);
+  private hasCrashed = false;
+
+  reset() {
+    this.hasCrashed = false;
+  }
+
   animate(
     t: number,
     ctx: ScenarioContext,
     setStage: (stage: number) => void,
-    setText: (text: string) => void,
     setPlaying: (playing: boolean) => void
   ) {
     // Increase the overall speed of the scenario by 35%
@@ -22,7 +29,6 @@ export class SimulatorScenarioRightTurnService {
     // Stage 0: 0s to 4.0s -> Moving straight forward together, signaling
     if (t < 4.0) {
       setStage(0);
-      setText("Bài học: Hiện tượng 'cắt góc' của xe tải lớn/xe container khiến nó quét qua các làn bên trong khi rẽ. TUYỆT ĐỐI không đi song song với xe tải lớn/xe container ở các khúc cua hoặc ngã tư.");
       ctx.setBlinkerActive(true, 'right');
 
       const progressZ = startZ + t * speed;
@@ -49,7 +55,6 @@ export class SimulatorScenarioRightTurnService {
     // Stage 1: 4.0s to 5.1s -> Truck turns into Lane 2, motorcycle goes straight, collision!
     else if (t < 5.1) {
       setStage(1);
-      setText("Bài học: Hiện tượng 'cắt góc' của xe tải lớn/xe container khiến nó quét qua các làn bên trong khi rẽ. TUYỆT ĐỐI không đi song song với xe tải lớn/xe container ở các khúc cua hoặc ngã tư.");
       
       const activeT = t - 4.0; // 0 to 1.1
       const turnT = activeT / 3.3; // Proportion of the 90-degree turn
@@ -82,8 +87,11 @@ export class SimulatorScenarioRightTurnService {
     }
     // Stage 2: 5.1s to 9.8s -> Collision, roll over, and trailer rear wheels crush
     else if (t < 9.8) {
+      if (!this.hasCrashed) {
+        this.audioService.playCrashSound();
+        this.hasCrashed = true;
+      }
       setStage(2);
-      setText("Bài học: Hiện tượng 'cắt góc' của xe tải lớn/xe container khiến nó quét qua các làn bên trong khi rẽ. TUYỆT ĐỐI không đi song song với xe tải lớn/xe container ở các khúc cua hoặc ngã tư.");
       
       // Implement deceleration after reaction time (starting from t = 5.8)
       let activeT = t - 4.0; // time since truck started turning
@@ -164,7 +172,6 @@ export class SimulatorScenarioRightTurnService {
     else {
       setPlaying(false);
       ctx.setBlinkerActive(false);
-      setText("Bài học: Hiện tượng 'cắt góc' của xe tải lớn/xe container khiến nó quét qua các làn bên trong khi rẽ. TUYỆT ĐỐI không đi song song với xe tải lớn/xe container ở các khúc cua hoặc ngã tư.");
     }
   }
 }

@@ -1,0 +1,118 @@
+--- src/app/simulator-scenario-right-turn.service.ts
++++ src/app/simulator-scenario-right-turn.service.ts
+@@ -16,7 +16,6 @@
+     t: number,
+     ctx: ScenarioContext,
+     setStage: (stage: number) => void,
+-    setText: (text: string) => void,
+     setPlaying: (playing: boolean) => void
+   ) {
+     const speed = 15; // m/s (~54 km/h)
+@@ -57,7 +56,6 @@
+     // Stage 1: 4.0s to 5.1s -> Truck turns into Lane 2, motorcycle goes straight, collision!
+     else if (t < 5.1) {
+       setStage(1);
+-      setText("Bài học: Hiện tượng 'cắt góc' của xe tải lớn/xe container khiến nó quét qua các làn bên trong khi rẽ. TUYỆT ĐỐI không đi song song với xe tải lớn/xe container ở các khúc cua hoặc ngã tư.");
+       
+       const activeT = t - 4.0; // 0 to 1.1
+       const turnT = activeT / 3.3; // Proportion of the 90-degree turn
+@@ -95,7 +93,6 @@
+         this.hasCrashed = true;
+       }
+       setStage(2);
+-      setText("Bài học: Hiện tượng 'cắt góc' của xe tải lớn/xe container khiến nó quét qua các làn bên trong khi rẽ. TUYỆT ĐỐI không đi song song với xe tải lớn/xe container ở các khúc cua hoặc ngã tư.");
+       
+       // Implement deceleration after reaction time (starting from t = 5.8)
+       let activeT = t - 4.0; // time since truck started turning
+@@ -176,7 +173,6 @@
+     else {
+       setPlaying(false);
+       ctx.setBlinkerActive(false);
+-      setText("Bài học: Hiện tượng 'cắt góc' của xe tải lớn/xe container khiến nó quét qua các làn bên trong khi rẽ. TUYỆT ĐỐI không đi song song với xe tải lớn/xe container ở các khúc cua hoặc ngã tư.");
+     }
+   }
+ }
+--- src/app/simulator-scenario-cut-off.service.ts
++++ src/app/simulator-scenario-cut-off.service.ts
+@@ -16,7 +16,6 @@
+     t: number,
+     ctx: ScenarioContext,
+     setStage: (stage: number) => void,
+-    setText: (text: string) => void,
+     setPlaying: (playing: boolean) => void,
+     setLight: (color: 'red' | 'yellow' | 'green') => void
+   ) {
+@@ -36,7 +35,6 @@
+     // Stage 0: 0s to 2.5s -> Dừng chờ đèn đỏ
+     if (t < 2.5) {
+       setStage(0);
+-      setText("Bài học: Tuyệt đối không bao giờ tạt đầu đột ngột ngay sát mũi xe tải lớn hoặc xe container.");
+       ctx.setMotoBlinkerActive(true, 'left');
+       
+       if (ctx.truckNode) {
+@@ -60,7 +58,6 @@
+     // Stage 1: 2.5s to 5.38s -> Đèn xanh, cả hai cùng khởi hành, xe máy tạt đầu
+     else if (t < 5.38) {
+       setStage(1);
+-      setText("Bài học: Tuyệt đối không bao giờ tạt đầu đột ngột ngay sát mũi xe tải lớn hoặc xe container.");
+       ctx.setMotoBlinkerActive(true, 'left');
+       
+       const activeT = t - 2.5; 
+@@ -122,7 +119,6 @@
+         this.hasCrashed = true;
+       }
+       setStage(2);
+-      setText("Bài học: Tuyệt đối không bao giờ tạt đầu đột ngột ngay sát mũi xe tải lớn hoặc xe container.");
+       ctx.setMotoBlinkerActive(false);
+       
+       const fallT = t - 5.38; // for bike falling and crushing
+@@ -212,7 +208,6 @@
+     // Stage 3: End of Scenario
+     else {
+       setPlaying(false);
+-      setText("Bài học: Tuyệt đối không bao giờ tạt đầu đột ngột ngay sát mũi xe tải lớn hoặc xe container.");
+     }
+   }
+ }
+--- src/app/simulator-scenario-tailgate.service.ts
++++ src/app/simulator-scenario-tailgate.service.ts
+@@ -18,7 +18,6 @@
+     dt: number,
+     ctx: ScenarioContext,
+     setStage: (stage: number) => void,
+-    setText: (text: string) => void,
+     setPlaying: (playing: boolean) => void
+   ) {
+     const speed = 20; // m/s (~72 km/h)
+@@ -36,7 +35,6 @@
+     // Stage 0: 0s to 2.5s -> Riding close behind
+     if (t < 2.5) {
+       setStage(0);
+-      setText("Bài học: Luôn giữ khoảng cách an toàn tối thiểu (quy tắc 3 giây) khi chạy sau xe tải lớn. Giúp bạn luôn có tầm nhìn thoáng và đủ thời gian phản ứng khi xe trước phanh gấp.");
+       truckZ = initialZ + t * speed;
+       bikeZ = truckZ + bikeOffset;
+       this.updatePositions(ctx, truckZ, bikeZ);
+@@ -44,7 +42,6 @@
+     // Stage 1: 2.5s to 5.0s -> Still tailgating, completely invisible in mirrors
+     else if (t < 5.0) {
+       setStage(1);
+-      setText("Bài học: Luôn giữ khoảng cách an toàn tối thiểu (quy tắc 3 giây) khi chạy sau xe tải lớn. Giúp bạn luôn có tầm nhìn thoáng và đủ thời gian phản ứng khi xe trước phanh gấp.");
+       truckZ = initialZ + t * speed;
+       bikeZ = truckZ + bikeOffset;
+       this.updatePositions(ctx, truckZ, bikeZ);
+@@ -52,7 +49,6 @@
+     // Stage 2: 5.0s to 8.5s -> Sudden emergency brake!
+     else if (t < 8.5) {
+       setStage(2);
+-      setText("Bài học: Luôn giữ khoảng cách an toàn tối thiểu (quy tắc 3 giây) khi chạy sau xe tải lớn. Giúp bạn luôn có tầm nhìn thoáng và đủ thời gian phản ứng khi xe trước phanh gấp.");
+       
+       const activeT = t - 5.0;
+       const truckStartZ = initialZ + 5.0 * speed;
+@@ -138,7 +134,6 @@
+     // Stage 3: End of Scenario
+     else {
+       setPlaying(false);
+-      setText("Bài học: Luôn giữ khoảng cách an toàn tối thiểu (quy tắc 3 giây) khi chạy sau xe tải lớn. Giúp bạn luôn có tầm nhìn thoáng và đủ thời gian phản ứng khi xe trước phanh gấp.");
+     }
+   }
+ 

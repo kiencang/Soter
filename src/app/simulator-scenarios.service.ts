@@ -45,7 +45,10 @@ export class SimulatorScenarioService {
     this.scenarioTimer = 0;
     this.scenarioStage.set(0);
 
-    // Thiết lập màu đèn tín hiệu riêng cho từng kịch bản (hiện tại cả 3 kịch bản là xanh, riêng cut_off ban đầu là đỏ)
+    this.rightTurnScenario.reset();
+    this.cutOffScenario.reset();
+    this.tailgateScenario.reset();
+
     if (type === 'right_turn') {
       this.trafficLightColor.set('green');
     } else if (type === 'cut_off') {
@@ -138,15 +141,14 @@ export class SimulatorScenarioService {
     const scenario = this.activeScenario();
 
     const setStage = (stage: number) => this.scenarioStage.set(stage);
-    const setText = (text: string) => this.scenarioText.set(text);
     const setPlaying = (playing: boolean) => this.isPlayingScenario.set(playing);
 
     if (scenario === 'right_turn') {
-      this.rightTurnScenario.animate(t, ctx, setStage, setText, setPlaying);
+      this.rightTurnScenario.animate(t, ctx, setStage, setPlaying);
     } else if (scenario === 'cut_off') {
-      this.cutOffScenario.animate(t, ctx, setStage, setText, setPlaying, (color) => this.trafficLightColor.set(color));
+      this.cutOffScenario.animate(t, ctx, setStage, setPlaying, (color) => this.trafficLightColor.set(color));
     } else if (scenario === 'tailgate') {
-      this.tailgateScenario.animate(t, dt, ctx, setStage, setText, setPlaying);
+      this.tailgateScenario.animate(t, dt, ctx, setStage, setPlaying);
     }
 
     if (!this.isPlayingScenario()) {

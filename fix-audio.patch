@@ -1,0 +1,68 @@
+--- src/app/simulator-audio.service.ts
++++ src/app/simulator-audio.service.ts
+@@ -83,46 +83,40 @@
+     } catch(e) {}
+   }
+ 
+   playCrashSound() {
+     if (!this.soundEnabled() || !this.audioCtx) return;
+     try {
++      const now = this.audioCtx.currentTime;
++      
+       // 1. Impact thud (low frequency drop)
+       const thudOsc = this.audioCtx.createOscillator();
+       thudOsc.type = 'sine';
+-      thudOsc.frequency.setValueAtTime(150, this.audioCtx.currentTime);
+-      thudOsc.frequency.exponentialRampToValueAtTime(0.01, this.audioCtx.currentTime + 0.5);
++      thudOsc.frequency.setValueAtTime(150, now);
++      thudOsc.frequency.exponentialRampToValueAtTime(0.01, now + 0.4);
+ 
+       const thudGain = this.audioCtx.createGain();
+-      thudGain.gain.setValueAtTime(1.5, this.audioCtx.currentTime);
+-      thudGain.gain.exponentialRampToValueAtTime(0.01, this.audioCtx.currentTime + 0.5);
++      thudGain.gain.setValueAtTime(1.5, now);
++      thudGain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+ 
+       thudOsc.connect(thudGain);
+       thudGain.connect(this.audioCtx.destination);
+-      thudOsc.start();
+-      thudOsc.stop(this.audioCtx.currentTime + 0.5);
++      thudOsc.start(now);
++      thudOsc.stop(now + 0.4);
+ 
+       // 2. Noise burst (crunch/shatter)
+-      const bufferSize = this.audioCtx.sampleRate * 0.6; // 0.6 seconds
++      const duration = 0.35;
++      const bufferSize = this.audioCtx.sampleRate * duration;
+       const buffer = this.audioCtx.createBuffer(1, bufferSize, this.audioCtx.sampleRate);
+       const data = buffer.getChannelData(0);
+       for (let i = 0; i < bufferSize; i++) {
+         data[i] = Math.random() * 2 - 1; // White noise
+       }
+       
+       const noise = this.audioCtx.createBufferSource();
+       noise.buffer = buffer;
+ 
+       const noiseFilter = this.audioCtx.createBiquadFilter();
+       noiseFilter.type = 'lowpass';
+-      noiseFilter.frequency.setValueAtTime(1000, this.audioCtx.currentTime);
+-      noiseFilter.frequency.exponentialRampToValueAtTime(100, this.audioCtx.currentTime + 0.6);
++      noiseFilter.frequency.setValueAtTime(1200, now);
++      noiseFilter.frequency.exponentialRampToValueAtTime(100, now + duration);
+ 
+       const noiseGain = this.audioCtx.createGain();
+-      noiseGain.gain.setValueAtTime(1.0, this.audioCtx.currentTime);
+-      noiseGain.gain.exponentialRampToValueAtTime(0.01, this.audioCtx.currentTime + 0.6);
++      noiseGain.gain.setValueAtTime(1.0, now);
++      noiseGain.gain.exponentialRampToValueAtTime(0.01, now + duration);
++      // Ensure it goes absolute 0 at the end
++      noiseGain.gain.linearRampToValueAtTime(0, now + duration + 0.05);
+ 
+       noise.connect(noiseFilter);
+       noiseFilter.connect(noiseGain);
+       noiseGain.connect(this.audioCtx.destination);
+-      noise.start();
++      noise.start(now);
++      noise.stop(now + duration + 0.05);
+     } catch(e) {}
+   }

@@ -1,15 +1,24 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import * as BABYLON from '@babylonjs/core';
 import { ScenarioContext } from './simulator-scenarios.service';
+import { SimulatorAudioService } from './simulator-audio.service';
 
 @Injectable({ providedIn: 'root' })
 export class SimulatorScenarioTailgateService {
+  private audioService = inject(SimulatorAudioService);
+  private hasBraked = false;
+  private hasCrashed = false;
+
+  reset() {
+    this.hasBraked = false;
+    this.hasCrashed = false;
+  }
+
   animate(
     t: number,
     dt: number,
     ctx: ScenarioContext,
     setStage: (stage: number) => void,
-    setText: (text: string) => void,
     setPlaying: (playing: boolean) => void
   ) {
     const speed = 10.0;
@@ -26,7 +35,6 @@ export class SimulatorScenarioTailgateService {
     // Stage 0: 0s to 2.5s -> Riding close behind
     if (t < 2.5) {
       setStage(0);
-      setText("Bài học: Luôn giữ khoảng cách an toàn tối thiểu (quy tắc 3 giây) khi chạy sau xe tải lớn. Giúp bạn luôn có tầm nhìn thoáng và đủ thời gian phản ứng khi xe trước phanh gấp.");
       truckZ = initialZ + t * speed;
       bikeZ = truckZ + bikeOffset;
       this.updatePositions(ctx, truckZ, bikeZ);
@@ -34,7 +42,6 @@ export class SimulatorScenarioTailgateService {
     // Stage 1: 2.5s to 5.0s -> Still tailgating, completely invisible in mirrors
     else if (t < 5.0) {
       setStage(1);
-      setText("Bài học: Luôn giữ khoảng cách an toàn tối thiểu (quy tắc 3 giây) khi chạy sau xe tải lớn. Giúp bạn luôn có tầm nhìn thoáng và đủ thời gian phản ứng khi xe trước phanh gấp.");
       truckZ = initialZ + t * speed;
       bikeZ = truckZ + bikeOffset;
       this.updatePositions(ctx, truckZ, bikeZ);
@@ -42,7 +49,6 @@ export class SimulatorScenarioTailgateService {
     // Stage 2: 5.0s to 8.5s -> Sudden emergency brake!
     else if (t < 8.5) {
       setStage(2);
-      setText("Bài học: Luôn giữ khoảng cách an toàn tối thiểu (quy tắc 3 giây) khi chạy sau xe tải lớn. Giúp bạn luôn có tầm nhìn thoáng và đủ thời gian phản ứng khi xe trước phanh gấp.");
       
       const activeT = t - 5.0;
       const truckStartZ = initialZ + 5.0 * speed;
@@ -63,6 +69,10 @@ export class SimulatorScenarioTailgateService {
       if (activeT < 0.5) {
         bikeDist = speed * activeT;
       } else {
+        if (!this.hasBraked) {
+          this.audioService.playBrakeSound();
+          this.hasBraked = true;
+        }
         const brakeT = Math.min(activeT - 0.5, 1.0);
         const bikeDecel = speed / 1.0;
         bikeDist = speed * 0.5 + speed * brakeT - 0.5 * bikeDecel * brakeT * brakeT;
@@ -80,6 +90,10 @@ export class SimulatorScenarioTailgateService {
       ctx.motorcycleX.set(2.25);
       
       if (bikeZ >= collisionLimitZ) {
+        if (!this.hasCrashed) {
+          this.audioService.playCrashSound();
+          this.hasCrashed = true;
+        }
         // Crashed
         bikeZ = collisionLimitZ; 
         ctx.motorcycleZ.set(bikeZ);
@@ -120,7 +134,6 @@ export class SimulatorScenarioTailgateService {
     // Stage 3: End of Scenario
     else {
       setPlaying(false);
-      setText("Bài học: Luôn giữ khoảng cách an toàn tối thiểu (quy tắc 3 giây) khi chạy sau xe tải lớn. Giúp bạn luôn có tầm nhìn thoáng và đủ thời gian phản ứng khi xe trước phanh gấp.");
     }
   }
 
