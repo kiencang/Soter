@@ -1,27 +1,25 @@
 <div class="flex flex-col h-full justify-between gap-6" id="simulator-view">
         <div class="space-y-6">
           
-          <!-- Title block -->
-          <div class="flex items-center justify-between border-b border-white/5 pb-4">
-            <div>
-              <h2 class="text-lg font-display font-bold text-white">TRUNG TÂM MÔ PHỎNG</h2>
+          <!-- Title block & Toggle Blind Spot Overlays (integrated closely) -->
+          <div class="border-b border-white/5 pb-4 space-y-3">
+            <div class="flex items-center justify-between">
+              <div>
+                <h2 class="text-lg font-display font-bold text-white">TRUNG TÂM MÔ PHỎNG</h2>
+              </div>
+              <!-- Sound controller -->
+              <button (click)="sim.toggleSound()" class="p-2 rounded-xl border border-white/5 bg-slate-800 text-slate-400 hover:text-white transition-all">
+                @if (sim.soundEnabled()) {
+                  🔊
+                } @else {
+                  🔇
+                }
+              </button>
             </div>
-            <!-- Sound controller -->
-            <button (click)="sim.toggleSound()" class="p-2 rounded-xl border border-white/5 bg-slate-800 text-slate-400 hover:text-white transition-all">
-              @if (sim.soundEnabled()) {
-                🔊
-              } @else {
-                🔇
-              }
-            </button>
-          </div>
 
-          <!-- Section 1: POV Choice removed -->
-          <div class="space-y-2">
-            <!-- Toggle Blind Spot Overlays (Moved to right column) -->
             @if (sim.viewMode() === 'orbit') {
-              <div class="flex items-center justify-between p-3 bg-slate-950/40 border border-white/5 rounded-xl transition-all">
-                <span class="text-sm font-medium text-slate-300">Hiển thị vùng điểm mù</span>
+              <div class="flex items-center justify-between p-2.5 bg-slate-950/40 border border-white/5 rounded-xl transition-all">
+                <span class="text-xs font-medium text-slate-300">Hiển thị vùng điểm mù</span>
                 <button (click)="sim.toggleBlindSpotOverlays()" class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none cursor-pointer"
                         [class.bg-amber-500]="sim.showBlindSpotOverlays()" [class.bg-slate-700]="!sim.showBlindSpotOverlays()"
                         id="toggle-blindspot-right">
@@ -58,7 +56,7 @@
                         [class.border-white/5]="sim.activeScenario() !== 'cut_off'"
                         id="scenario-cutoff-btn">
                   <span>02</span>
-                  <span>Tạt Đầu Cabin</span>
+                  <span>Tạt Đầu</span>
                 </button>
                 <button (click)="sim.startScenario('tailgate')" 
                         class="py-2 px-1 text-[11px] rounded-xl border font-semibold transition-all text-center leading-tight flex flex-col justify-between h-14"
@@ -70,7 +68,7 @@
                         [class.border-white/5]="sim.activeScenario() !== 'tailgate'"
                         id="scenario-tailgate-btn">
                   <span>03</span>
-                  <span>Quá Gần Đuôi Xe</span>
+                  <span>Sát Đuôi Xe</span>
                 </button>
               </div>
 

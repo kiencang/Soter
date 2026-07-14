@@ -25,7 +25,7 @@ export class SimulatorService {
 
   // Real-time motorcycle state
   motorcycleX = signal<number>(6.05);
-  motorcycleZ = signal<number>(-5.0);
+  motorcycleZ = signal<number>(-16.5);
 
   // Status indicators (Vietnamese)
   currentZone = signal<string>('Ngoài vùng nguy hiểm');
