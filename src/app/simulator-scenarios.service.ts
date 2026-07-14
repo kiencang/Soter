@@ -61,9 +61,9 @@ export class SimulatorScenarioService {
 
     // Set initial text based on the scenario
     if (type === 'right_turn') {
-      this.scenarioText.set("Bài học: Hiện tượng 'cắt góc' của xe tải lớn/xe container khiến nó quét qua các làn bên trong khi rẽ. TUYỆT ĐỐI không đi song song với xe tải lớn/xe container ở các khúc cua hoặc ngã tư.");
+      this.scenarioText.set("Bài học: Khi xe tải rẽ, hiện tượng 'cắt góc' của xe tải lớn/xe container khiến nó quét qua các làn bên trong. TUYỆT ĐỐI không đi song song với xe tải lớn/xe container ở các khúc cua hoặc ngã tư.");
     } else if (type === 'cut_off') {
-      this.scenarioText.set("Bài học: Tuyệt đối không bao giờ tạt đầu đột ngột ngay sát mũi xe tải lớn hoặc xe container.");
+      this.scenarioText.set("Bài học: Có hai vấn đề cần lưu ý ở đây, (a) Xe gắn máy đang ở trong vùng điểm mù, (b) Sau đó lại di chuyển nhanh và tạt đầu đột ngột ngay sát mũi xe tải lớn.");
     } else if (type === 'tailgate') {
       this.scenarioText.set("Bài học: Luôn giữ khoảng cách an toàn tối thiểu (quy tắc 3 giây) khi chạy sau xe tải lớn. Giúp bạn luôn có tầm nhìn thoáng và đủ thời gian phản ứng khi xe trước phanh gấp.");
     } else {
