@@ -84,13 +84,13 @@ export class SimulatorVehicleTruckService {
     rLight.parent = truckNode;
 
     // Blinkers (Xi-nhan) for turns
-    blinkerLeft = BABYLON.MeshBuilder.CreateBox('blinkL', { width: 0.15, height: 0.15, depth: 0.1 }, scene);
-    blinkerLeft.position.set(-1.18, 1.0, 4.86);
+    blinkerLeft = BABYLON.MeshBuilder.CreateBox('blinkL', { width: 0.24, height: 0.24, depth: 0.12 }, scene);
+    blinkerLeft.position.set(-1.22, 1.0, 4.86);
     blinkerLeft.material = blinkerLeftMat;
     blinkerLeft.parent = truckNode;
 
-    blinkerRight = BABYLON.MeshBuilder.CreateBox('blinkR', { width: 0.15, height: 0.15, depth: 0.1 }, scene);
-    blinkerRight.position.set(1.18, 1.0, 4.86);
+    blinkerRight = BABYLON.MeshBuilder.CreateBox('blinkR', { width: 0.24, height: 0.24, depth: 0.12 }, scene);
+    blinkerRight.position.set(1.22, 1.0, 4.86);
     blinkerRight.material = blinkerRightMat;
     blinkerRight.parent = truckNode;
 
