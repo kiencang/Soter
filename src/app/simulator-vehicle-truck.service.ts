@@ -177,8 +177,8 @@ export class SimulatorVehicleTruckService {
     mirrorGlassMat.emissiveColor = new BABYLON.Color3(0.2, 0.2, 0.25);
 
     // Left Mirror
-    const mirrorBarL = BABYLON.MeshBuilder.CreateBox('mBarL', { width: 0.4, height: 0.08, depth: 0.08 }, scene);
-    mirrorBarL.position.set(-1.45, 2.4, 3.2);
+    const mirrorBarL = BABYLON.MeshBuilder.CreateBox('mBarL', { width: 0.35, height: 0.05, depth: 0.05 }, scene);
+    mirrorBarL.position.set(-1.41, 2.5, 3.25);
     mirrorBarL.material = tireMat;
     mirrorBarL.parent = truckNode;
 
@@ -195,8 +195,8 @@ export class SimulatorVehicleTruckService {
     mirrorGlassL.parent = mirrorPlateL;
 
     // Right Mirror
-    const mirrorBarR = BABYLON.MeshBuilder.CreateBox('mBarR', { width: 0.4, height: 0.08, depth: 0.08 }, scene);
-    mirrorBarR.position.set(1.45, 2.4, 3.2);
+    const mirrorBarR = BABYLON.MeshBuilder.CreateBox('mBarR', { width: 0.35, height: 0.05, depth: 0.05 }, scene);
+    mirrorBarR.position.set(1.41, 2.5, 3.25);
     mirrorBarR.material = tireMat;
     mirrorBarR.parent = truckNode;
 

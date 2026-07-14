@@ -62,7 +62,14 @@ export class SimulatorCameraService {
     this.frontMirrorRTT.renderListPredicate = (mesh) => {
       // Exclude the mirror disc itself to prevent visual feedback loop
       if (mesh === this.frontMirrorDisc) return false;
-      // Exclude truck/trailer body parts so they don't obstruct the look-down view of the road/obstacle
+      // Exclude truck/trailer body parts and all sub-children (e.g. brackets, arms) recursively
+      let p = mesh.parent;
+      while (p) {
+        if (p === truckNode || p.name === 'trailerNode') {
+          return false;
+        }
+        p = p.parent;
+      }
       if (mesh.parent === truckNode) return false;
       if (mesh.parent && mesh.parent.name === 'trailerNode') return false;
       return true;
@@ -163,11 +170,43 @@ export class SimulatorCameraService {
     // 2. Update left mirror camera
     if (this.leftMirrorCamera) {
       this.leftMirrorCamera.update();
+      const frameEl = document.getElementById('frame-left-mirror');
+      const canvasEl = this.leftMirrorCamera.getScene().getEngine().getRenderingCanvas();
+      if (frameEl && canvasEl) {
+        const frameRect = frameEl.getBoundingClientRect();
+        const canvasRect = canvasEl.getBoundingClientRect();
+        if (canvasRect.width > 0 && canvasRect.height > 0) {
+          const x = (frameRect.left - canvasRect.left) / canvasRect.width;
+          const y = (canvasRect.bottom - frameRect.bottom) / canvasRect.height;
+          const w = frameRect.width / canvasRect.width;
+          const h = frameRect.height / canvasRect.height;
+          this.leftMirrorCamera.viewport.x = x;
+          this.leftMirrorCamera.viewport.y = y;
+          this.leftMirrorCamera.viewport.width = w;
+          this.leftMirrorCamera.viewport.height = h;
+        }
+      }
     }
 
     // 3. Update right mirror camera
     if (this.rightMirrorCamera) {
       this.rightMirrorCamera.update();
+      const frameEl = document.getElementById('frame-right-mirror');
+      const canvasEl = this.rightMirrorCamera.getScene().getEngine().getRenderingCanvas();
+      if (frameEl && canvasEl) {
+        const frameRect = frameEl.getBoundingClientRect();
+        const canvasRect = canvasEl.getBoundingClientRect();
+        if (canvasRect.width > 0 && canvasRect.height > 0) {
+          const x = (frameRect.left - canvasRect.left) / canvasRect.width;
+          const y = (canvasRect.bottom - frameRect.bottom) / canvasRect.height;
+          const w = frameRect.width / canvasRect.width;
+          const h = frameRect.height / canvasRect.height;
+          this.rightMirrorCamera.viewport.x = x;
+          this.rightMirrorCamera.viewport.y = y;
+          this.rightMirrorCamera.viewport.width = w;
+          this.rightMirrorCamera.viewport.height = h;
+        }
+      }
     }
 
     // 4. Align front mirror 3D disc to HTML overlay container perfectly
