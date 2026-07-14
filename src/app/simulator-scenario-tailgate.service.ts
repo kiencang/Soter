@@ -85,14 +85,15 @@ export class SimulatorScenarioTailgateService {
         ctx.motorcycleZ.set(bikeZ);
         
         if (ctx.motorcycleNode) {
-          ctx.motorcycleNode.position.set(2.25, 0.015, bikeZ);
-          
           const crashActiveT = Math.max(0, activeT - 0.3);
           const crushFactor = Math.min(crashActiveT / 0.5, 1.0);
           
+          const fallY = 0.015 + (crushFactor * 0.28);
+          ctx.motorcycleNode.position.set(2.25, fallY, bikeZ);
+          
           // Xe húc vào đít xe tải: bốc đuôi lên một chút rồi đổ
           const pitchAngle = Math.sin(crushFactor * Math.PI) * (Math.PI / 6); 
-          const fallAngle = crushFactor * (Math.PI / 2.2); 
+          const fallAngle = crushFactor * (Math.PI / 2.2);
           
           ctx.motorcycleNode.rotation.x = pitchAngle; 
           ctx.motorcycleNode.rotation.y = crushFactor * 0.3; 

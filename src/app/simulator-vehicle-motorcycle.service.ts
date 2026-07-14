@@ -107,6 +107,15 @@ export class SimulatorVehicleMotorcycleService {
     seat.material = seatMat;
     seat.parent = motorcycleNode;
 
+    // Chỗ để chân (Footrests)
+    const footrestMat = new BABYLON.StandardMaterial('footrestMat', scene);
+    footrestMat.diffuseColor = new BABYLON.Color3(0.3, 0.3, 0.3);
+    const footrest = BABYLON.MeshBuilder.CreateCylinder('mFootrest', { diameter: 0.05, height: 0.6 }, scene);
+    footrest.position.set(0, 0.21, -0.02);
+    footrest.rotation.z = Math.PI / 2;
+    footrest.material = footrestMat;
+    footrest.parent = motorcycleNode;
+
     // Upward-swept exhaust pipe (ống pô) on right side
     const exhaustMat = new BABYLON.StandardMaterial('exhaustMat', scene);
     exhaustMat.diffuseColor = new BABYLON.Color3(0.5, 0.5, 0.5);
@@ -273,47 +282,91 @@ export class SimulatorVehicleMotorcycleService {
     torso.material = jacketMat;
     torso.parent = motorcycleNode;
 
-    // Left Arm holding handle grip
-    const leftUpperArm = BABYLON.MeshBuilder.CreateCylinder('mLeftUpperArm', { diameter: 0.14, height: 0.4 }, scene);
-    leftUpperArm.position.set(-0.25, 1.25, -0.05);
-    leftUpperArm.rotation.x = 0.4;
-    leftUpperArm.rotation.z = 0.15;
+    // Left Arm holding handle grip (Capsule for smoothness)
+    const leftUpperArm = BABYLON.MeshBuilder.CreateCapsule('mLeftUpperArm', { radius: 0.07, height: 0.35 }, scene);
+    leftUpperArm.position.set(-0.275, 1.35, -0.025);
+    leftUpperArm.rotation.x = -0.9;
+    leftUpperArm.rotation.z = 0.25;
     leftUpperArm.material = jacketMat;
     leftUpperArm.parent = motorcycleNode;
 
-    const leftForearm = BABYLON.MeshBuilder.CreateCylinder('mLeftForearm', { diameter: 0.12, height: 0.45 }, scene);
-    leftForearm.position.set(-0.29, 1.12, 0.28);
-    leftForearm.rotation.x = -0.65;
-    leftForearm.rotation.y = -0.15;
+    const leftForearm = BABYLON.MeshBuilder.CreateCapsule('mLeftForearm', { radius: 0.06, height: 0.5 }, scene);
+    leftForearm.position.set(-0.325, 1.15, 0.325);
+    leftForearm.rotation.x = -1.15;
+    leftForearm.rotation.z = 0.25;
     leftForearm.material = jacketMat;
     leftForearm.parent = motorcycleNode;
 
     // Right Arm holding handle grip
-    const rightUpperArm = BABYLON.MeshBuilder.CreateCylinder('mRightUpperArm', { diameter: 0.14, height: 0.4 }, scene);
-    rightUpperArm.position.set(0.25, 1.25, -0.05);
-    rightUpperArm.rotation.x = 0.4;
-    rightUpperArm.rotation.z = -0.15;
+    const rightUpperArm = BABYLON.MeshBuilder.CreateCapsule('mRightUpperArm', { radius: 0.07, height: 0.35 }, scene);
+    rightUpperArm.position.set(0.275, 1.35, -0.025);
+    rightUpperArm.rotation.x = -0.9;
+    rightUpperArm.rotation.z = -0.25;
     rightUpperArm.material = jacketMat;
     rightUpperArm.parent = motorcycleNode;
 
-    const rightForearm = BABYLON.MeshBuilder.CreateCylinder('mRightForearm', { diameter: 0.12, height: 0.45 }, scene);
-    rightForearm.position.set(0.29, 1.12, 0.28);
-    rightForearm.rotation.x = -0.65;
-    rightForearm.rotation.y = 0.15;
+    const rightForearm = BABYLON.MeshBuilder.CreateCapsule('mRightForearm', { radius: 0.06, height: 0.5 }, scene);
+    rightForearm.position.set(0.325, 1.15, 0.325);
+    rightForearm.rotation.x = -1.15;
+    rightForearm.rotation.z = -0.25;
     rightForearm.material = jacketMat;
     rightForearm.parent = motorcycleNode;
+
+    // --- LEGS ---
+    const pantsMat = new BABYLON.StandardMaterial('pantsMat', scene);
+    pantsMat.diffuseColor = new BABYLON.Color3(0.15, 0.65, 0.35); // Safety green
+
+    // Thighs
+    const leftThigh = BABYLON.MeshBuilder.CreateCapsule('mLeftThigh', { radius: 0.09, height: 0.55 }, scene);
+    leftThigh.position.set(-0.16, 0.72, -0.1);
+    leftThigh.rotation.x = Math.PI / 3;
+    leftThigh.material = pantsMat;
+    leftThigh.parent = motorcycleNode;
+    
+    const rightThigh = BABYLON.MeshBuilder.CreateCapsule('mRightThigh', { radius: 0.09, height: 0.55 }, scene);
+    rightThigh.position.set(0.16, 0.72, -0.1);
+    rightThigh.rotation.x = Math.PI / 3;
+    rightThigh.material = pantsMat;
+    rightThigh.parent = motorcycleNode;
+
+    // Calves
+    const leftCalf = BABYLON.MeshBuilder.CreateCapsule('mLeftCalf', { radius: 0.07, height: 0.55 }, scene);
+    leftCalf.position.set(-0.18, 0.5, 0.1);
+    leftCalf.rotation.x = -Math.PI / 8;
+    leftCalf.material = pantsMat;
+    leftCalf.parent = motorcycleNode;
+
+    const rightCalf = BABYLON.MeshBuilder.CreateCapsule('mRightCalf', { radius: 0.07, height: 0.55 }, scene);
+    rightCalf.position.set(0.18, 0.5, 0.1);
+    rightCalf.rotation.x = -Math.PI / 8;
+    rightCalf.material = pantsMat;
+    rightCalf.parent = motorcycleNode;
+
+    // Shoes
+    const shoeMat = new BABYLON.StandardMaterial('shoeMat', scene);
+    shoeMat.diffuseColor = new BABYLON.Color3(0.08, 0.08, 0.08); // Black shoes
+
+    const leftShoe = BABYLON.MeshBuilder.CreateBox('mLeftShoe', { width: 0.12, height: 0.08, depth: 0.25 }, scene);
+    leftShoe.position.set(-0.22, 0.25, -0.02);
+    leftShoe.material = shoeMat;
+    leftShoe.parent = motorcycleNode;
+
+    const rightShoe = BABYLON.MeshBuilder.CreateBox('mRightShoe', { width: 0.12, height: 0.08, depth: 0.25 }, scene);
+    rightShoe.position.set(0.22, 0.25, -0.02);
+    rightShoe.material = shoeMat;
+    rightShoe.parent = motorcycleNode;
 
     // Dark grey driving gloves
     const gloveMat = new BABYLON.StandardMaterial('gloveMat', scene);
     gloveMat.diffuseColor = new BABYLON.Color3(0.12, 0.12, 0.14);
 
     const gloveL = BABYLON.MeshBuilder.CreateSphere('mGloveL', { diameter: 0.15 }, scene);
-    gloveL.position.set(-0.32, 1.05, 0.55);
+    gloveL.position.set(-0.35, 1.05, 0.55);
     gloveL.material = gloveMat;
     gloveL.parent = motorcycleNode;
 
     const gloveR = BABYLON.MeshBuilder.CreateSphere('mGloveR', { diameter: 0.15 }, scene);
-    gloveR.position.set(0.32, 1.05, 0.55);
+    gloveR.position.set(0.35, 1.05, 0.55);
     gloveR.material = gloveMat;
     gloveR.parent = motorcycleNode;
 

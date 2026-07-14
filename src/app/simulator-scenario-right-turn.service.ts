@@ -142,12 +142,17 @@ export class SimulatorScenarioRightTurnService {
         // Yaw/Xoay nghiêng góc xe trượt trên đường
         ctx.motorcycleNode.rotation.y = pushFactor * 0.45; 
         
-        // Crushing starts when the trailer's rear wheels actually sweep over the fallen bike (around t = 7.1, fallT = 2.0)
-        const crushStartT = 2.0; 
-        if (fallT > crushStartT) {
-           const crushProgress = (fallT - crushStartT) * 1.5; 
-           const crushFactor = Math.max(1.0 - crushProgress, 0.05);
+        const firstCrushStartT = 0.6; 
+        const secondCrushStartT = 2.0; 
+        
+        if (fallT > secondCrushStartT) {
+           const crushProgress = (fallT - secondCrushStartT) * 1.5; 
+           const crushFactor = Math.max(0.5 - crushProgress, 0.05);
            ctx.motorcycleNode.scaling.set(crushFactor, 1.2, 1.2); 
+        } else if (fallT > firstCrushStartT) {
+           const crushProgress = Math.min((fallT - firstCrushStartT) * 2.5, 0.5);
+           const crushFactor = 1.0 - crushProgress;
+           ctx.motorcycleNode.scaling.set(crushFactor, 1.2, 1.2);
         } else {
            ctx.motorcycleNode.scaling.set(1, 1, 1);
         }

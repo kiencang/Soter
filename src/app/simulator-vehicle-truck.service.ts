@@ -219,25 +219,25 @@ export class SimulatorVehicleTruckService {
     frontMirrorBase.material = tireMat;
     frontMirrorBase.parent = truckNode;
 
-    // The circular convex mirror casing (back)
-    const frontMirrorPlate = BABYLON.MeshBuilder.CreateCylinder('fmPlate', { diameter: 0.45, height: 0.05 }, scene);
-    frontMirrorPlate.position.set(1.1, 3.38, 4.8);
-    frontMirrorPlate.rotation.x = 0.4; // tilted downward to monitor the front bumper
-    frontMirrorPlate.material = tireMat;
-    frontMirrorPlate.parent = truckNode;
-
-    // A beautiful black mounting bracket/hinge on the back of the mirror plate to receive the arm cleanly
-    const mirrorBracket = BABYLON.MeshBuilder.CreateBox('mBracket', { width: 0.12, height: 0.08, depth: 0.12 }, scene);
-    mirrorBracket.position.set(0, 0.03, 0); // centered on the back face of the mirror plate
-    mirrorBracket.material = tireMat;
-    mirrorBracket.parent = frontMirrorPlate;
-
-    // Bracket arm extending forward-upward from the cabin - adjusted length and rotation to plug into the bracket on the back
-    const frontMirrorArm = BABYLON.MeshBuilder.CreateCylinder('fmArm', { diameter: 0.05, height: 1.18 }, scene);
-    frontMirrorArm.position.set(1.1, 3.18, 4.18);
-    frontMirrorArm.rotation.x = 1.236; // slanted forward-upward
+    // Bracket arm extending forward-upward from the cabin
+    const frontMirrorArm = BABYLON.MeshBuilder.CreateCylinder('fmArm', { diameter: 0.05, height: 1.2 }, scene);
+    frontMirrorArm.position.set(1.1, 3.15, 4.15); 
+    frontMirrorArm.rotation.x = 1.2; // slanted forward-upward
     frontMirrorArm.material = tireMat;
     frontMirrorArm.parent = truckNode;
+
+    // A beautiful black mounting bracket/hinge at the end of the arm
+    const mirrorBracket = BABYLON.MeshBuilder.CreateBox('mBracket', { width: 0.12, height: 0.08, depth: 0.12 }, scene);
+    mirrorBracket.position.set(0, 0.6, 0); // At the tip of the arm
+    mirrorBracket.rotation.x = -0.8; // Tilt bracket downward relative to the arm
+    mirrorBracket.material = tireMat;
+    mirrorBracket.parent = frontMirrorArm;
+
+    // The circular convex mirror casing (back)
+    const frontMirrorPlate = BABYLON.MeshBuilder.CreateCylinder('fmPlate', { diameter: 0.45, height: 0.05 }, scene);
+    frontMirrorPlate.position.set(0, -0.04, 0); // Attach to the bottom of the bracket
+    frontMirrorPlate.material = tireMat;
+    frontMirrorPlate.parent = mirrorBracket;
 
     // The mirror reflective surface (lens)
     const frontMirrorGlass = BABYLON.MeshBuilder.CreateCylinder('fmGlass', { diameter: 0.41, height: 0.01 }, scene);
