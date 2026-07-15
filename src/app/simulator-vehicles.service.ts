@@ -16,8 +16,8 @@ export class SimulatorVehiclesService {
     return this.truckService.createTruck(scene);
   }
 
-  createMotorcycle(scene: BABYLON.Scene) {
-    return this.motorcycleService.createMotorcycle(scene);
+  createMotorcycle(scene: BABYLON.Scene, options?: { frameColor?: BABYLON.Color3, helmetColor?: BABYLON.Color3 }) {
+    return this.motorcycleService.createMotorcycle(scene, options);
   }
 
   private createFlatPolygon(name: string, vertices: BABYLON.Vector3[], scene: BABYLON.Scene, material: BABYLON.Material): BABYLON.Mesh {

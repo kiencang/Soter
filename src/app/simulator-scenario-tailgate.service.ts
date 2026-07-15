@@ -271,6 +271,47 @@ export class SimulatorScenarioTailgateService {
     else {
       setPlaying(false);
     }
+    
+    this.updateOncomingMotorcycle(t, ctx);
+  }
+
+  private updateOncomingMotorcycle(t: number, ctx: ScenarioContext) {
+    if (!ctx.oncomingMotorcycleNode) return;
+    
+    // t goes from 0 to 10
+    // To align perfectly with the truck's approach:
+    // At t = 5.2, the motorcycle reaches its stop line Z = 14.5 and initiates the U-turn.
+    // Since it moves at 10.0 m/s:
+    // t=0 to t=5.2: moving straight towards the intersection
+    if (t < 5.2) {
+      ctx.oncomingMotorcycleNode.position.set(-3.5, 0, 14.5 + (5.2 - t) * 10.0);
+      ctx.oncomingMotorcycleNode.rotation.y = Math.PI;
+    }
+    // t=5.2 to t=6.2: U-turn from X=-3.5 to X=2.25
+    else if (t < 6.2) {
+      const u = t - 5.2;
+      
+      // X uses smoothstep to go from -3.5 to 2.25
+      const smoothU = u * u * (3 - 2 * u);
+      ctx.oncomingMotorcycleNode.position.x = -3.5 + 5.75 * smoothU;
+      
+      // Z uses constant acceleration from -10m/s to +8m/s (starts at Z=14.5, ends at Z=13.5)
+      ctx.oncomingMotorcycleNode.position.z = 14.5 - 10.0 * u + 9.0 * u * u;
+      
+      // Rotation matches velocity vector
+      const vx = 5.75 * 6 * u * (1 - u);
+      const vz = -10.0 + 18.0 * u;
+      ctx.oncomingMotorcycleNode.rotation.y = Math.atan2(vx, vz);
+      
+      // Add slight tilt (banking) during the turn based on lateral acceleration
+      ctx.oncomingMotorcycleNode.rotation.z = -Math.sin(u * Math.PI) * 0.35;
+    }
+    // t=6.2 onwards: drives forward in +Z direction
+    else {
+      ctx.oncomingMotorcycleNode.position.set(2.25, 0, 13.5 + (t - 6.2) * 8.0);
+      ctx.oncomingMotorcycleNode.rotation.y = 0;
+      ctx.oncomingMotorcycleNode.rotation.z = 0;
+    }
   }
 
   private updatePositions(ctx: ScenarioContext, truckZ: number, bikeZ: number, carZ: number) {

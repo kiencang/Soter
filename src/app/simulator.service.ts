@@ -104,6 +104,7 @@ export class SimulatorService {
   private trailerNode: BABYLON.TransformNode | null = null;
   private trailerRearPos: BABYLON.Vector3 | null = null;
   private motorcycleNode: BABYLON.TransformNode | null = null;
+  private oncomingMotorcycleNode: BABYLON.TransformNode | null = null;
   private carNode: BABYLON.TransformNode | null = null;
 
   // Track positions for wheel rotation physics
@@ -270,6 +271,7 @@ export class SimulatorService {
       truckNode: this.truckNode,
       trailerNode: this.trailerNode,
       motorcycleNode: this.motorcycleNode,
+      oncomingMotorcycleNode: this.oncomingMotorcycleNode,
       carNode: this.carNode,
       motorcycleX: this.motorcycleX,
       motorcycleZ: this.motorcycleZ,
@@ -385,6 +387,9 @@ export class SimulatorService {
       this.blinkerLeft = truckResult.blinkerLeft;
       this.blinkerRight = truckResult.blinkerRight;
       this.motorcycleNode = this.vehiclesService.createMotorcycle(this.scene!);
+      this.oncomingMotorcycleNode = this.vehiclesService.createMotorcycle(this.scene!, {
+        frameColor: new BABYLON.Color3(0.95, 0.8, 0.0) // Yellow frame
+      });
       this.carNode = this.vehiclesService.createCar(this.scene!);
       this.carNode.setEnabled(false);
 
@@ -711,6 +716,7 @@ export class SimulatorService {
       this.truckNode,
       this.trailerNode,
       this.motorcycleNode,
+      this.oncomingMotorcycleNode,
       this.trafficLightRed,
       this.trafficLightYellow,
       this.trafficLightGreen
@@ -727,6 +733,7 @@ export class SimulatorService {
     this.truckNode = null;
     this.trailerNode = null;
     this.motorcycleNode = null;
+    this.oncomingMotorcycleNode = null;
     this.trafficLightRed = null;
     this.trafficLightYellow = null;
     this.trafficLightGreen = null;

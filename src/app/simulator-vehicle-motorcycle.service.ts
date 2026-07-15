@@ -3,11 +3,11 @@ import * as BABYLON from '@babylonjs/core';
 
 @Injectable({ providedIn: 'root' })
 export class SimulatorVehicleMotorcycleService {
-  createMotorcycle(scene: BABYLON.Scene) {
+  createMotorcycle(scene: BABYLON.Scene, options?: { frameColor?: BABYLON.Color3, helmetColor?: BABYLON.Color3 }) {
     const motorcycleNode = new BABYLON.TransformNode('motorcycleNode', scene);
 
     const frameMat = new BABYLON.StandardMaterial('frameMat', scene);
-    frameMat.diffuseColor = new BABYLON.Color3(0.9, 0.1, 0.1); // High contrast red bike
+    frameMat.diffuseColor = options?.frameColor || new BABYLON.Color3(0.9, 0.1, 0.1); // High contrast red bike
     frameMat.specularColor = new BABYLON.Color3(1, 1, 1);
 
     const tireMat = new BABYLON.StandardMaterial('tMat', scene);
@@ -18,7 +18,7 @@ export class SimulatorVehicleMotorcycleService {
     mRimMat.specularColor = new BABYLON.Color3(0.8, 0.8, 0.8);
 
     const helmetMat = new BABYLON.StandardMaterial('helmetMat', scene);
-    helmetMat.diffuseColor = new BABYLON.Color3(0.95, 0.8, 0.0); // Hi-vis yellow helmet
+    helmetMat.diffuseColor = options?.helmetColor || new BABYLON.Color3(0.95, 0.8, 0.0); // Hi-vis yellow helmet
 
     const jacketMat = new BABYLON.StandardMaterial('jacketMat', scene);
     jacketMat.diffuseColor = new BABYLON.Color3(0.15, 0.65, 0.35); // Safety green jacket

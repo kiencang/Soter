@@ -8,6 +8,7 @@ export interface ScenarioContext {
   truckNode: BABYLON.TransformNode | null;
   trailerNode: BABYLON.TransformNode | null;
   motorcycleNode: BABYLON.TransformNode | null;
+  oncomingMotorcycleNode: BABYLON.TransformNode | null;
   carNode: BABYLON.TransformNode | null;
   motorcycleX: { set(val: number): void };
   motorcycleZ: { set(val: number): void };
@@ -101,6 +102,12 @@ export class SimulatorScenarioService {
       ctx.motorcycleNode.rotation.set(0, 0, 0);
       ctx.motorcycleNode.scaling.set(1, 1, 1);
       ctx.motorcycleNode.position.y = (type === 'tailgate') ? 0.015 : 0;
+    }
+
+    if (ctx.oncomingMotorcycleNode) {
+      ctx.oncomingMotorcycleNode.setEnabled(type === 'tailgate');
+      ctx.oncomingMotorcycleNode.rotation.set(0, Math.PI, 0); // Facing the other way
+      ctx.oncomingMotorcycleNode.position.set(-3.5, 0, 66.5); // Initial position for tailgate
     }
 
     if (ctx.carNode) {
