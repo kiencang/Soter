@@ -8,6 +8,7 @@ export interface ScenarioContext {
   truckNode: BABYLON.TransformNode | null;
   trailerNode: BABYLON.TransformNode | null;
   motorcycleNode: BABYLON.TransformNode | null;
+  carNode: BABYLON.TransformNode | null;
   motorcycleX: { set(val: number): void };
   motorcycleZ: { set(val: number): void };
   syncMotorcyclePosition: () => void;
@@ -19,6 +20,7 @@ export interface ScenarioContext {
   setMotoBlinkerActive: (active: boolean, side?: 'left' | 'right' | 'both') => void;
   getTrailerRearPos: () => BABYLON.Vector3 | null;
   setTrailerRearPos: (pos: BABYLON.Vector3 | null) => void;
+  setScenarioText: (text: string) => void;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -101,6 +103,12 @@ export class SimulatorScenarioService {
       ctx.motorcycleNode.position.y = (type === 'tailgate') ? 0.015 : 0;
     }
 
+    if (ctx.carNode) {
+      ctx.carNode.setEnabled(type === 'tailgate');
+      ctx.carNode.position.set(6.75, 0, -75.0);
+      ctx.carNode.rotation.set(0, 0, 0);
+    }
+
     ctx.intersectionMeshes.forEach(mesh => mesh.isVisible = true);
 
     if (type === 'free') {
@@ -119,7 +127,7 @@ export class SimulatorScenarioService {
       ctx.syncMotorcyclePosition();
       ctx.setViewMode('orbit');
     } else if (type === 'tailgate') {
-      ctx.motorcycleX.set(2.25);
+      ctx.motorcycleX.set(3.2);
       ctx.motorcycleZ.set(-63.85);
       ctx.syncMotorcyclePosition();
       ctx.setViewMode('orbit');

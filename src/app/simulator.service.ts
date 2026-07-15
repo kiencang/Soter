@@ -104,11 +104,13 @@ export class SimulatorService {
   private trailerNode: BABYLON.TransformNode | null = null;
   private trailerRearPos: BABYLON.Vector3 | null = null;
   private motorcycleNode: BABYLON.TransformNode | null = null;
+  private carNode: BABYLON.TransformNode | null = null;
 
   // Track positions for wheel rotation physics
   private lastTruckPos: BABYLON.Vector3 | null = null;
   private lastTrailerPos: BABYLON.Vector3 | null = null;
   private lastMotorcyclePos: BABYLON.Vector3 | null = null;
+  private lastCarPos: BABYLON.Vector3 | null = null;
   
   // Blind Spot indicator meshes on the ground
   private frontBlindSpotMesh: BABYLON.Mesh | null = null;
@@ -268,6 +270,7 @@ export class SimulatorService {
       truckNode: this.truckNode,
       trailerNode: this.trailerNode,
       motorcycleNode: this.motorcycleNode,
+      carNode: this.carNode,
       motorcycleX: this.motorcycleX,
       motorcycleZ: this.motorcycleZ,
       syncMotorcyclePosition: () => this.syncMotorcyclePosition(),
@@ -284,7 +287,8 @@ export class SimulatorService {
         this.motoBlinkerSide = side || 'both';
       },
       getTrailerRearPos: () => this.trailerRearPos,
-      setTrailerRearPos: (pos) => { this.trailerRearPos = pos; }
+      setTrailerRearPos: (pos) => { this.trailerRearPos = pos; },
+      setScenarioText: (text) => { this.scenarioService.scenarioText.set(text); }
     };
   }
 
@@ -293,6 +297,7 @@ export class SimulatorService {
     this.lastTruckPos = null;
     this.lastTrailerPos = null;
     this.lastMotorcyclePos = null;
+    this.lastCarPos = null;
     this.scenarioService.startScenario(type, this.getScenarioContext());
     this.updateAudioForScenario(type);
   }
@@ -301,6 +306,7 @@ export class SimulatorService {
     this.lastTruckPos = null;
     this.lastTrailerPos = null;
     this.lastMotorcyclePos = null;
+    this.lastCarPos = null;
     this.scenarioService.resetScenario(this.getScenarioContext());
     this.updateAudioForScenario(this.activeScenario());
   }
@@ -379,6 +385,8 @@ export class SimulatorService {
       this.blinkerLeft = truckResult.blinkerLeft;
       this.blinkerRight = truckResult.blinkerRight;
       this.motorcycleNode = this.vehiclesService.createMotorcycle(this.scene!);
+      this.carNode = this.vehiclesService.createCar(this.scene!);
+      this.carNode.setEnabled(false);
 
       // Set initial positions for the MENU state (right-hand traffic lanes)
       if (this.truckNode) {
@@ -562,6 +570,9 @@ export class SimulatorService {
     if (this.motorcycleNode && !this.lastMotorcyclePos) {
       this.lastMotorcyclePos = this.motorcycleNode.position.clone();
     }
+    if (this.carNode && !this.lastCarPos) {
+      this.lastCarPos = this.carNode.position.clone();
+    }
 
     // 2. Calculate displacements
     let truckDistance = 0;
@@ -603,6 +614,19 @@ export class SimulatorService {
       this.lastMotorcyclePos.copyFrom(currentPos);
     }
 
+    let carDistance = 0;
+    if (this.carNode && this.lastCarPos) {
+      const currentPos = this.carNode.position;
+      carDistance = BABYLON.Vector3.Distance(currentPos, this.lastCarPos);
+      const forward = this.carNode.forward || this.carNode.getDirection(BABYLON.Axis.Z);
+      const direction = currentPos.subtract(this.lastCarPos);
+      const dot = BABYLON.Vector3.Dot(direction, forward);
+      if (dot < 0) {
+        carDistance = -carDistance;
+      }
+      this.lastCarPos.copyFrom(currentPos);
+    }
+
     // 3. Apply rotation to Truck and Trailer Tires
     // Tire diameter is ~1.2m, radius is ~0.6m. Rotation angle = distance / radius.
     // Negative sign because Y rotation axis of cylinder aligns with global movement.
@@ -629,6 +653,16 @@ export class SimulatorService {
       const motoRotDelta = -motorcycleDistance / 0.275;
       motoWheels.forEach(wheel => {
         wheel.rotate(BABYLON.Axis.Y, motoRotDelta, BABYLON.Space.LOCAL);
+      });
+    }
+
+    // 5. Apply rotation to Car Wheels
+    // Wheel diameter is ~0.65m, radius is ~0.325m. Rotation angle = distance / radius.
+    const carWheels = this.carNode?.getChildMeshes(false, (mesh) => mesh.name.startsWith('carWheel_')) || [];
+    if (carWheels.length > 0 && Math.abs(carDistance) > 0.0001) {
+      const carRotDelta = -carDistance / 0.325;
+      carWheels.forEach(wheel => {
+        wheel.rotate(BABYLON.Axis.Y, carRotDelta, BABYLON.Space.LOCAL);
       });
     }
   }

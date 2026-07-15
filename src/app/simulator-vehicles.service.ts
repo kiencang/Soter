@@ -2,12 +2,14 @@ import { Injectable, inject } from '@angular/core';
 import * as BABYLON from '@babylonjs/core';
 import { SimulatorVehicleTruckService } from './simulator-vehicle-truck.service';
 import { SimulatorVehicleMotorcycleService } from './simulator-vehicle-motorcycle.service';
+import { SimulatorVehicleCarService } from './simulator-vehicle-car.service';
 import { SimulatorLogicService } from './simulator-logic.service';
 
 @Injectable({ providedIn: 'root' })
 export class SimulatorVehiclesService {
   private truckService = inject(SimulatorVehicleTruckService);
   private motorcycleService = inject(SimulatorVehicleMotorcycleService);
+  private carService = inject(SimulatorVehicleCarService);
   private logicService = inject(SimulatorLogicService);
 
   createTruck(scene: BABYLON.Scene) {
@@ -144,6 +146,10 @@ export class SimulatorVehiclesService {
     }
     
     return trailerRearPos;
+  }
+
+  createCar(scene: BABYLON.Scene): BABYLON.TransformNode {
+    return this.carService.createCar(scene);
   }
 
 }
