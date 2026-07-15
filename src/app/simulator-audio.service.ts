@@ -137,32 +137,83 @@ export class SimulatorAudioService {
   playBrakeSound() {
     if (!this.soundEnabled() || !this.audioCtx) return;
     try {
-      // Brake screech using bandpass filtered white noise
-      const bufferSize = this.audioCtx.sampleRate * 0.8; // 0.8 seconds
+      const now = this.audioCtx.currentTime;
+      const duration = 1.2;
+
+      // Create a white noise buffer
+      const bufferSize = this.audioCtx.sampleRate * duration;
       const buffer = this.audioCtx.createBuffer(1, bufferSize, this.audioCtx.sampleRate);
       const data = buffer.getChannelData(0);
       for (let i = 0; i < bufferSize; i++) {
         data[i] = Math.random() * 2 - 1;
       }
-      
-      const noise = this.audioCtx.createBufferSource();
-      noise.buffer = buffer;
+      const noiseNode = this.audioCtx.createBufferSource();
+      noiseNode.buffer = buffer;
 
-      const noiseFilter = this.audioCtx.createBiquadFilter();
-      noiseFilter.type = 'bandpass';
-      noiseFilter.frequency.setValueAtTime(1500, this.audioCtx.currentTime);
-      noiseFilter.frequency.linearRampToValueAtTime(800, this.audioCtx.currentTime + 0.8);
-      noiseFilter.Q.value = 1.5; // Resonance
+      // 1. Friction Rumble (low frequency tearing)
+      const rumbleFilter = this.audioCtx.createBiquadFilter();
+      rumbleFilter.type = 'lowpass';
+      rumbleFilter.frequency.setValueAtTime(600, now);
+      rumbleFilter.frequency.exponentialRampToValueAtTime(100, now + duration);
 
-      const noiseGain = this.audioCtx.createGain();
-      noiseGain.gain.setValueAtTime(0.01, this.audioCtx.currentTime);
-      noiseGain.gain.linearRampToValueAtTime(0.4, this.audioCtx.currentTime + 0.1);
-      noiseGain.gain.exponentialRampToValueAtTime(0.01, this.audioCtx.currentTime + 0.8);
+      const rumbleGain = this.audioCtx.createGain();
+      rumbleGain.gain.setValueAtTime(0, now);
+      rumbleGain.gain.linearRampToValueAtTime(1.0, now + 0.1);
+      rumbleGain.gain.linearRampToValueAtTime(0, now + duration);
 
-      noise.connect(noiseFilter);
-      noiseFilter.connect(noiseGain);
-      noiseGain.connect(this.audioCtx.destination);
-      noise.start();
+      noiseNode.connect(rumbleFilter);
+      rumbleFilter.connect(rumbleGain);
+      rumbleGain.connect(this.audioCtx.destination);
+
+      // 2. Tire Squeal (high frequency resonant bands)
+      const squealFilter1 = this.audioCtx.createBiquadFilter();
+      squealFilter1.type = 'bandpass';
+      squealFilter1.frequency.setValueAtTime(1800, now);
+      squealFilter1.frequency.linearRampToValueAtTime(900, now + duration);
+      squealFilter1.Q.setValueAtTime(15, now);
+
+      const squealFilter2 = this.audioCtx.createBiquadFilter();
+      squealFilter2.type = 'bandpass';
+      squealFilter2.frequency.setValueAtTime(3200, now);
+      squealFilter2.frequency.linearRampToValueAtTime(1800, now + duration);
+      squealFilter2.Q.setValueAtTime(10, now);
+
+      const squealGain = this.audioCtx.createGain();
+      squealGain.gain.setValueAtTime(0, now);
+      squealGain.gain.linearRampToValueAtTime(2.0, now + 0.15); // Loud squeal
+      squealGain.gain.exponentialRampToValueAtTime(0.01, now + duration);
+
+      noiseNode.connect(squealFilter1);
+      noiseNode.connect(squealFilter2);
+      squealFilter1.connect(squealGain);
+      squealFilter2.connect(squealGain);
+
+      // 3. Stutter/skipping effect (Tires hopping on asphalt)
+      const stutterLFO = this.audioCtx.createOscillator();
+      stutterLFO.type = 'sawtooth';
+      stutterLFO.frequency.setValueAtTime(35, now); // 35Hz skipping
+      stutterLFO.frequency.linearRampToValueAtTime(10, now + duration); // slow down as it stops
+
+      const stutterGain = this.audioCtx.createGain();
+      stutterGain.gain.setValueAtTime(0.6, now); // Depth of the stutter (0.6 means gain goes from 0.4 to 1.6)
+
+      const masterSquealGain = this.audioCtx.createGain();
+      masterSquealGain.gain.setValueAtTime(1.0, now);
+
+      // Apply stutter to the squeal
+      stutterLFO.connect(stutterGain);
+      stutterGain.connect(masterSquealGain.gain);
+
+      squealGain.connect(masterSquealGain);
+      masterSquealGain.connect(this.audioCtx.destination);
+
+      // Start everything
+      noiseNode.start(now);
+      stutterLFO.start(now);
+
+      // Stop everything
+      noiseNode.stop(now + duration + 0.05);
+      stutterLFO.stop(now + duration + 0.05);
     } catch(e) {}
   }
 

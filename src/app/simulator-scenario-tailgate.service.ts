@@ -36,6 +36,7 @@ export class SimulatorScenarioTailgateService {
     let truckZ = initialZ;
     let bikeZ = initialZ + bikeOffset;
     let carZ = carInitialZ;
+    let isCarStopped = false;
 
     // Stage 0: 0s to 2.5s -> Riding close behind
     if (t < 2.5) {
@@ -119,6 +120,7 @@ export class SimulatorScenarioTailgateService {
           // Came to a stop safely
           const stopTime = carSpeed / carDecel;
           carZ = carStartZ + brakeStartTime * carSpeed + (carSpeed * stopTime - 0.5 * carDecel * stopTime * stopTime);
+          isCarStopped = true;
         }
       }
 
@@ -181,7 +183,7 @@ export class SimulatorScenarioTailgateService {
         const carTailL = ctx.carNode.getChildMeshes().find(m => m.name === 'carTailL');
         const carTailR = ctx.carNode.getChildMeshes().find(m => m.name === 'carTailR');
 
-        if (this.hasCarBraked) {
+        if (this.hasCarBraked && !isCarStopped) {
           // 1. Pitch dip: Nose of the car tilts forward during heavy braking
           ctx.carNode.rotation.set(-0.035, 0, 0);
           
@@ -214,6 +216,34 @@ export class SimulatorScenarioTailgateService {
           }
           
           // Ensure they are enabled so we don't have holes in the car mesh
+          if (carLightL) carLightL.setEnabled(true);
+          if (carLightR) carLightR.setEnabled(true);
+          if (carTailL) carTailL.setEnabled(true);
+          if (carTailR) carTailR.setEnabled(true);
+        } else if (isCarStopped) {
+          // Car has fully stopped: No pitch dip, no vibration, hazard lights continue flashing, but brake lights remain SOLID bright red
+          ctx.carNode.rotation.set(0, 0, 0);
+          ctx.carNode.position.set(6.75, 0, carZ);
+          
+          const flash = Math.floor(t * 5) % 2 === 0;
+          
+          if (carLightL && carLightL.material) {
+            (carLightL.material as BABYLON.StandardMaterial).emissiveColor = flash 
+              ? new BABYLON.Color3(1.5, 1.5, 1.2) 
+              : new BABYLON.Color3(0.1, 0.1, 0.05);
+          }
+          if (carLightR && carLightR.material) {
+            (carLightR.material as BABYLON.StandardMaterial).emissiveColor = flash 
+              ? new BABYLON.Color3(1.5, 1.5, 1.2) 
+              : new BABYLON.Color3(0.1, 0.1, 0.05);
+          }
+          if (carTailL && carTailL.material) {
+            (carTailL.material as BABYLON.StandardMaterial).emissiveColor = new BABYLON.Color3(2.5, 0.05, 0.05);
+          }
+          if (carTailR && carTailR.material) {
+            (carTailR.material as BABYLON.StandardMaterial).emissiveColor = new BABYLON.Color3(2.5, 0.05, 0.05);
+          }
+          
           if (carLightL) carLightL.setEnabled(true);
           if (carLightR) carLightR.setEnabled(true);
           if (carTailL) carTailL.setEnabled(true);
