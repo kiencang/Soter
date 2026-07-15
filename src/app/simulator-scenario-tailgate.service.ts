@@ -10,16 +10,12 @@ export class SimulatorScenarioTailgateService {
   private hasCrashed = false;
   private crashTime = 0;
   private hasCarBraked = false;
-  private hasCarCrashed = false;
-  private carCrashTime = 0;
 
   reset() {
     this.hasBraked = false;
     this.hasCrashed = false;
     this.crashTime = 0;
     this.hasCarBraked = false;
-    this.hasCarCrashed = false;
-    this.carCrashTime = 0;
   }
 
   animate(
@@ -35,7 +31,7 @@ export class SimulatorScenarioTailgateService {
     
     // Passenger car specs
     const carSpeed = 13.5; // High speed in Lane 1 (approx 49 km/h)
-    const carInitialZ = -100.0; // Starts far behind
+    const carInitialZ = -98.0; // Starts slightly further back to avoid physical overlap with the fallen motorcycle, creating a perfect close call
 
     let truckZ = initialZ;
     let bikeZ = initialZ + bikeOffset;
@@ -102,7 +98,7 @@ export class SimulatorScenarioTailgateService {
 
       // Calculate Passenger Car Position
       const carStartZ = carInitialZ + 5.0 * carSpeed; // Position at t = 5.0
-      const brakeStartTime = 1.4; // Car driver reacts and brakes 0.3s after motorcycle crashes (at t = 5.0 + 1.1 = 6.1s)
+      const brakeStartTime = 1.1; // Car driver reacts and brakes 0.6s after motorcycle crashes (at t = 5.0 + 1.1 = 6.1s)
       
       if (activeT < brakeStartTime) {
         // Car continues speeding
@@ -113,14 +109,14 @@ export class SimulatorScenarioTailgateService {
           this.audioService.playBrakeSound();
           this.hasCarBraked = true;
         }
-        const carDecel = 12.0; // Intense deceleration
+        const carDecel = 10.0; // Very heavy braking deceleration
         const carBrakeT = activeT - brakeStartTime;
         const speedAfterBraking = carSpeed - carDecel * carBrakeT;
         
         if (speedAfterBraking > 0) {
           carZ = carStartZ + brakeStartTime * carSpeed + (carSpeed * carBrakeT - 0.5 * carDecel * carBrakeT * carBrakeT);
         } else {
-          // Came to a stop
+          // Came to a stop safely
           const stopTime = carSpeed / carDecel;
           carZ = carStartZ + brakeStartTime * carSpeed + (carSpeed * stopTime - 0.5 * carDecel * stopTime * stopTime);
         }
@@ -141,45 +137,10 @@ export class SimulatorScenarioTailgateService {
         const slideFactor = Math.min(timeSinceCrash / slideDuration, 1.0);
         const slideProgress = 1.0 - Math.pow(1.0 - slideFactor, 2);
         
-        // Starts further to the right of Lane 2 (3.2) and slides into Lane 1 (5.2)
+        // Starts on the right of Lane 2 (3.2) and slides partially into Lane 1 (5.2)
         const finalX = 3.2 + slideProgress * (5.2 - 3.2);
         // Slides forward relative to the crash impact point by 2.5 meters (inertia momentum)
-        let finalZ = collisionLimitZ + slideProgress * 2.5;
-
-        // Collision with Car check (front of car is carZ + 2.1; motorcycle is at finalZ)
-        const carFrontZ = carZ + 2.1;
-        const isCarColliding = carFrontZ >= finalZ - 0.8;
-
-        if (isCarColliding || this.hasCarCrashed) {
-          if (!this.hasCarCrashed) {
-            this.audioService.playCrashSound();
-            this.hasCarCrashed = true;
-            this.carCrashTime = t;
-          }
-
-          // Push motorcycle forward slightly due to car impact momentum
-          const timeSinceCarCrash = t - this.carCrashTime;
-          const carCrashStopFactor = Math.min(timeSinceCarCrash / 0.8, 1.0);
-          const carCrashStopProgress = 1.0 - Math.pow(1.0 - carCrashStopFactor, 2);
-          
-          // Stop both vehicles and push forward by 1.2 meters
-          carZ = (carZ - (carFrontZ - (finalZ - 0.8))) + carCrashStopProgress * 1.2;
-          finalZ = carZ + 2.1 + 0.8;
-
-          // Flash car's headlights/taillights as hazard warning lights
-          if (ctx.carNode) {
-            const flash = Math.floor(t * 4) % 2 === 0;
-            const carLightL = ctx.carNode.getChildMeshes().find(m => m.name === 'carLightL');
-            const carLightR = ctx.carNode.getChildMeshes().find(m => m.name === 'carLightR');
-            const carTailL = ctx.carNode.getChildMeshes().find(m => m.name === 'carTailL');
-            const carTailR = ctx.carNode.getChildMeshes().find(m => m.name === 'carTailR');
-            
-            if (carLightL) carLightL.setEnabled(flash);
-            if (carLightR) carLightR.setEnabled(flash);
-            if (carTailL) carTailL.setEnabled(flash);
-            if (carTailR) carTailR.setEnabled(flash);
-          }
-        }
+        const finalZ = collisionLimitZ + slideProgress * 2.5;
         
         ctx.motorcycleX.set(finalX);
         ctx.motorcycleZ.set(finalZ);
@@ -214,8 +175,64 @@ export class SimulatorScenarioTailgateService {
 
       if (ctx.carNode) {
         ctx.carNode.setEnabled(true);
-        ctx.carNode.position.set(6.75, 0, carZ);
-        ctx.carNode.rotation.set(0, 0, 0);
+        
+        const carLightL = ctx.carNode.getChildMeshes().find(m => m.name === 'carLightL');
+        const carLightR = ctx.carNode.getChildMeshes().find(m => m.name === 'carLightR');
+        const carTailL = ctx.carNode.getChildMeshes().find(m => m.name === 'carTailL');
+        const carTailR = ctx.carNode.getChildMeshes().find(m => m.name === 'carTailR');
+
+        if (this.hasCarBraked) {
+          // 1. Pitch dip: Nose of the car tilts forward during heavy braking
+          ctx.carNode.rotation.set(-0.035, 0, 0);
+          
+          // 2. ABS tyre vibration: High-frequency shake simulating tyre slip/ABS operation
+          const shake = Math.sin(t * 70) * 0.012;
+          ctx.carNode.position.set(6.75 + shake, 0, carZ);
+          
+          // 3. Hazard flashing & Bright Brake Lights: Headlights flash, taillights flash between ultra bright red and standard dim red
+          const flash = Math.floor(t * 5) % 2 === 0;
+          
+          if (carLightL && carLightL.material) {
+            (carLightL.material as BABYLON.StandardMaterial).emissiveColor = flash 
+              ? new BABYLON.Color3(1.5, 1.5, 1.2) 
+              : new BABYLON.Color3(0.1, 0.1, 0.05);
+          }
+          if (carLightR && carLightR.material) {
+            (carLightR.material as BABYLON.StandardMaterial).emissiveColor = flash 
+              ? new BABYLON.Color3(1.5, 1.5, 1.2) 
+              : new BABYLON.Color3(0.1, 0.1, 0.05);
+          }
+          if (carTailL && carTailL.material) {
+            (carTailL.material as BABYLON.StandardMaterial).emissiveColor = flash 
+              ? new BABYLON.Color3(2.5, 0.05, 0.05) 
+              : new BABYLON.Color3(0.4, 0.01, 0.01);
+          }
+          if (carTailR && carTailR.material) {
+            (carTailR.material as BABYLON.StandardMaterial).emissiveColor = flash 
+              ? new BABYLON.Color3(2.5, 0.05, 0.05) 
+              : new BABYLON.Color3(0.4, 0.01, 0.01);
+          }
+          
+          // Ensure they are enabled so we don't have holes in the car mesh
+          if (carLightL) carLightL.setEnabled(true);
+          if (carLightR) carLightR.setEnabled(true);
+          if (carTailL) carTailL.setEnabled(true);
+          if (carTailR) carTailR.setEnabled(true);
+        } else {
+          // Standard motion: no pitch dip, no shake, solid headlights and standard taillights
+          ctx.carNode.rotation.set(0, 0, 0);
+          ctx.carNode.position.set(6.75, 0, carZ);
+          
+          if (carLightL && carLightL.material) (carLightL.material as BABYLON.StandardMaterial).emissiveColor = new BABYLON.Color3(1.0, 1.0, 0.8);
+          if (carLightR && carLightR.material) (carLightR.material as BABYLON.StandardMaterial).emissiveColor = new BABYLON.Color3(1.0, 1.0, 0.8);
+          if (carTailL && carTailL.material) (carTailL.material as BABYLON.StandardMaterial).emissiveColor = new BABYLON.Color3(0.9, 0.1, 0.1);
+          if (carTailR && carTailR.material) (carTailR.material as BABYLON.StandardMaterial).emissiveColor = new BABYLON.Color3(0.9, 0.1, 0.1);
+          
+          if (carLightL) carLightL.setEnabled(true);
+          if (carLightR) carLightR.setEnabled(true);
+          if (carTailL) carTailL.setEnabled(true);
+          if (carTailR) carTailR.setEnabled(true);
+        }
       }
       
       ctx.checkBlindSpotState();
