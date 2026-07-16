@@ -75,7 +75,7 @@ export class SimulatorScenarioService {
     } else if (type === 'tailgate') {
       this.scenarioText.set("Bài học: Luôn giữ khoảng cách an toàn khi chạy sau xe tải lớn. Giúp bạn luôn có tầm nhìn thoáng và đủ thời gian phản ứng khi xe trước phanh gấp.");
     } else if (type === 'head_squeeze') {
-      this.scenarioText.set("Bài học: Khi dừng chờ đèn đỏ tại các nút giao, TUYỆT ĐỐI không len lỏi chen vào dừng ngay trước đầu xe tải lớn/xe container vì đây là vùng mù trực diện (mũi xe) cực kỳ nguy hiểm, tài xế hoàn toàn không thấy bạn khi khởi hành.");
+      this.scenarioText.set("Bài học: Khi dừng chờ đèn đỏ tại các nút giao, TUYỆT ĐỐI không len lỏi chen vào dừng ngay trước đầu xe tải lớn/xe container.");
     } else {
       this.scenarioText.set("");
     }

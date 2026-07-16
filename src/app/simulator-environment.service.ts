@@ -17,42 +17,11 @@ export class SimulatorEnvironmentService {
     const whiteLineMat = new BABYLON.StandardMaterial('whiteLineMat', scene);
     whiteLineMat.emissiveColor = new BABYLON.Color3(0.85, 0.85, 0.85);
 
-    // Striped Concrete barrier material (dải phân cách cứng sơn đỏ trắng sọc chéo)
-    const barrierMat = new BABYLON.StandardMaterial('barrierMat', scene);
-    const barrierTex = new BABYLON.DynamicTexture("barrierTex", { width: 512, height: 128 }, scene, true);
-    const ctx = barrierTex.getContext();
-
-    // Fill white background
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, 512, 128);
-
-    // Draw diagonal red stripes
-    ctx.fillStyle = "#cc1111"; // Bright reflective red
-    const stripeWidth = 35;
-    const gap = 35;
-    for (let x = -100; x < 512 + 100; x += stripeWidth + gap) {
-      ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x + stripeWidth, 0);
-      ctx.lineTo(x + stripeWidth - 50, 128);
-      ctx.lineTo(x - 50, 128);
-      ctx.closePath();
-      ctx.fill();
-    }
-    barrierTex.update();
-    
-    // Set wrapping so it repeats nicely along the long barriers
-    barrierTex.wrapU = BABYLON.Texture.WRAP_ADDRESSMODE;
-    barrierTex.wrapV = BABYLON.Texture.WRAP_ADDRESSMODE;
-    barrierMat.diffuseTexture = barrierTex;
-    barrierMat.emissiveTexture = barrierTex; // Self-illumination so side faces are vibrant and clearly visible
-    barrierMat.specularColor = new BABYLON.Color3(0.1, 0.1, 0.1);
-
-    // Steel railing material to connect concrete barrier blocks
-    const railMat = new BABYLON.StandardMaterial('railMat', scene);
-    railMat.diffuseColor = new BABYLON.Color3(0.75, 0.75, 0.75); // Silver/metal
-    railMat.specularColor = new BABYLON.Color3(0.9, 0.9, 0.9);
-    railMat.specularPower = 32;
+    // Double yellow line material (2 vạch vàng song song)
+    const yellowLineMat = new BABYLON.StandardMaterial('yellowLineMat', scene);
+    yellowLineMat.diffuseColor = new BABYLON.Color3(0.98, 0.66, 0.15);
+    yellowLineMat.emissiveColor = new BABYLON.Color3(0.98, 0.66, 0.15);
+    yellowLineMat.specularColor = new BABYLON.Color3(0.0, 0.0, 0.0); // Ngăn ánh sáng phản chiếu làm trắng vạch
 
     // --- Road Lines & Crosswalks (4 directions) ---
     for (let d = 0; d < 4; d++) {
@@ -61,44 +30,21 @@ export class SimulatorEnvironmentService {
       const sinA = Math.sin(angle);
       const rot = (x: number, z: number) => ({ x: x * cosA + z * sinA, z: -x * sinA + z * cosA });
 
-      // 1. Center Solid Concrete Barrier & White Lane Dividers
+      // 1. Center Double Yellow Lines & White Lane Dividers
+      
+      // Center Double Yellow Lines (Vạch vàng đôi nét liền)
+      for (const x of [-0.15, 0.15]) {
+        const pCenter = rot(x, 57.5);
+        const centerLine = BABYLON.MeshBuilder.CreateBox(`centerLine_${d}_${x}`, { width: 0.15, height: 0.01, depth: 85.0 }, scene);
+        centerLine.position.set(pCenter.x, 0.01, pCenter.z);
+        centerLine.rotation.y = angle;
+        centerLine.material = yellowLineMat;
+        intersectionMeshes.push(centerLine);
+      }
+
+      // White lane dividers (đứt khúc)
       for (let i = 0; i < 14; i++) {
         const zPos = 17 + i * 6;
-        const zPosBarrier = 16.5 + i * 6;
-        
-        // Physical Concrete Barrier Block (Dải phân cách cứng)
-        const pY = rot(0, zPosBarrier);
-        
-        // Define custom faceUV to map the stripes correctly along the length of each face
-        const faceUV = new Array(6);
-        faceUV[0] = new BABYLON.Vector4(0, 0, 1, 1); // Front
-        faceUV[1] = new BABYLON.Vector4(0, 0, 1, 1); // Back
-        faceUV[2] = new BABYLON.Vector4(0, 0, 2.0, 1); // Right side (repeat 2x along depth U)
-        faceUV[3] = new BABYLON.Vector4(0, 0, 2.0, 1); // Left side (repeat 2x along depth U)
-        faceUV[4] = new BABYLON.Vector4(0, 0, 1, 2.0); // Top face (repeat 2x along depth V)
-        faceUV[5] = new BABYLON.Vector4(0, 0, 1, 1); // Bottom
-        
-        const barrier = BABYLON.MeshBuilder.CreateBox(`barrier_${d}_${i}`, { 
-          width: 0.35, 
-          height: 0.45, 
-          depth: 3.0, // Reduced from 5.8 to make a clear 3.0m gap between blocks
-          faceUV: faceUV,
-          wrap: true
-        }, scene);
-        barrier.position.set(pY.x, 0.225, pY.z);
-        barrier.rotation.y = angle;
-        barrier.material = barrierMat;
-        intersectionMeshes.push(barrier);
-
-        // Connecting metal rail between this block and the next block (to prevent bypassing the gaps)
-        if (i < 13) {
-          const pR = rot(0, zPosBarrier + 3.0);
-          const rail = BABYLON.MeshBuilder.CreateCylinder(`rail_${d}_${i}`, { diameter: 0.08, height: 3.4 }, scene);
-          rail.position.set(pR.x, 0.25, pR.z); // Slightly off center height for realistic connection
-          rail.rotation.set(Math.PI / 2, angle, 0);
-          rail.material = railMat;
-          intersectionMeshes.push(rail);
-        }
 
         // White lane dividers
         for (const x of [-4.5, 4.5]) {

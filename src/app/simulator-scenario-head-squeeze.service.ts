@@ -96,8 +96,8 @@ export class SimulatorScenarioHeadSqueezeService {
         ctx.motorcycleNode.scaling.set(1, 1, 1);
       }
     }
-    // Stage 1: 2.0s to 3.0s -> Đèn đỏ, xe máy dừng trước đầu xe tải chờ đèn, cả hai dừng yên vị trí
-    else if (t < 3.0) {
+    // Stage 1: 2.0s to 4.2s -> Đèn đỏ đến 3.0s, chuyển xanh ở 3.0s, xe tải delay thêm 1.2s để phản ứng
+    else if (t < 4.2) {
       setStage(1);
       ctx.setMotoBlinkerActive(false);
 
@@ -116,13 +116,13 @@ export class SimulatorScenarioHeadSqueezeService {
         ctx.motorcycleNode.scaling.set(1, 1, 1);
       }
     }
-    // Stage 2: 3.0s to 3.2s -> Đèn chuyển xanh, xe tải xuất phát, xe máy đứng yên do không chú ý
-    else if (t < 3.2) {
+    // Stage 2: 4.2s to 4.4s -> Xe tải xuất phát, tiến tới áp sát xe máy
+    else if (t < 4.4) {
       setStage(2);
       ctx.setMotoBlinkerActive(false);
 
-      const activeT = t - 3.0;
-      const truckZ = -20.7 + activeT * 3.5; // Xe tải chuyển động tiến lên
+      const activeT = t - 4.2;
+      const truckZ = -20.7 + activeT * 3.0; // Xe tải chuyển động tiến lên
 
       if (ctx.truckNode) {
         ctx.truckNode.position.set(2.25, 0, truckZ);
@@ -139,49 +139,63 @@ export class SimulatorScenarioHeadSqueezeService {
         ctx.motorcycleNode.scaling.set(1, 1, 1);
       }
     }
-    // Stage 3: 3.2s to 6.5s -> Va chạm! Xe máy bị ủi ngã và cuốn vào gầm khi xe tải di chuyển quán tính rồi phanh gấp
-    else if (t < 6.5) {
+    // Stage 3: 4.4s to 8.0s -> Va chạm ở 4.4s! Xe máy bị ủi ngã và cuốn vào gầm
+    else if (t < 8.0) {
       if (!this.hasCrashed) {
         this.audioService.playCrashSound();
         this.hasCrashed = true;
       }
       setStage(3);
 
-      const activeT = t - 3.0;
+      const activeT = t - 4.2; // Thời gian xe tải đã di chuyển tính từ lúc bắt đầu ở 4.2s
       let truckZ = -20.7;
       
-      if (activeT < 0.7) {
-        // Giai đoạn đầu di chuyển trước khi tài xế kịp phản ứng phanh (0.2s đến 0.7s)
-        truckZ = -20.7 + activeT * 3.5;
-      } else if (activeT < 1.7) {
-        // Tài xế phanh gấp dừng hẳn trong vòng 1 giây
-        const s = activeT - 0.7;
-        const v0 = 3.5;
-        const T = 1.0;
-        const startBrakeZ = -20.7 + 0.7 * 3.5; // -18.25
+      if (activeT < 1.4) {
+        // Di chuyển đều đến 5.6s (phản ứng của tài xế mất 1.2s sau khi đụng lúc 4.4s)
+        truckZ = -20.7 + activeT * 3.0;
+      } else if (activeT < 2.6) {
+        // Phanh gấp từ 5.6s đến 6.8s (dừng trong 1.2s)
+        const s = activeT - 1.4;
+        const v0 = 3.0;
+        const T = 1.2;
+        const startBrakeZ = -20.7 + 1.4 * 3.0; // -16.5
         truckZ = startBrakeZ + v0 * (s - (s * s) / (2 * T));
       } else {
-        // Đã dừng hoàn toàn
-        truckZ = -16.5;
+        // Đã dừng hoàn toàn ở 6.8s
+        truckZ = -14.7;
       }
 
       if (ctx.truckNode) {
         ctx.truckNode.position.set(2.25, 0, truckZ);
       }
 
-      const fallT = t - 3.2; // thời gian từ lúc va chạm
-      const pushDuration = 0.5;
+      const fallT = t - 4.4; // thời gian từ lúc va chạm (4.4s)
+      const pushDuration = 0.6; // Mất 0.6s để ngã bẹp xuống mặt đường
       const pushFactor = Math.min(fallT / pushDuration, 1.0);
       
-      // Xe máy bị húc xô đổ dồn về trước 1.5m (văng từ -15.0 lên -13.5)
-      const currentBikeZ = -15.0 + pushFactor * 1.5;
+      let currentBikeZ = -15.0;
+      
+      if (pushFactor < 1.0) {
+        // Đang ngã: Bị cản trước xe tải đẩy đi, giữ khoảng cách cứng 5.1m với tâm xe tải để KHÔNG bị chìm vào cản trước
+        currentBikeZ = truckZ + 5.1;
+      } else {
+        // Đã ngã phẳng xuống đường ở t = 5.0. 
+        // Lúc này truckZ = -20.7 + 0.8 * 3.0 = -18.3 -> BikeZ = -18.3 + 5.1 = -13.2
+        // Cho xe máy trượt tự do thêm một tí rồi dừng lại do ma sát mặt đường
+        const slideT = fallT - pushDuration; 
+        const maxSlide = 0.3; // Trượt thêm 0.3m
+        const slideProgress = Math.min(slideT / 0.4, 1.0); // Trượt trong 0.4s
+        const easeSlide = slideProgress * (2 - slideProgress); // ease-out
+        currentBikeZ = -13.2 + easeSlide * maxSlide; // Dừng hẳn ở -12.9
+      }
 
       ctx.motorcycleX.set(2.25);
       ctx.motorcycleZ.set(currentBikeZ);
 
       if (ctx.motorcycleNode) {
         // Đặt sát mặt đường (Y = 0.015) để bẹp sát mặt đường khi ngã
-        ctx.motorcycleNode.position.set(2.25, 0.015, currentBikeZ);
+        const yPos = 0.0 + pushFactor * 0.015;
+        ctx.motorcycleNode.position.set(2.25, yPos, currentBikeZ);
         
         // Ngã đổ: Xe đổ hẳn sang phải (Z-rotation giảm dần đến -Math.PI / 2)
         ctx.motorcycleNode.rotation.z = pushFactor * (-Math.PI / 2);
@@ -189,18 +203,22 @@ export class SimulatorScenarioHeadSqueezeService {
         // Xoay chéo nhẹ góc xe khi ngã
         ctx.motorcycleNode.rotation.y = -0.5 * pushFactor;
         
-        // Chúi đầu nhẹ khi đang ngã (1 - pushFactor kéo x-rotation về 0 khi ngã hẳn xuống đường để nằm phẳng)
+        // Chúi đầu nhẹ khi đang ngã
         ctx.motorcycleNode.rotation.x = -0.4 * pushFactor * (1 - pushFactor);
 
-        // Bị cuốn vào gầm và cán nát dưới gầm xe tải (sau khi đã ngã phẳng ở t >= 3.7, tức fallT > 0.5)
-        const crushStartT = 0.5;
-        if (fallT > crushStartT) {
-          const crushProgress = (fallT - crushStartT) * 2.0; // Tăng tốc độ cán dẹp dứt khoát
-          const crushFactor = Math.max(1.0 - crushProgress, 0.05);
-          ctx.motorcycleNode.scaling.set(crushFactor, 1.2, 1.2);
-        } else {
-          ctx.motorcycleNode.scaling.set(1, 1, 1);
+        // Bị cuốn vào gầm và cán nát dưới gầm xe tải
+        // Tính toán khoảng cách tương đối giữa tâm xe tải và xe máy để đồng bộ vị trí bánh xe
+        const relativeZ = currentBikeZ - truckZ; 
+        
+        let crushFactor = 1.0;
+        
+        if (relativeZ < 4.2) {
+          // Bánh 1 cán qua (khoảng offset 4.2m tính từ tâm xe tải). Xe máy bẹp toàn bộ
+          const crush1Progress = Math.max(0, Math.min(1, (4.2 - relativeZ) / 0.6)); // từ 4.2m đến 3.6m
+          crushFactor = 1.0 - 0.95 * crush1Progress; 
         }
+        
+        ctx.motorcycleNode.scaling.set(crushFactor, 1.2, 1.2);
       }
 
       ctx.checkBlindSpotState();
