@@ -295,7 +295,7 @@ export class SimulatorService {
   }
 
   // --- Scenario handling ---
-  startScenario(type: 'free' | 'right_turn' | 'cut_off' | 'tailgate') {
+  startScenario(type: 'free' | 'right_turn' | 'cut_off' | 'tailgate' | 'head_squeeze') {
     this.lastTruckPos = null;
     this.lastTrailerPos = null;
     this.lastMotorcyclePos = null;
@@ -321,7 +321,7 @@ export class SimulatorService {
     this.updateAudioForScenario(this.activeScenario());
   }
 
-  private updateAudioForScenario(type: 'free' | 'right_turn' | 'cut_off' | 'tailgate') {
+  private updateAudioForScenario(type: 'free' | 'right_turn' | 'cut_off' | 'tailgate' | 'head_squeeze') {
     if (type !== 'free') {
       if (this.soundEnabled() && this.isPlayingScenario()) {
         this.audioService.initAudio();
@@ -390,6 +390,7 @@ export class SimulatorService {
       this.oncomingMotorcycleNode = this.vehiclesService.createMotorcycle(this.scene!, {
         frameColor: new BABYLON.Color3(0.95, 0.8, 0.0) // Yellow frame
       });
+      this.oncomingMotorcycleNode.setEnabled(false);
       this.carNode = this.vehiclesService.createCar(this.scene!);
       this.carNode.setEnabled(false);
 

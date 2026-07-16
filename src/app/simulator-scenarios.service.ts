@@ -3,6 +3,7 @@ import * as BABYLON from '@babylonjs/core';
 import { SimulatorScenarioRightTurnService } from './simulator-scenario-right-turn.service';
 import { SimulatorScenarioCutOffService } from './simulator-scenario-cut-off.service';
 import { SimulatorScenarioTailgateService } from './simulator-scenario-tailgate.service';
+import { SimulatorScenarioHeadSqueezeService } from './simulator-scenario-head-squeeze.service';
 
 export interface ScenarioContext {
   truckNode: BABYLON.TransformNode | null;
@@ -29,8 +30,9 @@ export class SimulatorScenarioService {
   private rightTurnScenario = inject(SimulatorScenarioRightTurnService);
   private cutOffScenario = inject(SimulatorScenarioCutOffService);
   private tailgateScenario = inject(SimulatorScenarioTailgateService);
+  private headSqueezeScenario = inject(SimulatorScenarioHeadSqueezeService);
 
-  activeScenario = signal<'free' | 'right_turn' | 'cut_off' | 'tailgate'>('right_turn');
+  activeScenario = signal<'free' | 'right_turn' | 'cut_off' | 'tailgate' | 'head_squeeze'>('right_turn');
   isPlayingScenario = signal<boolean>(false);
   isAtStart = signal<boolean>(true);
   isCompleted = signal<boolean>(false);
@@ -40,7 +42,7 @@ export class SimulatorScenarioService {
   
   scenarioTimer = 0;
 
-  startScenario(type: 'free' | 'right_turn' | 'cut_off' | 'tailgate', ctx: ScenarioContext) {
+  startScenario(type: 'free' | 'right_turn' | 'cut_off' | 'tailgate' | 'head_squeeze', ctx: ScenarioContext) {
     this.activeScenario.set(type);
     this.isPlayingScenario.set(false);
     this.isAtStart.set(true);
@@ -51,6 +53,7 @@ export class SimulatorScenarioService {
     this.rightTurnScenario.reset();
     this.cutOffScenario.reset();
     this.tailgateScenario.reset();
+    this.headSqueezeScenario.reset();
 
     if (type === 'right_turn') {
       this.trafficLightColor.set('green');
@@ -58,6 +61,8 @@ export class SimulatorScenarioService {
       this.trafficLightColor.set('red');
     } else if (type === 'tailgate') {
       this.trafficLightColor.set('green');
+    } else if (type === 'head_squeeze') {
+      this.trafficLightColor.set('red');
     } else {
       this.trafficLightColor.set('green');
     }
@@ -69,6 +74,8 @@ export class SimulatorScenarioService {
       this.scenarioText.set("Bài học: Có hai vấn đề cần lưu ý ở đây, (a) Xe gắn máy đang ở trong vùng điểm mù, (b) Sau đó lại di chuyển nhanh và tạt đầu đột ngột ngay sát mũi xe tải lớn.");
     } else if (type === 'tailgate') {
       this.scenarioText.set("Bài học: Luôn giữ khoảng cách an toàn khi chạy sau xe tải lớn. Giúp bạn luôn có tầm nhìn thoáng và đủ thời gian phản ứng khi xe trước phanh gấp.");
+    } else if (type === 'head_squeeze') {
+      this.scenarioText.set("Bài học: Khi dừng chờ đèn đỏ tại các nút giao, TUYỆT ĐỐI không len lỏi chen vào dừng ngay trước đầu xe tải lớn/xe container vì đây là vùng mù trực diện (mũi xe) cực kỳ nguy hiểm, tài xế hoàn toàn không thấy bạn khi khởi hành.");
     } else {
       this.scenarioText.set("");
     }
@@ -85,6 +92,8 @@ export class SimulatorScenarioService {
         initialTruckZ = -19.7;
       } else if (type === 'tailgate') {
         initialTruckZ = -50.0;
+      } else if (type === 'head_squeeze') {
+        initialTruckZ = -20.7;
       } else {
         initialTruckZ = -40.0;
       }
@@ -138,6 +147,11 @@ export class SimulatorScenarioService {
       ctx.motorcycleZ.set(-63.85);
       ctx.syncMotorcyclePosition();
       ctx.setViewMode('orbit');
+    } else if (type === 'head_squeeze') {
+      ctx.motorcycleX.set(6.05);
+      ctx.motorcycleZ.set(-23.0);
+      ctx.syncMotorcyclePosition();
+      ctx.setViewMode('orbit');
     }
   }
 
@@ -164,6 +178,8 @@ export class SimulatorScenarioService {
       this.cutOffScenario.animate(t, ctx, setStage, setPlaying, (color) => this.trafficLightColor.set(color));
     } else if (scenario === 'tailgate') {
       this.tailgateScenario.animate(t, dt, ctx, setStage, setPlaying);
+    } else if (scenario === 'head_squeeze') {
+      this.headSqueezeScenario.animate(t, ctx, setStage, setPlaying, (color) => this.trafficLightColor.set(color));
     }
 
     if (!this.isPlayingScenario()) {
