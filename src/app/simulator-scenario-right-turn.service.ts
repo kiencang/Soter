@@ -10,6 +10,7 @@ export class SimulatorScenarioRightTurnService {
 
   reset() {
     this.hasCrashed = false;
+    this.audioService.stopHorn();
   }
 
   animate(
@@ -20,6 +21,18 @@ export class SimulatorScenarioRightTurnService {
   ) {
     // Increase the overall speed of the scenario by 35%
     t = t * 1.35;
+
+    // Tự động bấm còi cảnh báo 3 lần trước khi rẽ phải (giai đoạn t < 4.0)
+    const isHornActive = 
+      (t >= 1.2 && t < 1.6) || 
+      (t >= 2.0 && t < 2.4) || 
+      (t >= 2.8 && t < 3.3);
+
+    if (isHornActive) {
+      this.audioService.playHorn();
+    } else {
+      this.audioService.stopHorn();
+    }
 
     const startZ = -34.1;
     const endStraightZ = -12.1;

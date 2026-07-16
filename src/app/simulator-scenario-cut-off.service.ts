@@ -71,6 +71,7 @@ export class SimulatorScenarioCutOffService {
       let bikeX = 6.05;
       let bikeZ = -18.0;
       let bikeRotY = 0;
+      let bikeRotZ = 0;
 
       // Xe máy di chuyển nhanh gấp rưỡi giai đoạn đi thẳng ban đầu (rút ngắn từ 1.5s xuống 1.0s)
       if (activeT < 1.0) {
@@ -78,29 +79,27 @@ export class SimulatorScenarioCutOffService {
         bikeX = 6.05;
         bikeZ = -18.0 + ratio * 10.35; 
         bikeRotY = 0;
+        bikeRotZ = 0;
       } else {
-        // Giai đoạn rẽ tạt đầu cũng được tăng tốc (rút ngắn từ 1.38s xuống 1.0s)
-        const ratio = Math.min((activeT - 1.0) / 1.0, 1.0); 
+        // Giai đoạn ôm cua rẽ trái tạt đầu được làm mượt mà tự nhiên bằng quỹ đạo vòng cung
+        const u = Math.min((activeT - 1.0) / 1.0, 1.0); 
         
-        // Cải thiện đường đi mượt mà bằng Cubic Bezier (Tránh đổi hướng đột ngột gây cứng nhắc)
-        const t2 = ratio;
-        const p0_x = 6.05;
-        const p1_x = 6.05; // Giữ hướng thẳng lúc bắt đầu rẽ
-        const p2_x = 3.55; // Điều hướng cong mềm mại về phía cabin phải
-        const p3_x = 2.75; // Điểm va chạm cuối cùng
+        const startX = 6.05;
+        const endX = 2.75;
+        const startZ = -7.65;
+        const endZ = -5.55;
 
-        const p0_z = -7.65;
-        const p1_z = -6.65; // Đẩy lên trước một chút để tạo độ uốn cong tự nhiên
-        const p2_z = -6.35;
-        const p3_z = -5.55;
-
-        bikeX = Math.pow(1 - t2, 3) * p0_x + 3 * Math.pow(1 - t2, 2) * t2 * p1_x + 3 * (1 - t2) * t2 * t2 * p2_x + Math.pow(t2, 3) * p3_x;
-        bikeZ = Math.pow(1 - t2, 3) * p0_z + 3 * Math.pow(1 - t2, 2) * t2 * p1_z + 3 * (1 - t2) * t2 * t2 * p2_z + Math.pow(t2, 3) * p3_z;
+        // Mô phỏng đường rẽ trái dạng vòng cung mượt mà tự nhiên (không giật cục)
+        bikeX = startX + (endX - startX) * u * u;
+        bikeZ = startZ + (endZ - startZ) * u;
         
-        // Tính góc xoay mượt mà theo tiếp tuyến của đường Bezier
-        const dx = 3 * Math.pow(1 - t2, 2) * (p1_x - p0_x) + 6 * (1 - t2) * t2 * (p2_x - p1_x) + 3 * t2 * t2 * (p3_x - p2_x);
-        const dz = 3 * Math.pow(1 - t2, 2) * (p1_z - p0_z) + 6 * (1 - t2) * t2 * (p2_z - p1_z) + 3 * t2 * t2 * (p3_z - p2_z);
+        // Tính góc xoay mượt mà theo tiếp tuyến của quỹ đạo vòng cung
+        const dx = 2 * (endX - startX) * u;
+        const dz = endZ - startZ;
         bikeRotY = Math.atan2(dx, dz); 
+
+        // Độ nghiêng (banking) tự nhiên khi ôm cua rẽ trái (nghiêng nhẹ về bên trái)
+        bikeRotZ = Math.sin(u * Math.PI) * 0.25;
       }
 
       ctx.motorcycleX.set(bikeX);
@@ -110,7 +109,7 @@ export class SimulatorScenarioCutOffService {
         ctx.motorcycleNode.position.set(bikeX, 0.0, bikeZ);
         ctx.motorcycleNode.rotation.y = bikeRotY;
         ctx.motorcycleNode.rotation.x = 0;
-        ctx.motorcycleNode.rotation.z = 0;
+        ctx.motorcycleNode.rotation.z = bikeRotZ;
         ctx.motorcycleNode.scaling.set(1, 1, 1);
       }
     }
@@ -146,20 +145,9 @@ export class SimulatorScenarioCutOffService {
         ctx.truckNode.position.set(2.25, 0, truckZ);
       }
 
-      // Vị trí lúc va chạm (đồng bộ khớp 100% với t2_c = 1.0 kết thúc đường cong rẽ)
-      const t2_c = 1.0;
-      const p0_x = 6.05;
-      const p1_x = 6.05;
-      const p2_x = 3.55;
-      const p3_x = 2.75;
-
-      const p0_z = -7.65;
-      const p1_z = -6.65;
-      const p2_z = -6.35;
-      const p3_z = -5.55;
-
-      const collisionBikeX = Math.pow(1 - t2_c, 3) * p0_x + 3 * Math.pow(1 - t2_c, 2) * t2_c * p1_x + 3 * (1 - t2_c) * t2_c * t2_c * p2_x + Math.pow(t2_c, 3) * p3_x;
-      const collisionBikeZ = Math.pow(1 - t2_c, 3) * p0_z + 3 * Math.pow(1 - t2_c, 2) * t2_c * p1_z + 3 * (1 - t2_c) * t2_c * t2_c * p2_z + Math.pow(t2_c, 3) * p3_z;
+      // Vị trí lúc va chạm (đồng bộ khớp 100% với u = 1.0 kết thúc đường cong rẽ)
+      const collisionBikeX = 2.75;
+      const collisionBikeZ = -5.55;
       
       // Xe máy bị ủi tới trước một chút rồi nằm im
       const pushFactor = Math.min(fallT / 0.4, 1.0);
@@ -180,9 +168,9 @@ export class SimulatorScenarioCutOffService {
       if (ctx.motorcycleNode) {
         ctx.motorcycleNode.position.set(collisionBikeX, 0.015, currentBikeZ); 
         
-        // Tính góc xoay mượt mà theo tiếp tuyến của đường Bezier tại thời điểm va chạm
-        const dx_c = 3 * Math.pow(1 - t2_c, 2) * (p1_x - p0_x) + 6 * (1 - t2_c) * t2_c * (p2_x - p1_x) + 3 * t2_c * t2_c * (p3_x - p2_x);
-        const dz_c = 3 * Math.pow(1 - t2_c, 2) * (p1_z - p0_z) + 6 * (1 - t2_c) * t2_c * (p2_z - p1_z) + 3 * t2_c * t2_c * (p3_z - p2_z);
+        // Tính góc xoay mượt mà theo tiếp tuyến của đường cong tại thời điểm va chạm (u = 1.0)
+        const dx_c = 2 * (2.75 - 6.05) * 1.0;
+        const dz_c = -5.55 - (-7.65);
         const collisionBikeRotY = Math.atan2(dx_c, dz_c);
 
         // Ngã đổ: Bị húc từ sau nên văng tới trước và ngã sang phải nằm phẳng trên đường
