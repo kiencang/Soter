@@ -1,20 +1,16 @@
 # Soter
 Ứng dụng mô phỏng điểm mù của xe tải, container. Dự án đang trong giai đoạn **phát triển & thử nghiệm**.
 
+Link: https://soter.nguyenducanh.workers.dev/
+
+Lưu ý: Ứng dụng mô phỏng một số tình huống tai nạn, có thể gây khó chịu cho người xem.
+
 ## Mô tả
 Xe tải lớn, xe container có những điểm mù khiến cho người lái xe không thể quan sát các phương tiện khác ngay cả khi nhìn qua gương chiếu hậu.
 
 Người lái các phương tiện nhỏ (như xe máy, xe đạp) hoặc đi bộ nếu không nhận thức được các điểm mù này có thể đi vào các điểm mù đó nhưng lại giả định sai lầm rằng tài xế xe tải lớn nhìn thấy mình. Điều này có thể dẫn đến nguy cơ tai nạn nghiêm trọng trong một số tình huống.
 
 Ứng dụng này bên cạnh điểm nhìn toàn cảnh, nó mô phỏng điểm nhìn của tài xế xe tải, giúp người lái xe nhỏ, người đi bộ ý thức được tốt hơn điểm mù của xe tải lớn.
-
-## Thông báo lỗi `Không Hỗ Trợ WebGL`
-
-Nếu bạn nhận được thông báo này khi chạy ứng dụng:
-
-> Trình duyệt hoặc phần cứng của bạn hiện tại không hỗ trợ WebGL đồ họa 3D (hoặc tính năng tăng tốc phần cứng bị tắt). Để có thể trải nghiệm đầy đủ mô phỏng 3D trực quan này, vui lòng bật 'Tăng tốc phần cứng' trong cài đặt trình duyệt hoặc sử dụng một trình duyệt hiện đại khác.
-
-Thì có thể do trình duyệt đang hạn chế khả năng dùng GPU của ứng dụng (ví dụ do các tab khác đang bật đang sử dụng GPU tương đối nhiều). Cách đơn giản nhất là tắt các tab trình duyệt khác đi, và tải lại trang web của ứng dụng Soter.
 
 ## Lưu ý
 Mặc dù người phát triển ứng dụng này có tham khảo các tài liệu về điểm mù xe tải, cũng như khảo sát nhiều video tai nạn do điểm mù để mô phỏng được chính xác. Nó không đảm bảo rằng việc mô phỏng là chính xác 100%.
@@ -25,6 +21,14 @@ Diện tích và vị trí giới hạn của điểm mù thay đổi khá nhi�
 - “Điểm mù” xe ô tô – Cách nhận biết và phòng tránh hiểm họa đến từ những “góc chết”: https://csgt.bocongan.gov.vn/tintuc/diem-mu-xe-o-to-cach-nhan-biet-va-phong-tranh-hiem-hoa-den-tu-nhung-goc-chet.html;
 - Các trang web tiếng Anh với từ khóa `truck blind spot`;
 - Các video trên YouTube với từ khóa `tai nạn do điểm mù`;
+
+## Thông báo lỗi `Không Hỗ Trợ WebGL`
+
+Nếu bạn nhận được thông báo này khi chạy ứng dụng:
+
+> Trình duyệt hoặc phần cứng của bạn hiện tại không hỗ trợ WebGL đồ họa 3D (hoặc tính năng tăng tốc phần cứng bị tắt). Để có thể trải nghiệm đầy đủ mô phỏng 3D trực quan này, vui lòng bật 'Tăng tốc phần cứng' trong cài đặt trình duyệt hoặc sử dụng một trình duyệt hiện đại khác.
+
+Thì có thể do trình duyệt đang hạn chế khả năng dùng GPU của ứng dụng (ví dụ do các tab khác đang bật đang sử dụng GPU tương đối nhiều). Cách đơn giản nhất là tắt các tab trình duyệt khác đi, và tải lại trang web của ứng dụng Soter.
 
 ## Các thư viện chính được ứng dụng này dùng
 - BabylonJS: Tạo mô phỏng cho ứng dụng;
