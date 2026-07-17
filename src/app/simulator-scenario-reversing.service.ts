@@ -22,12 +22,16 @@ export class SimulatorScenarioReversingService {
     let truckZ = -250;
     let truckRotY = 0;
     
-    let motoX = 7.0; // Left of lane 1 center (7.5), completely in the blind spot
+    let motoX = 7.5; // Exactly in the center of the lane and rear blind spot
     let motoY = 0.015;
     let motoZ = -290;
     let motoRotY = 0;
     let motoRotX = 0;
     let motoRotZ = 0;
+    
+    let motoScaleX = 1.0;
+    let motoScaleY = 1.0;
+    let motoScaleZ = 1.0;
 
     // Stage 0: 0s to 10s -> Truck changes from lane 2 to lane 1 and drives straight to align trailer
     if (t < 10.0) {
@@ -71,9 +75,9 @@ export class SimulatorScenarioReversingService {
 
       const motoProgress = (t - 10.0) / 4.0; // 0 to 1
       
-      // Motorcycle stops at -119.5 (which is 19.5m behind truck origin, 8.25m behind trailer rear)
+      // Motorcycle stops at -115.25 (which is 15.25m behind truck origin, exactly in the center of the rear blind spot)
       const startZ = -230;
-      const endZ = -119.5;
+      const endZ = -115.25;
       const easeOut = Math.sin((motoProgress * Math.PI) / 2);
       motoZ = startZ + easeOut * (endZ - startZ);
     }
@@ -87,7 +91,7 @@ export class SimulatorScenarioReversingService {
       truckZ = -100;
       truckRotY = 0;
 
-      motoZ = -119.5;
+      motoZ = -115.25;
     }
     // Stage 3: 17s to 23s -> Truck reverses straight back
     else if (t < 23.0) {
@@ -103,8 +107,10 @@ export class SimulatorScenarioReversingService {
       truckZ = -100 - reverseTime * reverseSpeed;
       
       const trailerRearZ = truckZ - 11.25;
-      const collisionZ = -119.5 + 1.0; 
+      const collisionZ = -115.25 + 1.0; 
       
+      let crushScaling = 1.0;
+
       if (trailerRearZ <= collisionZ) {
         if (!this.hasCrashed) {
           this.audioService.playCrashSound();
@@ -112,21 +118,40 @@ export class SimulatorScenarioReversingService {
         }
         
         const impactDepth = collisionZ - trailerRearZ;
-        const fallProgress = Math.min(impactDepth / 2.5, 1.0);
+        const fallProgress = Math.min(impactDepth / 1.0, 1.0);
         
-        motoX = 7.0 + fallProgress * 0.5; // Slides to the center of the truck (X=7.5) to go under chassis
-        motoZ = -119.5 - fallProgress * 2.5;
-        motoY = 0.015 + fallProgress * 0.35; // Lift up slightly to avoid clipping through the ground
-        motoRotX = -fallProgress * (Math.PI / 8);
-        motoRotZ = fallProgress * (Math.PI / 2.2); // Fall sideways
-        motoRotY = fallProgress * (Math.PI / 3); // Spin slightly
+        // Slide to the left slightly
+        motoX = 7.5 - fallProgress * 0.4; 
+        motoZ = -115.25 - fallProgress * 1.5; // Dragged back slightly
+        motoY = 0.015 + fallProgress * 0.2; 
+        
+        // Fall sideways
+        motoRotX = 0;
+        motoRotZ = fallProgress * (Math.PI / 2); // Fall exactly flat on the side
+        motoRotY = fallProgress * (Math.PI / 8); // Slight angle
+        
+        const trailerWheelsZ = truckZ - 10.8; // Trailer wheels arrive just after the rear
+        if (trailerWheelsZ <= motoZ) {
+           const crushDepth = motoZ - trailerWheelsZ;
+           const crushProgress = Math.min(crushDepth / 1.5, 1.0);
+           crushScaling = Math.max(1.0 - crushProgress * 0.95, 0.05); 
+           
+           // Reduce the Y elevation as it gets crushed so it stays flat on the ground
+           motoY = 0.015 + (fallProgress * 0.2) * crushScaling;
+        }
+        
+        // Since the bike is rotated 90 degrees on Z, its local X axis is now vertical
+        motoScaleX = crushScaling;
+        motoScaleY = crushScaling < 1.0 ? 1.2 : 1.0; 
+        motoScaleZ = crushScaling < 1.0 ? 1.2 : 1.0;
       } else {
-        motoZ = -119.5;
+        motoZ = -115.25;
       }
     }
     else {
       setStage(4);
       setPlaying(false);
+      return;
     }
 
     // Apply transformations
@@ -140,6 +165,7 @@ export class SimulatorScenarioReversingService {
       ctx.motorcycleNode.rotation.x = motoRotX;
       ctx.motorcycleNode.rotation.y = motoRotY;
       ctx.motorcycleNode.rotation.z = motoRotZ;
+      ctx.motorcycleNode.scaling.set(motoScaleX, motoScaleY, motoScaleZ);
     }
     
     ctx.motorcycleX.set(motoX);

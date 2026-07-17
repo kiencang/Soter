@@ -167,7 +167,7 @@ export class SimulatorScenarioService {
       ctx.syncMotorcyclePosition();
       ctx.setViewMode('orbit');
     } else if (type === 'reversing') {
-      ctx.motorcycleX.set(7.0);
+      ctx.motorcycleX.set(7.5);
       ctx.motorcycleZ.set(-290.0);
       ctx.syncMotorcyclePosition();
       ctx.setViewMode('orbit');

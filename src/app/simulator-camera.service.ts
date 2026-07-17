@@ -135,7 +135,7 @@ export class SimulatorCameraService {
         this.mainCamera.target = new BABYLON.Vector3(0, 1.8, -10);
         this.mainCamera.alpha = -Math.PI / 3;
         this.mainCamera.beta = Math.PI / 4;
-        this.mainCamera.radius = 25;
+        this.mainCamera.radius = 40;
       }
       this.mainCamera.attachControl(canvas, true);
     } else if (mode === 'rider') {
