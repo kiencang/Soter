@@ -104,7 +104,11 @@ export class SimulatorScenarioReversingService {
       
       truckX = 7.5;
       truckRotY = 0;
-      truckZ = -100 - reverseTime * reverseSpeed;
+      
+      // Stop reversing when the 3 rear axles of the tri-axle group have just fully rolled over the motorcycle (at truckZ = -108.3).
+      // This ensures the truck stops immediately after the 3rd axle rolls over and before the 4th axle can reach it.
+      const reverseDist = Math.min(reverseTime * reverseSpeed, 8.3);
+      truckZ = -100 - reverseDist;
       
       const trailerRearZ = truckZ - 11.25;
       const collisionZ = -115.25 + 1.0; 
@@ -120,27 +124,40 @@ export class SimulatorScenarioReversingService {
         const impactDepth = collisionZ - trailerRearZ;
         const fallProgress = Math.min(impactDepth / 1.0, 1.0);
         
-        // Slide to the left slightly
-        motoX = 7.5 - fallProgress * 0.4; 
-        motoZ = -115.25 - fallProgress * 1.5; // Dragged back slightly
-        motoY = 0.015 + fallProgress * 0.2; 
+        // Shift slightly to the right to compensate for falling flat to the left,
+        // keeping the entire fallen motorcycle body centered under the wide trailer silhouette
+        // so it remains 100% invisible to both side mirrors.
+        motoX = 7.5 + fallProgress * 0.25; 
         
-        // Fall sideways
+        // Let it get pushed back only slightly on impact, then remain stationary on the ground
+        // so the trailer and its wheels can actually roll over it instead of dragging it.
+        motoZ = -115.25 - fallProgress * 0.5;
+        
+        motoY = 0.015 + fallProgress * 0.15; 
+        
+        // Fall flat sideways to the left
         motoRotX = 0;
         motoRotZ = fallProgress * (Math.PI / 2); // Fall exactly flat on the side
-        motoRotY = fallProgress * (Math.PI / 8); // Slight angle
+        motoRotY = fallProgress * (Math.PI / 12); // Subtle realistic orientation shift on impact
         
-        const trailerWheelsZ = truckZ - 10.8; // Trailer wheels arrive just after the rear
-        if (trailerWheelsZ <= motoZ) {
-           const crushDepth = motoZ - trailerWheelsZ;
-           const crushProgress = Math.min(crushDepth / 1.5, 1.0);
+        // Trailer rear wheels (rearmost axle) are at local Z = -9.7 relative to trailer pivot (truckZ)
+        const trailerWheelsZ = truckZ - 9.7;
+        
+        // The wheel starts contacting and rolling onto the motorcycle when its rear-most edge touches it.
+        // Since the truck is reversing (-Z), this begins when trailerWheelsZ is at motoZ + 0.6.
+        // The crushing completes when the wheel center rolls past it (at motoZ - 0.4).
+        const contactStart = motoZ + 0.6;
+        const contactEnd = motoZ - 0.4;
+        
+        if (trailerWheelsZ <= contactStart) {
+           const crushProgress = Math.min(Math.max((contactStart - trailerWheelsZ) / (contactStart - contactEnd), 0.0), 1.0);
            crushScaling = Math.max(1.0 - crushProgress * 0.95, 0.05); 
            
-           // Reduce the Y elevation as it gets crushed so it stays flat on the ground
-           motoY = 0.015 + (fallProgress * 0.2) * crushScaling;
+           // Keep it flat on the ground as it gets crushed
+           motoY = 0.015 + (fallProgress * 0.15) * crushScaling;
         }
         
-        // Since the bike is rotated 90 degrees on Z, its local X axis is now vertical
+        // Apply the crush scaling
         motoScaleX = crushScaling;
         motoScaleY = crushScaling < 1.0 ? 1.2 : 1.0; 
         motoScaleZ = crushScaling < 1.0 ? 1.2 : 1.0;
