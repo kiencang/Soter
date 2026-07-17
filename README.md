@@ -21,6 +21,10 @@ Mặc dù người phát triển ứng dụng này có tham khảo các tài li�
 
 Diện tích và vị trí giới hạn của điểm mù thay đổi khá nhiều tùy thuộc vào nhiều yếu tố khác nhau, chẳng hạn như: kích cỡ xe tải, chiều cao xe, kích cỡ gương, và góc gương. Do vậy bạn không nên mặc định mô phỏng điểm mù trên ứng dụng khớp chính xác với mọi loại xe tải mà bạn thấy ngoài đời thực. **Xe tải ngoài đời thực có thể có điểm mù lớn hơn ứng dụng này mô phỏng**.
 
+## Các thư viện chính được ứng dụng này dùng
+- BabylonJS: Tạo mô phỏng cho ứng dụng;
+- Tailwind CSS: Tạo CSS, dàn trang cho ứng dụng;
+
 ## Tuyên bố từ chối trách nhiệm
 Ứng dụng này chỉ là một mô phỏng, nó **không khớp 100% thực tế**, chỉ dùng nó như công cụ tham khảo.
 
