@@ -18,10 +18,39 @@ export class SimulatorService {
   private logicService = inject(SimulatorLogicService);
   // App states
   gameState = signal<'MENU' | 'SIMULATION'>('MENU');
+  isDevMode = signal<boolean>(false);
+  
+  // Custom Blind Spot Vertices for free scenario
+  customL1x = signal<number>(-8.0);
+  customL1z = signal<number>(-8.0);
+  customL2x = signal<number>(0.0);
+  customL2z = signal<number>(2.5);
+  customL3x = signal<number>(0.0);
+  customL3z = signal<number>(4.85);
+  customL4x = signal<number>(-8.0);
+  customL4z = signal<number>(2.65);
+
+  customR1x = signal<number>(8.0);
+  customR1z = signal<number>(-9.0);
+  customR2x = signal<number>(0.0);
+  customR2z = signal<number>(1.5);
+  customR3x = signal<number>(0.0);
+  customR3z = signal<number>(4.85);
+  customR4x = signal<number>(8.0);
+  customR4z = signal<number>(0.65);
+
   get viewMode() { return this.cameraService.viewMode; }
   get lookDirection() { return this.cameraService.lookDirection; }
   showBlindSpotOverlays = signal<boolean>(true);
   webGlSupported = signal<boolean>(true);
+
+  toggleDevMode() {
+    const newVal = !this.isDevMode();
+    this.isDevMode.set(newVal);
+    if (!newVal && this.activeScenario() === 'free') {
+      this.startScenario('right_turn');
+    }
+  }
 
   // Real-time motorcycle state
   motorcycleX = signal<number>(6.05);
@@ -247,20 +276,22 @@ export class SimulatorService {
   // --- Move Controls ---
   moveX(val: number) {
     if (this.activeScenario() !== 'free') return;
-    this.motorcycleX.update(x => Math.max(-10, Math.min(10, x + val)));
+    this.motorcycleX.update(x => Math.max(-15.0, Math.min(20.0, x + val)));
     this.syncMotorcyclePosition();
   }
 
   moveZ(val: number) {
     if (this.activeScenario() !== 'free') return;
-    this.motorcycleZ.update(z => Math.max(-30, Math.min(20, z + val)));
+    this.motorcycleZ.update(z => Math.max(-80.0, Math.min(-10.0, z + val)));
     this.syncMotorcyclePosition();
   }
 
-  setMotorcycleCoords(x: number, z: number) {
+  setMotorcycleCoords(x: number | string, z: number | string) {
     if (this.activeScenario() !== 'free') return;
-    this.motorcycleX.set(x);
-    this.motorcycleZ.set(z);
+    const parsedX = typeof x === 'string' ? parseFloat(x) : x;
+    const parsedZ = typeof z === 'string' ? parseFloat(z) : z;
+    this.motorcycleX.set(Math.max(-15.0, Math.min(20.0, parsedX)));
+    this.motorcycleZ.set(Math.max(-80.0, Math.min(-10.0, parsedZ)));
     this.syncMotorcyclePosition();
   }
 
@@ -311,11 +342,113 @@ export class SimulatorService {
   }
 
   // --- Scenario handling ---
+  updateFlatPolygon(mesh: BABYLON.Mesh | null, vertices: BABYLON.Vector3[]) {
+    if (!mesh) return;
+    const positions: number[] = [];
+    const indices: number[] = [];
+    const normals: number[] = [];
+    
+    vertices.forEach(v => {
+      positions.push(v.x, v.y, v.z);
+    });
+    
+    if (vertices.length === 4) {
+      indices.push(0, 1, 2);
+      indices.push(0, 2, 3);
+      indices.push(2, 1, 0);
+      indices.push(3, 2, 0);
+    }
+    
+    for (let i = 0; i < vertices.length; i++) {
+      normals.push(0, 1, 0);
+    }
+    
+    const vertexData = new BABYLON.VertexData();
+    vertexData.positions = positions;
+    vertexData.indices = indices;
+    vertexData.normals = normals;
+    
+    vertexData.applyToMesh(mesh);
+  }
+
+  updateCustomVerticesInLogic() {
+    this.logicService.customLeftVertices = [
+      new BABYLON.Vector3(this.customL1x(), 0.015, this.customL1z()),
+      new BABYLON.Vector3(this.customL2x(), 0.015, this.customL2z()),
+      new BABYLON.Vector3(this.customL3x(), 0.015, this.customL3z()),
+      new BABYLON.Vector3(this.customL4x(), 0.015, this.customL4z())
+    ];
+
+    this.logicService.customRightVertices = [
+      new BABYLON.Vector3(this.customR1x(), 0.015, this.customR1z()),
+      new BABYLON.Vector3(this.customR2x(), 0.015, this.customR2z()),
+      new BABYLON.Vector3(this.customR3x(), 0.015, this.customR3z()),
+      new BABYLON.Vector3(this.customR4x(), 0.015, this.customR4z())
+    ];
+  }
+
+  syncBlindSpotMeshesWithCurrentSettings() {
+    if (!this.scene) return;
+    const leftVerts = this.logicService.getLeftBlindSpotVerticesLocal();
+    const rightVerts = this.logicService.getRightBlindSpotVerticesLocal();
+    
+    this.updateFlatPolygon(this.leftBlindSpotMesh, leftVerts);
+    this.updateFlatPolygon(this.rightBlindSpotMesh, rightVerts);
+    
+    this.checkBlindSpotState();
+  }
+
+  updateCustomVertex(vertexName: string, axis: 'x' | 'z', value: number) {
+    if (this.activeScenario() !== 'free') return;
+    
+    switch (vertexName) {
+      case 'L1': if (axis === 'x') this.customL1x.set(value); else this.customL1z.set(value); break;
+      case 'L2': if (axis === 'x') this.customL2x.set(value); else this.customL2z.set(value); break;
+      case 'L3': if (axis === 'x') this.customL3x.set(value); else this.customL3z.set(value); break;
+      case 'L4': if (axis === 'x') this.customL4x.set(value); else this.customL4z.set(value); break;
+      case 'R1': if (axis === 'x') this.customR1x.set(value); else this.customR1z.set(value); break;
+      case 'R2': if (axis === 'x') this.customR2x.set(value); else this.customR2z.set(value); break;
+      case 'R3': if (axis === 'x') this.customR3x.set(value); else this.customR3z.set(value); break;
+      case 'R4': if (axis === 'x') this.customR4x.set(value); else this.customR4z.set(value); break;
+    }
+    
+    this.updateCustomVerticesInLogic();
+    this.syncBlindSpotMeshesWithCurrentSettings();
+  }
+
+  resetCustomVertices() {
+    this.customL1x.set(-8.0);
+    this.customL1z.set(-8.0);
+    this.customL2x.set(0.0);
+    this.customL2z.set(2.5);
+    this.customL3x.set(0.0);
+    this.customL3z.set(4.85);
+    this.customL4x.set(-8.0);
+    this.customL4z.set(2.65);
+
+    this.customR1x.set(8.0);
+    this.customR1z.set(-9.0);
+    this.customR2x.set(0.0);
+    this.customR2z.set(1.5);
+    this.customR3x.set(0.0);
+    this.customR3z.set(4.85);
+    this.customR4x.set(8.0);
+    this.customR4z.set(0.65);
+
+    this.updateCustomVerticesInLogic();
+    this.syncBlindSpotMeshesWithCurrentSettings();
+  }
+
   startScenario(type: 'free' | 'right_turn' | 'cut_off' | 'tailgate' | 'head_squeeze' | 'reversing') {
     this.lastTruckPos = null;
     this.lastTrailerPos = null;
     this.lastMotorcyclePos = null;
     this.lastCarPos = null;
+    
+    this.logicService.useCustomVertices = (type === 'free');
+    this.updateCustomVerticesInLogic();
+    this.syncBlindSpotMeshesWithCurrentSettings();
+
     this.scenarioService.startScenario(type, this.getScenarioContext());
     this.updateAudioForScenario(type);
   }

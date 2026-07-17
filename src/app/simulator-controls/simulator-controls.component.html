@@ -94,6 +94,20 @@
                   <span>05</span>
                   <span>Lùi Xe</span>
                 </button>
+                @if (sim.isDevMode()) {
+                  <button (click)="sim.startScenario('free')" 
+                          class="py-2 px-1 text-[11px] rounded-xl border font-semibold transition-all text-center leading-tight flex flex-col justify-between h-14"
+                          [class.bg-amber-500/15]="sim.activeScenario() === 'free'"
+                          [class.text-amber-400]="sim.activeScenario() === 'free'"
+                          [class.border-amber-500/40]="sim.activeScenario() === 'free'"
+                          [class.bg-slate-800]="sim.activeScenario() !== 'free'"
+                          [class.text-slate-400]="sim.activeScenario() !== 'free'"
+                          [class.border-white/5]="sim.activeScenario() !== 'free'"
+                          id="scenario-free-btn">
+                    <span>06</span>
+                    <span>Tùy Chỉnh</span>
+                  </button>
+                }
               </div>
 
               <!-- Animated Scenario Box -->
@@ -105,65 +119,259 @@
                     @else if (sim.activeScenario() === 'tailgate') { TÌNH HUỐNG 3: BÁM ĐUÔI XE }
                     @else if (sim.activeScenario() === 'head_squeeze') { TÌNH HUỐNG 4: CHEN ĐẦU XE }
                     @else if (sim.activeScenario() === 'reversing') { TÌNH HUỐNG 5: LÙI XE }
+                    @else if (sim.activeScenario() === 'free') { KỊCH BẢN 6: TÙY CHỈNH VỊ TRÍ }
                   </span>
                   <div class="flex items-center gap-1.5">
-                    @if (sim.isPlayingScenario()) {
-                      <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
-                      <span class="text-[10px] font-mono text-slate-400">Đang chạy</span>
-                    } @else {
-                      <span class="text-[10px] font-mono text-slate-500">Đã dừng</span>
+                    @if (sim.activeScenario() !== 'free') {
+                      @if (sim.isPlayingScenario()) {
+                        <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                        <span class="text-[10px] font-mono text-slate-400">Đang chạy</span>
+                      } @else {
+                        <span class="text-[10px] font-mono text-slate-500">Đã dừng</span>
+                      }
                     }
                   </div>
                 </div>
 
                 <div class="p-4 space-y-4">
-                  <!-- Description Section -->
-                  @if (sim.scenarioDesc()) {
-                    <div class="space-y-1.5 border-b border-white/5 pb-3">
-                      <div class="flex items-center gap-1.5 text-blue-400 font-semibold text-[11px] uppercase tracking-wider">
-                        <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
-                        Mô tả tình huống
-                      </div>
+                  @if (sim.activeScenario() === 'free') {
+                    <div class="space-y-4">
                       <p class="text-xs text-slate-300 leading-relaxed">
-                        {{ sim.scenarioDesc() }}
+                        Chế độ tùy chỉnh vị trí cho phép bạn tự tinh chỉnh vị trí của xe máy quanh xe tải bằng các thanh trượt bên dưới để quan sát hệ thống gương chiếu hậu và các vùng điểm mù.
                       </p>
-                    </div>
-                  }
 
-                  <!-- Lesson Section -->
-                  @if (sim.scenarioLesson()) {
-                    <div class="space-y-1.5">
-                      <div class="flex items-center gap-1.5 text-amber-400 font-semibold text-[11px] uppercase tracking-wider">
-                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-                        Bài học rút ra
+                      <!-- Slider X (Ngang) -->
+                      <div class="space-y-1.5 p-3 bg-slate-900 border border-white/5 rounded-xl">
+                        <div class="flex items-center justify-between text-xs font-mono">
+                          <span class="text-slate-400 font-medium">Khoảng cách Ngang (Trục X)</span>
+                          <span class="text-amber-400 font-bold">
+                            @if (sim.motorcycleX() - 2.25 > 0.1) { Sang Phải +{{ (sim.motorcycleX() - 2.25).toFixed(1) }}m }
+                            @else if (sim.motorcycleX() - 2.25 < -0.1) { Sang Trái {{ (sim.motorcycleX() - 2.25).toFixed(1) }}m }
+                            @else { Giữa làn 0.0m }
+                          </span>
+                        </div>
+                        <input type="range" 
+                               class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-amber-500" 
+                               min="-15.0" 
+                               max="20.0" 
+                               step="0.1" 
+                               [value]="sim.motorcycleX()" 
+                               (input)="sim.setMotorcycleCoords($any($event.target).value, sim.motorcycleZ())" />
+                        <div class="flex justify-between text-[10px] font-mono text-slate-500">
+                          <span>Trái cực đại (-15m)</span>
+                          <span>Phải cực đại (+20m)</span>
+                        </div>
                       </div>
-                      <p class="text-xs text-slate-300 leading-relaxed">
-                        {{ sim.scenarioLesson() }}
-                      </p>
-                    </div>
-                  }
 
-                  <!-- Control triggers -->
-                  <div class="flex gap-2 border-t border-white/5 pt-3">
-                    @if (sim.isPlayingScenario()) {
-                      <button (click)="sim.isPlayingScenario.set(false)" class="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl text-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer" id="pause-scenario-btn">
-                        ⏸ Tạm dừng
-                      </button>
-                    } @else {
-                      @if (sim.isAtStart() || sim.isCompleted()) {
-                        <button (click)="sim.playScenario()" class="flex-1 py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-md shadow-amber-500/10" id="play-scenario-btn">
-                          ▶ Chạy mô phỏng
+                      <!-- Slider Y (Dọc / Z) -->
+                      <div class="space-y-1.5 p-3 bg-slate-900 border border-white/5 rounded-xl">
+                        <div class="flex items-center justify-between text-xs font-mono">
+                          <span class="text-slate-400 font-medium">Khoảng cách Dọc (Trục Y)</span>
+                          <span class="text-amber-400 font-bold">
+                            @if (sim.motorcycleZ() - (-19.7) > 0.1) { Phía trước +{{ (sim.motorcycleZ() - (-19.7)).toFixed(1) }}m }
+                            @else if (sim.motorcycleZ() - (-19.7) < -0.1) { Phía sau {{ (sim.motorcycleZ() - (-19.7)).toFixed(1) }}m }
+                            @else { Ngang cabin 0.0m }
+                          </span>
+                        </div>
+                        <input type="range" 
+                               class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-amber-500" 
+                               min="-80.0" 
+                               max="-10.0" 
+                               step="0.1" 
+                               [value]="sim.motorcycleZ()" 
+                               (input)="sim.setMotorcycleCoords(sim.motorcycleX(), $any($event.target).value)" />
+                        <div class="flex justify-between text-[10px] font-mono text-slate-500">
+                          <span>Sau cực xa (-60m)</span>
+                          <span>Trước cực xa (+10m)</span>
+                        </div>
+                      </div>
+
+                      <!-- Quick Presets -->
+                      <div class="space-y-2 pt-2 border-t border-white/5">
+                        <span class="text-[10px] font-mono text-slate-400 uppercase tracking-wider block">Thiết lập nhanh vị trí:</span>
+                        <div class="grid grid-cols-2 gap-2">
+                          <button (click)="sim.setMotorcycleCoords(2.25, -13.7)" class="py-1.5 px-2 bg-slate-900 hover:bg-slate-800 text-slate-300 rounded-lg border border-white/5 text-[11px] font-semibold text-left transition-colors cursor-pointer flex items-center gap-1">
+                            ⚠️ Sát đầu xe
+                          </button>
+                          <button (click)="sim.setMotorcycleCoords(6.0, -17.7)" class="py-1.5 px-2 bg-slate-900 hover:bg-slate-800 text-slate-300 rounded-lg border border-white/5 text-[11px] font-semibold text-left transition-colors cursor-pointer flex items-center gap-1">
+                            ⚠️ Hông bên phải
+                          </button>
+                          <button (click)="sim.setMotorcycleCoords(-2.5, -17.7)" class="py-1.5 px-2 bg-slate-900 hover:bg-slate-800 text-slate-300 rounded-lg border border-white/5 text-[11px] font-semibold text-left transition-colors cursor-pointer flex items-center gap-1">
+                            ⚠️ Hông bên trái
+                          </button>
+                          <button (click)="sim.setMotorcycleCoords(2.25, -35.7)" class="py-1.5 px-2 bg-slate-900 hover:bg-slate-800 text-slate-300 rounded-lg border border-white/5 text-[11px] font-semibold text-left transition-colors cursor-pointer flex items-center gap-1">
+                            ⚠️ Bám đuôi xe
+                          </button>
+                        </div>
+                      </div>
+
+                      <!-- Cấu hình điểm mù hông xe (Chỉ dành cho Dev) -->
+                      @if (sim.isDevMode()) {
+                        <div class="space-y-3 pt-3 border-t border-white/10">
+                          <div class="flex items-center justify-between">
+                            <span class="text-[10px] font-mono text-amber-400 uppercase tracking-wider font-bold">Căn chỉnh điểm mù (Dev)</span>
+                            <button (click)="sim.resetCustomVertices()" class="text-[9px] px-2 py-0.5 bg-slate-900 hover:bg-slate-800 border border-white/5 text-slate-400 rounded-md transition-colors cursor-pointer font-semibold">
+                              Đặt lại mặc định
+                            </button>
+                          </div>
+
+                          <!-- Tab selector Left / Right -->
+                          <div class="grid grid-cols-2 gap-1 bg-slate-900 p-0.5 rounded-lg border border-white/5">
+                            <button (click)="selectSide('left')" 
+                                    class="py-1 text-[10px] font-semibold rounded-md transition-all text-center cursor-pointer"
+                                    [class.bg-slate-800]="selectedSide() === 'left'"
+                                    [class.text-amber-400]="selectedSide() === 'left'"
+                                    [class.text-slate-400]="selectedSide() !== 'left'">
+                              Hông Trái (L)
+                            </button>
+                            <button (click)="selectSide('right')" 
+                                    class="py-1 text-[10px] font-semibold rounded-md transition-all text-center cursor-pointer"
+                                    [class.bg-slate-800]="selectedSide() === 'right'"
+                                    [class.text-amber-400]="selectedSide() === 'right'"
+                                    [class.text-slate-400]="selectedSide() !== 'right'">
+                              Hông Phải (R)
+                            </button>
+                          </div>
+
+                          <!-- Vertex selector (L1-L4 or R1-R4) -->
+                          <div class="grid grid-cols-4 gap-1 bg-slate-900/60 p-0.5 rounded-lg border border-white/5 text-center">
+                            @if (selectedSide() === 'left') {
+                              @for (v of ['L1', 'L2', 'L3', 'L4']; track v) {
+                                <button (click)="selectedVertex.set($any(v))"
+                                        class="py-1 text-[9px] font-mono rounded-md transition-all cursor-pointer font-bold"
+                                        [class.bg-amber-500/15]="selectedVertex() === v"
+                                        [class.text-amber-400]="selectedVertex() === v"
+                                        [class.border]="selectedVertex() === v"
+                                        [class.border-amber-500/30]="selectedVertex() === v"
+                                        [class.text-slate-500]="selectedVertex() !== v">
+                                  {{ v }}
+                                </button>
+                              }
+                            } @else {
+                              @for (v of ['R1', 'R2', 'R3', 'R4']; track v) {
+                                <button (click)="selectedVertex.set($any(v))"
+                                        class="py-1 text-[9px] font-mono rounded-md transition-all cursor-pointer font-bold"
+                                        [class.bg-amber-500/15]="selectedVertex() === v"
+                                        [class.text-amber-400]="selectedVertex() === v"
+                                        [class.border]="selectedVertex() === v"
+                                        [class.border-amber-500/30]="selectedVertex() === v"
+                                        [class.text-slate-500]="selectedVertex() !== v">
+                                  {{ v }}
+                                </button>
+                              }
+                            }
+                          </div>
+
+                          <!-- Selected Vertex Info & Sliders -->
+                          <div class="bg-slate-900/80 p-2.5 rounded-xl border border-white/5 space-y-2.5">
+                            <div class="flex items-center justify-between text-[10px] font-mono">
+                              <span class="text-slate-400">Đỉnh hiện tại: <strong class="text-amber-400 font-bold">{{ selectedVertex() }}</strong></span>
+                              <span class="text-slate-500">Tọa độ: ({{ currentVertexX().toFixed(2) }}, {{ currentVertexZ().toFixed(2) }})</span>
+                            </div>
+
+                            <!-- Vertex Slider X -->
+                            <div class="space-y-1">
+                              <div class="flex justify-between text-[9px] font-mono text-slate-500">
+                                <span>Trục X (Ngang)</span>
+                                <span class="text-amber-400 font-bold">{{ currentVertexX().toFixed(2) }}m</span>
+                              </div>
+                              <input type="range" 
+                                     class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-amber-500" 
+                                     [min]="vertexMinX()" 
+                                     [max]="vertexMaxX()" 
+                                     step="0.05" 
+                                     [value]="currentVertexX()" 
+                                     (input)="sim.updateCustomVertex(selectedVertex(), 'x', +$any($event.target).value)" />
+                            </div>
+
+                            <!-- Vertex Slider Z -->
+                            <div class="space-y-1">
+                              <div class="flex justify-between text-[9px] font-mono text-slate-500">
+                                <span>Trục Z (Dọc)</span>
+                                <span class="text-amber-400 font-bold">{{ currentVertexZ().toFixed(2) }}m</span>
+                              </div>
+                              <input type="range" 
+                                     class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-amber-500" 
+                                     [min]="vertexMinZ()" 
+                                     [max]="vertexMaxZ()" 
+                                     step="0.05" 
+                                     [value]="currentVertexZ()" 
+                                     (input)="sim.updateCustomVertex(selectedVertex(), 'z', +$any($event.target).value)" />
+                            </div>
+                          </div>
+
+                          <!-- Description info -->
+                          <div class="text-[9.5px] font-mono text-slate-400 bg-slate-950/50 p-2.5 rounded-lg border border-white/5 leading-relaxed">
+                            @if (selectedVertex() === 'L1') {
+                              <strong>L1 (Đuôi - Ngoài):</strong> Điểm biên phía sau bên trái của điểm mù. Chỉnh độ tỏa rộng phía sau hông trái (X âm sâu hơn, Z âm sâu hơn).
+                            } @else if (selectedVertex() === 'L2') {
+                              <strong>L2 (Hông - Sát xe):</strong> Điểm tựa sát cabin hông trái (bên tài). Xác định khoảng bám dọc sát sườn xe phía bên trái.
+                            } @else if (selectedVertex() === 'L3') {
+                              <strong>L3 (Mũi - Sát xe):</strong> Điểm góc trước cabin hông trái. Thường nằm sát cửa lái, nơi khởi điểm dải mù từ gương.
+                            } @else if (selectedVertex() === 'L4') {
+                              <strong>L4 (Mũi - Ngoài):</strong> Điểm biên phía trước bên trái. Chỉnh độ vát chéo, xiên góc về phía trước của dải điểm mù trái.
+                            } @else if (selectedVertex() === 'R1') {
+                              <strong>R1 (Đuôi - Ngoài):</strong> Điểm biên phía sau bên phải của điểm mù. Chỉnh độ tỏa rộng phía sau hông phải (X dương lớn hơn, Z âm sâu hơn).
+                            } @else if (selectedVertex() === 'R2') {
+                              <strong>R2 (Hông - Sát xe):</strong> Điểm tựa sát cabin hông phải (bên phụ). Xác định khoảng bám dọc sát sườn xe phía bên phải.
+                            } @else if (selectedVertex() === 'R3') {
+                              <strong>R3 (Mũi - Sát xe):</strong> Điểm góc trước cabin hông phải. Thường nằm sát cửa phụ, nơi khởi điểm dải mù phụ.
+                            } @else if (selectedVertex() === 'R4') {
+                              <strong>R4 (Mũi - Ngoài):</strong> Điểm biên phía trước bên phải. Chỉnh độ vát chéo, tạo dải quét tỏa rộng cực đại khi xe rẽ phải.
+                            }
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  } @else {
+                    <!-- Description Section -->
+                    @if (sim.scenarioDesc()) {
+                      <div class="space-y-1.5 border-b border-white/5 pb-3">
+                        <div class="flex items-center gap-1.5 text-blue-400 font-semibold text-[11px] uppercase tracking-wider">
+                          <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                          Mô tả tình huống
+                        </div>
+                        <p class="text-xs text-slate-300 leading-relaxed">
+                          {{ sim.scenarioDesc() }}
+                        </p>
+                      </div>
+                    }
+
+                    <!-- Lesson Section -->
+                    @if (sim.scenarioLesson()) {
+                      <div class="space-y-1.5">
+                        <div class="flex items-center gap-1.5 text-amber-400 font-semibold text-[11px] uppercase tracking-wider">
+                          <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                          Bài học rút ra
+                        </div>
+                        <p class="text-xs text-slate-300 leading-relaxed">
+                          {{ sim.scenarioLesson() }}
+                        </p>
+                      </div>
+                    }
+
+                    <!-- Control triggers -->
+                    <div class="flex gap-2 border-t border-white/5 pt-3">
+                      @if (sim.isPlayingScenario()) {
+                        <button (click)="sim.isPlayingScenario.set(false)" class="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl text-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer" id="pause-scenario-btn">
+                          ⏸ Tạm dừng
                         </button>
                       } @else {
-                        <button (click)="sim.resetScenario()" class="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl text-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer" id="reset-scenario-btn">
-                          ↺ Chạy lại từ đầu
-                        </button>
-                        <button (click)="sim.playScenario()" class="flex-1 py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-md shadow-amber-500/10" id="resume-scenario-btn">
-                          ▶ Tiếp tục
-                        </button>
+                        @if (sim.isAtStart() || sim.isCompleted()) {
+                          <button (click)="sim.playScenario()" class="flex-1 py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-md shadow-amber-500/10" id="play-scenario-btn">
+                            ▶ Chạy mô phỏng
+                          </button>
+                        } @else {
+                          <button (click)="sim.resetScenario()" class="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl text-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer" id="reset-scenario-btn">
+                            ↺ Chạy lại từ đầu
+                          </button>
+                          <button (click)="sim.playScenario()" class="flex-1 py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-md shadow-amber-500/10" id="resume-scenario-btn">
+                            ▶ Tiếp tục
+                          </button>
+                        }
                       }
-                    }
-                  </div>
+                    </div>
+                  }
                 </div>
               </div>
             </div>

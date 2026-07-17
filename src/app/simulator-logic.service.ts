@@ -9,9 +9,16 @@ export interface BlindSpotResult {
 
 @Injectable({ providedIn: 'root' })
 export class SimulatorLogicService {
+  customLeftVertices: BABYLON.Vector3[] | null = null;
+  customRightVertices: BABYLON.Vector3[] | null = null;
+  useCustomVertices = false;
+
   getLeftBlindSpotVerticesLocal(): BABYLON.Vector3[] {
+    if (this.useCustomVertices && this.customLeftVertices) {
+      return this.customLeftVertices;
+    }
     return [
-      new BABYLON.Vector3(-8.0, 0.015, -4.0),
+      new BABYLON.Vector3(-8.0, 0.015, -8.0),
       new BABYLON.Vector3(0.0, 0.015, 2.5),
       new BABYLON.Vector3(0.0, 0.015, 4.85),
       new BABYLON.Vector3(-8.0, 0.015, 2.65)
@@ -19,24 +26,28 @@ export class SimulatorLogicService {
   }
 
   getRightBlindSpotVerticesLocal(): BABYLON.Vector3[] {
+    if (this.useCustomVertices && this.customRightVertices) {
+      return this.customRightVertices;
+    }
     return [
+      new BABYLON.Vector3(8.0, 0.015, -9.0),
       new BABYLON.Vector3(0.0, 0.015, 1.5),
-      new BABYLON.Vector3(8.0, 0.015, -6.0),
-      new BABYLON.Vector3(8.0, 0.015, 0.65),
-      new BABYLON.Vector3(0.0, 0.015, 4.85)
+      new BABYLON.Vector3(0.0, 0.015, 4.85),
+      new BABYLON.Vector3(8.0, 0.015, 0.65)
     ];
   }
 
   isPointInQuad(px: number, pz: number, q: { x: number, z: number }[]): boolean {
+    let positive = 0;
+    let negative = 0;
     for (let i = 0; i < 4; i++) {
       const p1 = q[i];
       const p2 = q[(i + 1) % 4];
       const val = (p2.x - p1.x) * (pz - p1.z) - (p2.z - p1.z) * (px - p1.x);
-      if (val < 0) {
-        return false;
-      }
+      if (val < 0) negative++;
+      if (val > 0) positive++;
     }
-    return true;
+    return positive === 4 || negative === 4;
   }
 
   checkBlindSpot(

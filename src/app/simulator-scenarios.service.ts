@@ -121,7 +121,7 @@ export class SimulatorScenarioService {
       } else if (type === 'reversing') {
         initialTruckZ = -250.0;
       } else {
-        initialTruckZ = -40.0;
+        initialTruckZ = -19.7;
       }
       
       ctx.truckNode.position.set(initialTruckX, 0, initialTruckZ);
@@ -178,7 +178,7 @@ export class SimulatorScenarioService {
 
     if (type === 'free') {
       ctx.motorcycleX.set(7.5);
-      ctx.motorcycleZ.set(-45.0);
+      ctx.motorcycleZ.set(-25.0);
       ctx.syncMotorcyclePosition();
       ctx.setViewMode('orbit');
     } else if (type === 'right_turn') {
