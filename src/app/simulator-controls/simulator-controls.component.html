@@ -68,7 +68,7 @@
                         [class.border-white/5]="sim.activeScenario() !== 'tailgate'"
                         id="scenario-tailgate-btn">
                   <span>03</span>
-                  <span>Sát Đuôi Xe</span>
+                  <span>Bám Đuôi Xe</span>
                 </button>
                 <button (click)="sim.startScenario('head_squeeze')" 
                         class="py-2 px-1 text-[11px] rounded-xl border font-semibold transition-all text-center leading-tight flex flex-col justify-between h-14"
@@ -102,7 +102,7 @@
                   <span class="text-xs font-mono font-bold text-amber-400 uppercase tracking-wider">
                     @if (sim.activeScenario() === 'right_turn') { TÌNH HUỐNG 1: RẼ PHẢI }
                     @else if (sim.activeScenario() === 'cut_off') { TÌNH HUỐNG 2: TẠT ĐẦU XE }
-                    @else if (sim.activeScenario() === 'tailgate') { TÌNH HUỐNG 3: SÁT ĐUÔI XE }
+                    @else if (sim.activeScenario() === 'tailgate') { TÌNH HUỐNG 3: BÁM ĐUÔI XE }
                     @else if (sim.activeScenario() === 'head_squeeze') { TÌNH HUỐNG 4: CHEN ĐẦU XE }
                     @else if (sim.activeScenario() === 'reversing') { TÌNH HUỐNG 5: LÙI XE }
                   </span>
@@ -156,11 +156,11 @@
               <ul class="space-y-2.5 text-xs text-slate-300 leading-relaxed">
                 <li class="flex items-start gap-1.5">
                   <span class="text-amber-500 select-none">•</span>
-                  <span>Tránh đi song song với xe tải;</span>
+                  <span>Hạn chế tối đa hành vi đi song song với xe tải;</span>
                 </li>
                 <li class="flex items-start gap-1.5">
                   <span class="text-amber-500 select-none">•</span>
-                  <span>Tuyệt đối không được vượt qua xe ô tô khi các phương tiện đó đã có tín hiệu chuyển hướng; không vượt xe về cùng hướng với các xe tải lớn, xe container, xe buýt, xe khách 45 chỗ, xe khách giường nằm… khi nhìn thấy các xe này đang bật đèn chuyển hướng;</span>
+                  <span>Không vượt xe về cùng hướng với các xe tải lớn, xe container, xe buýt, xe khách 45 chỗ, xe khách giường nằm… khi nhìn thấy các xe này đang bật đèn chuyển hướng;</span>
                 </li>
                 <li class="flex items-start gap-1.5">
                   <span class="text-amber-500 select-none">•</span>
