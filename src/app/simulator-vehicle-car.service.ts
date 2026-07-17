@@ -70,6 +70,41 @@ export class SimulatorVehicleCarService {
     sideGlassR.material = glassMat;
     sideGlassR.parent = carNode;
 
+    // --- Side Mirrors (Gương chiếu hậu) ---
+    // Left Mirror (Gương chiếu hậu trái)
+    const leftMirrorHousing = BABYLON.MeshBuilder.CreateBox('carLeftMirrorHousing', { width: 0.12, height: 0.18, depth: 0.24 }, scene);
+    leftMirrorHousing.position.set(-0.95, 1.02, 0.8);
+    leftMirrorHousing.rotation.y = -0.15; // Sleek aerodynamic angle
+    leftMirrorHousing.material = bodyMat;
+    leftMirrorHousing.parent = carNode;
+
+    const leftMirrorGlass = BABYLON.MeshBuilder.CreateBox('carLeftMirrorGlass', { width: 0.1, height: 0.16, depth: 0.01 }, scene);
+    leftMirrorGlass.position.set(0.01, 0, -0.12); // Positioned at the back of the housing facing the driver
+    leftMirrorGlass.material = rimMat; // Reflective silver material
+    leftMirrorGlass.parent = leftMirrorHousing;
+
+    const leftMirrorArm = BABYLON.MeshBuilder.CreateBox('carLeftMirrorArm', { width: 0.16, height: 0.04, depth: 0.04 }, scene);
+    leftMirrorArm.position.set(-0.83, 1.0, 0.8);
+    leftMirrorArm.material = bodyMat;
+    leftMirrorArm.parent = carNode;
+
+    // Right Mirror (Gương chiếu hậu phải)
+    const rightMirrorHousing = BABYLON.MeshBuilder.CreateBox('carRightMirrorHousing', { width: 0.12, height: 0.18, depth: 0.24 }, scene);
+    rightMirrorHousing.position.set(0.95, 1.02, 0.8);
+    rightMirrorHousing.rotation.y = 0.15; // Sleek aerodynamic angle
+    rightMirrorHousing.material = bodyMat;
+    rightMirrorHousing.parent = carNode;
+
+    const rightMirrorGlass = BABYLON.MeshBuilder.CreateBox('carRightMirrorGlass', { width: 0.1, height: 0.16, depth: 0.01 }, scene);
+    rightMirrorGlass.position.set(-0.01, 0, -0.12); // Positioned at the back of the housing facing the driver
+    rightMirrorGlass.material = rimMat; // Reflective silver material
+    rightMirrorGlass.parent = rightMirrorHousing;
+
+    const rightMirrorArm = BABYLON.MeshBuilder.CreateBox('carRightMirrorArm', { width: 0.16, height: 0.04, depth: 0.04 }, scene);
+    rightMirrorArm.position.set(0.83, 1.0, 0.8);
+    rightMirrorArm.material = bodyMat;
+    rightMirrorArm.parent = carNode;
+
     // Headlights (đèn pha trước)
     const lightL = BABYLON.MeshBuilder.CreateBox('carLightL', { width: 0.25, height: 0.15, depth: 0.15 }, scene);
     lightL.position.set(-0.7, 0.575, 2.05);
