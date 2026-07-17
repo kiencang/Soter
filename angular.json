@@ -24,7 +24,8 @@
             "polyfills": [],
             "tsConfig": "tsconfig.app.json",
             "assets": [
-              "public"
+              "public",
+              "src/favicon.svg"
             ],
             "styles": [
               "src/styles.css"

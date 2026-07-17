@@ -12,6 +12,9 @@ export interface ScenarioContext {
   motorcycleNode: BABYLON.TransformNode | null;
   oncomingMotorcycleNode: BABYLON.TransformNode | null;
   carNode: BABYLON.TransformNode | null;
+  extraCarNode?: BABYLON.TransformNode | null;
+  extraMoto1Node?: BABYLON.TransformNode | null;
+  extraMoto2Node?: BABYLON.TransformNode | null;
   motorcycleX: { set(val: number): void };
   motorcycleZ: { set(val: number): void };
   syncMotorcyclePosition: () => void;
@@ -41,6 +44,8 @@ export class SimulatorScenarioService {
   isCompleted = signal<boolean>(false);
   scenarioStage = signal<number>(0);
   scenarioText = signal<string>('');
+  scenarioDesc = signal<string>('');
+  scenarioLesson = signal<string>('');
   trafficLightColor = signal<'red' | 'yellow' | 'green'>('green');
   
   scenarioTimer = 0;
@@ -73,16 +78,28 @@ export class SimulatorScenarioService {
 
     // Set initial text based on the scenario
     if (type === 'right_turn') {
-      this.scenarioText.set("Bài học: Khi xe tải rẽ, hiện tượng 'cắt góc' của xe tải lớn/xe container khiến nó quét qua các làn bên trong. TUYỆT ĐỐI không đi song song với xe tải lớn/xe container ở các khúc cua hoặc ngã tư.");
+      this.scenarioDesc.set("Xe máy đi song song với xe tải trong vùng điểm mù. Xe tải có tín hiệu rẽ phải, nhưng người lái xe máy không nắm được thông tin đó; ngược lại vì xe máy trong vùng điểm mù, tài xế xe tải cũng không nắm được thông tin xe máy đang đi song song.");
+      this.scenarioLesson.set("Khi xe tải rẽ, hiện tượng 'cắt góc' của xe tải lớn/xe container khiến nó quét qua các làn bên trong. TUYỆT ĐỐI không đi song song với xe tải lớn/xe container ở các khúc cua hoặc ngã tư.");
+      this.scenarioText.set("Khi xe tải rẽ, hiện tượng 'cắt góc' của xe tải lớn/xe container khiến nó quét qua các làn bên trong. TUYỆT ĐỐI không đi song song với xe tải lớn/xe container ở các khúc cua hoặc ngã tư.");
     } else if (type === 'cut_off') {
-      this.scenarioText.set("Bài học: Có hai vấn đề cần lưu ý ở đây, (a) Xe gắn máy đang ở trong vùng điểm mù, (b) Sau đó lại di chuyển nhanh và tạt đầu đột ngột ngay sát mũi xe tải lớn.");
+      this.scenarioDesc.set("Xe máy và ô tô tải đang dừng đèn đỏ. Xe máy ở trong vùng điểm mù. Xe máy có xi nhan từ trước trong lúc dừng đèn đỏ, với ý định rẽ trái. Người lái xe máy nghĩ rằng tài xế ô tô nhìn thấy và biết được ý định của mình từ sớm nhưng sự thật thì không.");
+      this.scenarioLesson.set("Có hai vấn đề cần lưu ý ở đây, (a) Xe gắn máy đang ở trong vùng điểm mù, (b) Sau đó lại di chuyển nhanh và tạt đầu đột ngột ngay sát mũi xe tải lớn.");
+      this.scenarioText.set("Có hai vấn đề cần lưu ý ở đây, (a) Xe gắn máy đang ở trong vùng điểm mù, (b) Sau đó lại di chuyển nhanh và tạt đầu đột ngột ngay sát mũi xe tải lớn.");
     } else if (type === 'tailgate') {
-      this.scenarioText.set("Bài học: Luôn giữ khoảng cách an toàn khi chạy sau xe tải lớn. Giúp bạn luôn có tầm nhìn thoáng và đủ thời gian phản ứng khi xe trước phanh gấp.");
+      this.scenarioDesc.set("Xe máy đỏ liên tục bám đuôi đằng sau ô tô tải ở khoảng cách không an toàn, điều này hạn chế tầm nhìn của xe máy và làm giảm thời gian có thể xử lý khi có tình huống bất thường xảy ra.");
+      this.scenarioLesson.set("Luôn giữ khoảng cách an toàn khi chạy sau xe tải lớn. Giúp bạn luôn có tầm nhìn thoáng và đủ thời gian phản ứng khi xe trước phanh gấp.");
+      this.scenarioText.set("Luôn giữ khoảng cách an toàn khi chạy sau xe tải lớn. Giúp bạn luôn có tầm nhìn thoáng và đủ thời gian phản ứng khi xe trước phanh gấp.");
     } else if (type === 'head_squeeze') {
-      this.scenarioText.set("Bài học: Khi dừng chờ đèn đỏ tại các nút giao, TUYỆT ĐỐI không len lỏi chen vào dừng ngay trước đầu xe tải lớn/xe container.");
+      this.scenarioDesc.set("Xe ô tô tải đang dừng đèn đỏ, xe máy đỏ từ phía sau đi lên và đứng sát ngay trước mũi xe ô tô tải.");
+      this.scenarioLesson.set("Khi dừng chờ đèn đỏ tại các nút giao, TUYỆT ĐỐI không len lỏi chen vào dừng ngay trước đầu xe tải lớn/xe container.");
+      this.scenarioText.set("Khi dừng chờ đèn đỏ tại các nút giao, TUYỆT ĐỐI không len lỏi chen vào dừng ngay trước đầu xe tải lớn/xe container.");
     } else if (type === 'reversing') {
-      this.scenarioText.set("Bài học: Tuyệt đối không đỗ xe hoặc đứng sát ngay sau đuôi xe tải lớn. Khi lùi xe, điểm mù phía sau đuôi xe tải dài tới hàng chục mét.");
+      this.scenarioDesc.set("Xe ô tô tải chuyển làn và dừng xe bên phải để chuẩn bị lùi xe. Trước khi lùi xe vài giây, xe máy màu đỏ di chuyển vào vùng điểm mù phía sau đuôi xe và dừng lại ở đó.");
+      this.scenarioLesson.set("Tuyệt đối không dừng xe hoặc đứng sát ngay sau đuôi xe tải lớn. Khi lùi xe, điểm mù phía sau đuôi xe tải có thể dài tới hàng chục mét hoặc hơn.");
+      this.scenarioText.set("Tuyệt đối không dừng xe hoặc đứng sát ngay sau đuôi xe tải lớn. Khi lùi xe, điểm mù phía sau đuôi xe tải có thể dài tới hàng chục mét hoặc hơn.");
     } else {
+      this.scenarioDesc.set("");
+      this.scenarioLesson.set("");
       this.scenarioText.set("");
     }
     ctx.setBlinkerActive(false);
@@ -137,6 +154,24 @@ export class SimulatorScenarioService {
       ctx.carNode.setEnabled(type === 'tailgate');
       ctx.carNode.position.set(6.75, 0, -75.0);
       ctx.carNode.rotation.set(0, 0, 0);
+    }
+
+    if (ctx.extraCarNode) {
+      ctx.extraCarNode.setEnabled(type === 'reversing');
+      ctx.extraCarNode.position.set(2.25, 0, -440);
+      ctx.extraCarNode.rotation.set(0, 0, 0);
+    }
+
+    if (ctx.extraMoto1Node) {
+      ctx.extraMoto1Node.setEnabled(type === 'reversing');
+      ctx.extraMoto1Node.position.set(7.5, 0, -250);
+      ctx.extraMoto1Node.rotation.set(0, 0, 0);
+    }
+
+    if (ctx.extraMoto2Node) {
+      ctx.extraMoto2Node.setEnabled(type === 'reversing');
+      ctx.extraMoto2Node.position.set(7.5, 0, -269);
+      ctx.extraMoto2Node.rotation.set(0, 0, 0);
     }
 
     ctx.intersectionMeshes.forEach(mesh => mesh.isVisible = true);

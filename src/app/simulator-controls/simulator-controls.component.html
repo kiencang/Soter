@@ -116,10 +116,32 @@
                   </div>
                 </div>
 
-                <div class="p-4 space-y-3">
-                  <p class="text-xs text-slate-300 leading-relaxed min-h-[72px]">
-                    {{ sim.scenarioText() }}
-                  </p>
+                <div class="p-4 space-y-4">
+                  <!-- Description Section -->
+                  @if (sim.scenarioDesc()) {
+                    <div class="space-y-1.5 border-b border-white/5 pb-3">
+                      <div class="flex items-center gap-1.5 text-blue-400 font-semibold text-[11px] uppercase tracking-wider">
+                        <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                        Mô tả tình huống
+                      </div>
+                      <p class="text-xs text-slate-300 leading-relaxed">
+                        {{ sim.scenarioDesc() }}
+                      </p>
+                    </div>
+                  }
+
+                  <!-- Lesson Section -->
+                  @if (sim.scenarioLesson()) {
+                    <div class="space-y-1.5">
+                      <div class="flex items-center gap-1.5 text-amber-400 font-semibold text-[11px] uppercase tracking-wider">
+                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                        Bài học rút ra
+                      </div>
+                      <p class="text-xs text-slate-300 leading-relaxed">
+                        {{ sim.scenarioLesson() }}
+                      </p>
+                    </div>
+                  }
 
                   <!-- Control triggers -->
                   <div class="flex gap-2 border-t border-white/5 pt-3">

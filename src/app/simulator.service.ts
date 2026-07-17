@@ -88,6 +88,8 @@ export class SimulatorService {
   get isCompleted() { return this.scenarioService.isCompleted; }
   get scenarioStage() { return this.scenarioService.scenarioStage; }
   get scenarioText() { return this.scenarioService.scenarioText; }
+  get scenarioDesc() { return this.scenarioService.scenarioDesc; }
+  get scenarioLesson() { return this.scenarioService.scenarioLesson; }
 
   // Audio state
   get soundEnabled() { return this.audioService.soundEnabled; }
@@ -106,6 +108,9 @@ export class SimulatorService {
   private motorcycleNode: BABYLON.TransformNode | null = null;
   private oncomingMotorcycleNode: BABYLON.TransformNode | null = null;
   private carNode: BABYLON.TransformNode | null = null;
+  private extraCarNode: BABYLON.TransformNode | null = null;
+  private extraMoto1Node: BABYLON.TransformNode | null = null;
+  private extraMoto2Node: BABYLON.TransformNode | null = null;
 
   // Track positions for wheel rotation physics
   private lastTruckPos: BABYLON.Vector3 | null = null;
@@ -278,6 +283,9 @@ export class SimulatorService {
       motorcycleNode: this.motorcycleNode,
       oncomingMotorcycleNode: this.oncomingMotorcycleNode,
       carNode: this.carNode,
+      extraCarNode: this.extraCarNode,
+      extraMoto1Node: this.extraMoto1Node,
+      extraMoto2Node: this.extraMoto2Node,
       motorcycleX: this.motorcycleX,
       motorcycleZ: this.motorcycleZ,
       syncMotorcyclePosition: () => this.syncMotorcyclePosition(),
@@ -408,6 +416,27 @@ export class SimulatorService {
       this.oncomingMotorcycleNode.setEnabled(false);
       this.carNode = this.vehiclesService.createCar(this.scene!);
       this.carNode.setEnabled(false);
+
+      this.extraCarNode = this.vehiclesService.createCar(this.scene!, {
+        bodyColor: new BABYLON.Color3(0.1, 0.3, 0.75) // Sleek deep sapphire blue
+      });
+      this.extraCarNode.setEnabled(false);
+
+      this.extraMoto1Node = this.vehiclesService.createMotorcycle(this.scene!, {
+        frameColor: new BABYLON.Color3(0.95, 0.8, 0.0), // Yellow frame
+        helmetColor: new BABYLON.Color3(0.1, 0.45, 0.85),
+        jacketColor: new BABYLON.Color3(0.12, 0.18, 0.28),
+        pantsColor: new BABYLON.Color3(0.12, 0.18, 0.28)
+      });
+      this.extraMoto1Node.setEnabled(false);
+
+      this.extraMoto2Node = this.vehiclesService.createMotorcycle(this.scene!, {
+        frameColor: new BABYLON.Color3(0.1, 0.6, 0.95), // Sky blue frame
+        helmetColor: new BABYLON.Color3(0.9, 0.15, 0.15), // Red helmet
+        jacketColor: new BABYLON.Color3(0.95, 0.95, 0.95), // White jacket
+        pantsColor: new BABYLON.Color3(0.1, 0.1, 0.1) // Black pants
+      });
+      this.extraMoto2Node.setEnabled(false);
 
       // Set initial positions for the MENU state (right-hand traffic lanes)
       if (this.truckNode) {

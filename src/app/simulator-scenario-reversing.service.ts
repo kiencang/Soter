@@ -8,8 +8,15 @@ export class SimulatorScenarioReversingService {
   private audioService = inject(SimulatorAudioService);
   private hasCrashed = false;
 
+  private lastCarZ = -440;
+  private lastM1Z = -250;
+  private lastM2Z = -269;
+
   reset() {
     this.hasCrashed = false;
+    this.lastCarZ = -440;
+    this.lastM1Z = -250;
+    this.lastM2Z = -269;
   }
 
   animate(
@@ -33,6 +40,61 @@ export class SimulatorScenarioReversingService {
     let motoScaleY = 1.0;
     let motoScaleZ = 1.0;
 
+    // --- Choreographing Extra Vehicles ---
+    
+    // 1. Extra Car (Sleek deep blue car)
+    // Moves continuously in Lane 2 (X = 2.25) at a steady speed of 20 units/s from far behind (Z = -440)
+    // Passes alongside the truck cabin precisely as the truck prepares/starts to reverse (around t = 16.5s to 17.0s)
+    let extraCarZ = -440 + t * 20.0;
+
+    // 2. Extra Moto 1 (Yellow)
+    // Starts in Lane 1 (X = 7.5), swerves to Lane 2 (X = 2.25) between t = 10.5s and t = 11.5s
+    // Then swerves back to Lane 1 (X = 7.5) between t = 14.5s and t = 15.5s to clear the lane for the car
+    let extraM1X = 7.5;
+    let extraM1Z = -250 + t * 12.0;
+    let extraM1RotY = 0;
+    if (t >= 10.5 && t < 11.5) {
+      const progress = (t - 10.5) / 1.0;
+      const smoothP = progress * progress * (3 - 2 * progress);
+      extraM1X = 7.5 + smoothP * (2.25 - 7.5);
+      extraM1RotY = -0.25 * Math.sin(progress * Math.PI);
+    } else if (t >= 11.5 && t < 14.5) {
+      extraM1X = 2.25;
+      extraM1RotY = 0;
+    } else if (t >= 14.5 && t < 15.5) {
+      const progress = (t - 14.5) / 1.0;
+      const smoothP = progress * progress * (3 - 2 * progress);
+      extraM1X = 2.25 + smoothP * (7.5 - 2.25);
+      extraM1RotY = 0.25 * Math.sin(progress * Math.PI);
+    } else if (t >= 15.5) {
+      extraM1X = 7.5;
+      extraM1RotY = 0;
+    }
+
+    // 3. Extra Moto 2 (Sky blue)
+    // Starts in Lane 1 (X = 7.5), swerves to Lane 2 (X = 2.25) between t = 12.0s and t = 13.0s
+    // Then swerves back to Lane 1 (X = 7.5) between t = 16.0s and t = 17.0s to clear the lane for the car
+    let extraM2X = 7.5;
+    let extraM2Z = -269 + t * 12.0;
+    let extraM2RotY = 0;
+    if (t >= 12.0 && t < 13.0) {
+      const progress = (t - 12.0) / 1.0;
+      const smoothP = progress * progress * (3 - 2 * progress);
+      extraM2X = 7.5 + smoothP * (2.25 - 7.5);
+      extraM2RotY = -0.25 * Math.sin(progress * Math.PI);
+    } else if (t >= 13.0 && t < 16.0) {
+      extraM2X = 2.25;
+      extraM2RotY = 0;
+    } else if (t >= 16.0 && t < 17.0) {
+      const progress = (t - 16.0) / 1.0;
+      const smoothP = progress * progress * (3 - 2 * progress);
+      extraM2X = 2.25 + smoothP * (7.5 - 2.25);
+      extraM2RotY = 0.25 * Math.sin(progress * Math.PI);
+    } else if (t >= 17.0) {
+      extraM2X = 7.5;
+      extraM2RotY = 0;
+    }
+
     // Stage 0: 0s to 10s -> Truck changes from lane 2 to lane 1 and drives straight to align trailer
     if (t < 10.0) {
       setStage(0);
@@ -52,13 +114,13 @@ export class SimulatorScenarioReversingService {
       truckX = 2.25 + smoothStep * (7.5 - 2.25);
       
       if (laneProgress > 0 && laneProgress < 1) {
-        const dx = 7.5 - 2.25;
-        const d_smooth = 6 * (laneProgress - laneProgress * laneProgress); // derivative
-        const vx = (dx / 3.0) * d_smooth;
-        const vz = (150 * (Math.PI / 2) * Math.cos((progress * Math.PI) / 2)) / 10.0; 
-        truckRotY = vz > 0.1 ? Math.atan2(vx, vz) : 0;
+         const dx = 7.5 - 2.25;
+         const d_smooth = 6 * (laneProgress - laneProgress * laneProgress); // derivative
+         const vx = (dx / 3.0) * d_smooth;
+         const vz = (150 * (Math.PI / 2) * Math.cos((progress * Math.PI) / 2)) / 10.0; 
+         truckRotY = vz > 0.1 ? Math.atan2(vx, vz) : 0;
       } else {
-        truckRotY = 0;
+         truckRotY = 0;
       }
       
       motoZ = -290 + progress * 60; // Cruises behind to -230
@@ -183,6 +245,57 @@ export class SimulatorScenarioReversingService {
       ctx.motorcycleNode.rotation.y = motoRotY;
       ctx.motorcycleNode.rotation.z = motoRotZ;
       ctx.motorcycleNode.scaling.set(motoScaleX, motoScaleY, motoScaleZ);
+    }
+
+    // Apply extra car position, rotation and wheel physics
+    if (ctx.extraCarNode) {
+      ctx.extraCarNode.position.set(2.25, 0, extraCarZ);
+      ctx.extraCarNode.rotation.set(0, 0, 0);
+      
+      const extraCarDistance = extraCarZ - this.lastCarZ;
+      this.lastCarZ = extraCarZ;
+      
+      const carWheels = ctx.extraCarNode.getChildMeshes(false, (mesh) => mesh.name.startsWith('carWheel_'));
+      if (carWheels.length > 0 && Math.abs(extraCarDistance) > 0.0001 && Math.abs(extraCarDistance) < 10.0) {
+        const carRotDelta = -extraCarDistance / 0.325;
+        carWheels.forEach(wheel => {
+          wheel.rotate(BABYLON.Axis.Y, carRotDelta, BABYLON.Space.LOCAL);
+        });
+      }
+    }
+
+    // Apply extra moto 1 position, rotation and wheel physics
+    if (ctx.extraMoto1Node) {
+      ctx.extraMoto1Node.position.set(extraM1X, 0, extraM1Z);
+      ctx.extraMoto1Node.rotation.set(0, extraM1RotY, 0);
+      
+      const extraM1Distance = extraM1Z - this.lastM1Z;
+      this.lastM1Z = extraM1Z;
+      
+      const m1Wheels = ctx.extraMoto1Node.getChildMeshes(false, (mesh) => mesh.name === 'mWheelF' || mesh.name === 'mWheelR');
+      if (m1Wheels.length > 0 && Math.abs(extraM1Distance) > 0.0001 && Math.abs(extraM1Distance) < 10.0) {
+        const m1RotDelta = -extraM1Distance / 0.275;
+        m1Wheels.forEach(wheel => {
+          wheel.rotate(BABYLON.Axis.Y, m1RotDelta, BABYLON.Space.LOCAL);
+        });
+      }
+    }
+
+    // Apply extra moto 2 position, rotation and wheel physics
+    if (ctx.extraMoto2Node) {
+      ctx.extraMoto2Node.position.set(extraM2X, 0, extraM2Z);
+      ctx.extraMoto2Node.rotation.set(0, extraM2RotY, 0);
+      
+      const extraM2Distance = extraM2Z - this.lastM2Z;
+      this.lastM2Z = extraM2Z;
+      
+      const m2Wheels = ctx.extraMoto2Node.getChildMeshes(false, (mesh) => mesh.name === 'mWheelF' || mesh.name === 'mWheelR');
+      if (m2Wheels.length > 0 && Math.abs(extraM2Distance) > 0.0001 && Math.abs(extraM2Distance) < 10.0) {
+        const m2RotDelta = -extraM2Distance / 0.275;
+        m2Wheels.forEach(wheel => {
+          wheel.rotate(BABYLON.Axis.Y, m2RotDelta, BABYLON.Space.LOCAL);
+        });
+      }
     }
     
     ctx.motorcycleX.set(motoX);

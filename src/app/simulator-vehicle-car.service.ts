@@ -3,11 +3,11 @@ import * as BABYLON from '@babylonjs/core';
 
 @Injectable({ providedIn: 'root' })
 export class SimulatorVehicleCarService {
-  createCar(scene: BABYLON.Scene): BABYLON.TransformNode {
+  createCar(scene: BABYLON.Scene, options?: { bodyColor?: BABYLON.Color3 }): BABYLON.TransformNode {
     const carNode = new BABYLON.TransformNode('carNode', scene);
 
     const bodyMat = new BABYLON.StandardMaterial('carBodyMat', scene);
-    bodyMat.diffuseColor = new BABYLON.Color3(0.85, 0.15, 0.15); // Sporty crimson red for high contrast
+    bodyMat.diffuseColor = options?.bodyColor || new BABYLON.Color3(0.85, 0.15, 0.15); // Sporty crimson red for high contrast
     bodyMat.specularColor = new BABYLON.Color3(0.8, 0.8, 0.8);
 
     const glassMat = new BABYLON.StandardMaterial('carGlassMat', scene);

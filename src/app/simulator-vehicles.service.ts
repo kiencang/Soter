@@ -148,8 +148,8 @@ export class SimulatorVehiclesService {
     return trailerRearPos;
   }
 
-  createCar(scene: BABYLON.Scene): BABYLON.TransformNode {
-    return this.carService.createCar(scene);
+  createCar(scene: BABYLON.Scene, options?: { bodyColor?: BABYLON.Color3 }): BABYLON.TransformNode {
+    return this.carService.createCar(scene, options);
   }
 
 }
