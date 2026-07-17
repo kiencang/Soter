@@ -114,9 +114,14 @@ export class SimulatorScenarioService {
     }
 
     if (ctx.oncomingMotorcycleNode) {
-      ctx.oncomingMotorcycleNode.setEnabled(type === 'tailgate');
-      ctx.oncomingMotorcycleNode.rotation.set(0, Math.PI, 0); // Facing the other way
-      ctx.oncomingMotorcycleNode.position.set(-3.5, 0, 66.5); // Initial position for tailgate
+      ctx.oncomingMotorcycleNode.setEnabled(type === 'tailgate' || type === 'head_squeeze');
+      if (type === 'head_squeeze') {
+        ctx.oncomingMotorcycleNode.rotation.set(0, 0, 0); // Hướng về phía trước
+        ctx.oncomingMotorcycleNode.position.set(6.75, 0, -16.5); // Dừng an toàn sau vạch dừng
+      } else {
+        ctx.oncomingMotorcycleNode.rotation.set(0, Math.PI, 0); // Facing the other way
+        ctx.oncomingMotorcycleNode.position.set(-3.5, 0, 66.5); // Initial position for tailgate
+      }
     }
 
     if (ctx.carNode) {

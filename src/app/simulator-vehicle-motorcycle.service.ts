@@ -3,7 +3,7 @@ import * as BABYLON from '@babylonjs/core';
 
 @Injectable({ providedIn: 'root' })
 export class SimulatorVehicleMotorcycleService {
-  createMotorcycle(scene: BABYLON.Scene, options?: { frameColor?: BABYLON.Color3, helmetColor?: BABYLON.Color3 }) {
+  createMotorcycle(scene: BABYLON.Scene, options?: { frameColor?: BABYLON.Color3, helmetColor?: BABYLON.Color3, jacketColor?: BABYLON.Color3, pantsColor?: BABYLON.Color3 }) {
     const motorcycleNode = new BABYLON.TransformNode('motorcycleNode', scene);
 
     const frameMat = new BABYLON.StandardMaterial('frameMat', scene);
@@ -21,7 +21,7 @@ export class SimulatorVehicleMotorcycleService {
     helmetMat.diffuseColor = options?.helmetColor || new BABYLON.Color3(0.95, 0.8, 0.0); // Hi-vis yellow helmet
 
     const jacketMat = new BABYLON.StandardMaterial('jacketMat', scene);
-    jacketMat.diffuseColor = new BABYLON.Color3(0.15, 0.65, 0.35); // Safety green jacket
+    jacketMat.diffuseColor = options?.jacketColor || new BABYLON.Color3(0.15, 0.65, 0.35); // Safety green jacket
 
     // 1. Two wheels (thinner profile: height 0.07)
     const wheelF = BABYLON.MeshBuilder.CreateCylinder('mWheelF', { diameter: 0.6, height: 0.07 }, scene);
@@ -314,7 +314,7 @@ export class SimulatorVehicleMotorcycleService {
 
     // --- LEGS ---
     const pantsMat = new BABYLON.StandardMaterial('pantsMat', scene);
-    pantsMat.diffuseColor = new BABYLON.Color3(0.15, 0.65, 0.35); // Safety green
+    pantsMat.diffuseColor = options?.pantsColor || new BABYLON.Color3(0.15, 0.65, 0.35); // Safety green
 
     // Thighs
     const leftThigh = BABYLON.MeshBuilder.CreateCapsule('mLeftThigh', { radius: 0.09, height: 0.55 }, scene);

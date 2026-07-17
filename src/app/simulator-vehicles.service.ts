@@ -16,7 +16,7 @@ export class SimulatorVehiclesService {
     return this.truckService.createTruck(scene);
   }
 
-  createMotorcycle(scene: BABYLON.Scene, options?: { frameColor?: BABYLON.Color3, helmetColor?: BABYLON.Color3 }) {
+  createMotorcycle(scene: BABYLON.Scene, options?: { frameColor?: BABYLON.Color3, helmetColor?: BABYLON.Color3, jacketColor?: BABYLON.Color3, pantsColor?: BABYLON.Color3 }) {
     return this.motorcycleService.createMotorcycle(scene, options);
   }
 

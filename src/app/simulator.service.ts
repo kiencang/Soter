@@ -124,9 +124,12 @@ export class SimulatorService {
   private intersectionMeshes: BABYLON.Mesh[] = [];
   private blinkerLeft: BABYLON.Mesh | null = null;
   private blinkerRight: BABYLON.Mesh | null = null;
-  private trafficLightRed: BABYLON.Mesh | null = null;
-  private trafficLightYellow: BABYLON.Mesh | null = null;
-  private trafficLightGreen: BABYLON.Mesh | null = null;
+  private trafficLightReds: BABYLON.Mesh[] = [];
+  private trafficLightYellows: BABYLON.Mesh[] = [];
+  private trafficLightGreens: BABYLON.Mesh[] = [];
+  private ewTrafficLightReds: BABYLON.Mesh[] = [];
+  private ewTrafficLightYellows: BABYLON.Mesh[] = [];
+  private ewTrafficLightGreens: BABYLON.Mesh[] = [];
   private lastTrafficLightColor: 'red' | 'yellow' | 'green' | null = null;
   private blinkerTimer = 0;
   private blinkerActive = false;
@@ -376,9 +379,12 @@ export class SimulatorService {
 
       // Build Traffic Light (Cột đèn giao thông mô phỏng)
       const tl = this.environmentService.createTrafficLight(this.scene!);
-      this.trafficLightRed = tl.red;
-      this.trafficLightYellow = tl.yellow;
-      this.trafficLightGreen = tl.green;
+      this.trafficLightReds = tl.nsReds;
+      this.trafficLightYellows = tl.nsYellows;
+      this.trafficLightGreens = tl.nsGreens;
+      this.ewTrafficLightReds = tl.ewReds;
+      this.ewTrafficLightYellows = tl.ewYellows;
+      this.ewTrafficLightGreens = tl.ewGreens;
 
       // Build 3D Models
       const truckResult = this.vehiclesService.createTruck(this.scene!);
@@ -388,7 +394,10 @@ export class SimulatorService {
       this.blinkerRight = truckResult.blinkerRight;
       this.motorcycleNode = this.vehiclesService.createMotorcycle(this.scene!);
       this.oncomingMotorcycleNode = this.vehiclesService.createMotorcycle(this.scene!, {
-        frameColor: new BABYLON.Color3(0.95, 0.8, 0.0) // Yellow frame
+        frameColor: new BABYLON.Color3(0.95, 0.8, 0.0), // Yellow frame
+        helmetColor: new BABYLON.Color3(0.1, 0.45, 0.85), // Clean modern blue helmet (to distinguish from red bike's yellow helmet)
+        jacketColor: new BABYLON.Color3(0.12, 0.18, 0.28), // Dark navy jacket (to distinguish from red bike's green jacket)
+        pantsColor: new BABYLON.Color3(0.12, 0.18, 0.28)  // Dark navy pants to match jacket color
       });
       this.oncomingMotorcycleNode.setEnabled(false);
       this.carNode = this.vehiclesService.createCar(this.scene!);
@@ -524,43 +533,76 @@ export class SimulatorService {
   }
 
   private updateTrafficLight() {
-    if (!this.trafficLightRed || !this.trafficLightYellow || !this.trafficLightGreen) return;
+    if (this.trafficLightReds.length === 0 || this.trafficLightYellows.length === 0 || this.trafficLightGreens.length === 0) return;
     const color = this.scenarioService.trafficLightColor();
     if (color === this.lastTrafficLightColor) return;
     this.lastTrafficLightColor = color;
 
-    const redMat = this.trafficLightRed.material as BABYLON.StandardMaterial;
-    const yellowMat = this.trafficLightYellow.material as BABYLON.StandardMaterial;
-    const greenMat = this.trafficLightGreen.material as BABYLON.StandardMaterial;
+    // 1. Update North-South Traffic Lights (matching active color)
+    this.trafficLightReds.forEach(red => {
+      const redMat = red.material as BABYLON.StandardMaterial;
+      if (color === 'red') {
+        redMat.diffuseColor = new BABYLON.Color3(1.0, 0.2, 0.2);
+        redMat.emissiveColor = new BABYLON.Color3(0.9, 0.1, 0.1);
+      } else {
+        redMat.diffuseColor = new BABYLON.Color3(0.2, 0.05, 0.05);
+        redMat.emissiveColor = new BABYLON.Color3(0.05, 0, 0);
+      }
+    });
 
-    if (color === 'red') {
-      redMat.diffuseColor = new BABYLON.Color3(1.0, 0.2, 0.2);
-      redMat.emissiveColor = new BABYLON.Color3(0.9, 0.1, 0.1);
-      
+    this.trafficLightYellows.forEach(yellow => {
+      const yellowMat = yellow.material as BABYLON.StandardMaterial;
+      if (color === 'yellow') {
+        yellowMat.diffuseColor = new BABYLON.Color3(1.0, 0.8, 0.2);
+        yellowMat.emissiveColor = new BABYLON.Color3(0.9, 0.7, 0.1);
+      } else {
+        yellowMat.diffuseColor = new BABYLON.Color3(0.2, 0.16, 0.05);
+        yellowMat.emissiveColor = new BABYLON.Color3(0.05, 0.04, 0);
+      }
+    });
+
+    this.trafficLightGreens.forEach(green => {
+      const greenMat = green.material as BABYLON.StandardMaterial;
+      if (color === 'green') {
+        greenMat.diffuseColor = new BABYLON.Color3(0.2, 1.0, 0.2);
+        greenMat.emissiveColor = new BABYLON.Color3(0.1, 0.9, 0.1);
+      } else {
+        greenMat.diffuseColor = new BABYLON.Color3(0.05, 0.2, 0.05);
+        greenMat.emissiveColor = new BABYLON.Color3(0, 0.05, 0);
+      }
+    });
+
+    // 2. Update East-West Traffic Lights (opposite color: Green when NS is Red, otherwise Red)
+    const ewColor = color === 'red' ? 'green' : 'red';
+
+    this.ewTrafficLightReds.forEach(red => {
+      const redMat = red.material as BABYLON.StandardMaterial;
+      if (ewColor === 'red') {
+        redMat.diffuseColor = new BABYLON.Color3(1.0, 0.2, 0.2);
+        redMat.emissiveColor = new BABYLON.Color3(0.9, 0.1, 0.1);
+      } else {
+        redMat.diffuseColor = new BABYLON.Color3(0.2, 0.05, 0.05);
+        redMat.emissiveColor = new BABYLON.Color3(0.05, 0, 0);
+      }
+    });
+
+    this.ewTrafficLightYellows.forEach(yellow => {
+      const yellowMat = yellow.material as BABYLON.StandardMaterial;
+      // In this simple opposite mapping, EW transitions directly, so its yellow is off
       yellowMat.diffuseColor = new BABYLON.Color3(0.2, 0.16, 0.05);
       yellowMat.emissiveColor = new BABYLON.Color3(0.05, 0.04, 0);
+    });
 
-      greenMat.diffuseColor = new BABYLON.Color3(0.05, 0.2, 0.05);
-      greenMat.emissiveColor = new BABYLON.Color3(0, 0.05, 0);
-    } else if (color === 'yellow') {
-      redMat.diffuseColor = new BABYLON.Color3(0.2, 0.05, 0.05);
-      redMat.emissiveColor = new BABYLON.Color3(0.05, 0, 0);
-
-      yellowMat.diffuseColor = new BABYLON.Color3(1.0, 0.8, 0.2);
-      yellowMat.emissiveColor = new BABYLON.Color3(0.9, 0.7, 0.1);
-
-      greenMat.diffuseColor = new BABYLON.Color3(0.05, 0.2, 0.05);
-      greenMat.emissiveColor = new BABYLON.Color3(0, 0.05, 0);
-    } else if (color === 'green') {
-      redMat.diffuseColor = new BABYLON.Color3(0.2, 0.05, 0.05);
-      redMat.emissiveColor = new BABYLON.Color3(0.05, 0, 0);
-
-      yellowMat.diffuseColor = new BABYLON.Color3(0.2, 0.16, 0.05);
-      yellowMat.emissiveColor = new BABYLON.Color3(0.05, 0.04, 0);
-
-      greenMat.diffuseColor = new BABYLON.Color3(0.2, 1.0, 0.2);
-      greenMat.emissiveColor = new BABYLON.Color3(0.1, 0.9, 0.1);
-    }
+    this.ewTrafficLightGreens.forEach(green => {
+      const greenMat = green.material as BABYLON.StandardMaterial;
+      if (ewColor === 'green') {
+        greenMat.diffuseColor = new BABYLON.Color3(0.2, 1.0, 0.2);
+        greenMat.emissiveColor = new BABYLON.Color3(0.1, 0.9, 0.1);
+      } else {
+        greenMat.diffuseColor = new BABYLON.Color3(0.05, 0.2, 0.05);
+        greenMat.emissiveColor = new BABYLON.Color3(0, 0.05, 0);
+      }
+    });
   }
 
   private spinWheelsInMotion(dt: number) {
@@ -709,6 +751,14 @@ export class SimulatorService {
     this.motoBlinkerLeftMeshes = [];
     this.motoBlinkerRightMeshes = [];
     
+    // Dispose individual meshes
+    this.trafficLightReds.forEach(m => m.dispose());
+    this.trafficLightYellows.forEach(m => m.dispose());
+    this.trafficLightGreens.forEach(m => m.dispose());
+    this.ewTrafficLightReds.forEach(m => m.dispose());
+    this.ewTrafficLightYellows.forEach(m => m.dispose());
+    this.ewTrafficLightGreens.forEach(m => m.dispose());
+
     [
       this.frontBlindSpotMesh, 
       this.leftBlindSpotMesh, 
@@ -717,10 +767,7 @@ export class SimulatorService {
       this.truckNode,
       this.trailerNode,
       this.motorcycleNode,
-      this.oncomingMotorcycleNode,
-      this.trafficLightRed,
-      this.trafficLightYellow,
-      this.trafficLightGreen
+      this.oncomingMotorcycleNode
     ].forEach(mesh => {
       if (mesh) {
         mesh.dispose();
@@ -735,9 +782,12 @@ export class SimulatorService {
     this.trailerNode = null;
     this.motorcycleNode = null;
     this.oncomingMotorcycleNode = null;
-    this.trafficLightRed = null;
-    this.trafficLightYellow = null;
-    this.trafficLightGreen = null;
+    this.trafficLightReds = [];
+    this.trafficLightYellows = [];
+    this.trafficLightGreens = [];
+    this.ewTrafficLightReds = [];
+    this.ewTrafficLightYellows = [];
+    this.ewTrafficLightGreens = [];
     this.lastTrafficLightColor = null;
 
     if (this.scene) {

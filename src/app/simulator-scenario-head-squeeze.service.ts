@@ -40,6 +40,22 @@ export class SimulatorScenarioHeadSqueezeService {
       ctx.truckNode.rotation.y = 0;
     }
 
+    // Hoạt cảnh cho xe máy vàng (tuân thủ luật, dừng đúng luật, rồi đi thẳng an toàn khi đèn xanh)
+    if (ctx.oncomingMotorcycleNode) {
+      if (t < 3.6) {
+        // Dừng chờ đèn đỏ, phản ứng trễ 0.6 giây sau khi đèn xanh chuyển lúc t=3.0s
+        ctx.oncomingMotorcycleNode.position.set(6.75, 0, -16.5);
+        ctx.oncomingMotorcycleNode.rotation.set(0, 0, 0);
+      } else {
+        // Xuất phát sau 0.6s phản ứng
+        const activeT = t - 3.6;
+        const speed = 4.5; // Tốc độ di chuyển an toàn
+        const yellowZ = -16.5 + activeT * speed;
+        ctx.oncomingMotorcycleNode.position.set(6.75, 0, yellowZ);
+        ctx.oncomingMotorcycleNode.rotation.set(0, 0, 0);
+      }
+    }
+
     // Đèn đỏ chuyển sang xanh ở giây thứ 3.0
     if (setTrafficLightColor) {
       if (t < 3.0) {
