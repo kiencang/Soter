@@ -124,6 +124,7 @@ export class SimulatorService {
   private intersectionMeshes: BABYLON.Mesh[] = [];
   private blinkerLeft: BABYLON.Mesh | null = null;
   private blinkerRight: BABYLON.Mesh | null = null;
+  private reverseLightMat: BABYLON.StandardMaterial | null = null;
   private trafficLightReds: BABYLON.Mesh[] = [];
   private trafficLightYellows: BABYLON.Mesh[] = [];
   private trafficLightGreens: BABYLON.Mesh[] = [];
@@ -136,6 +137,7 @@ export class SimulatorService {
   private blinkerSide: 'left' | 'right' | 'both' = 'both';
   private motoBlinkerActive = false;
   private motoBlinkerSide: 'left' | 'right' | 'both' = 'both';
+  private reverseActive = false;
   private blinkerOn = false;
   private motoBlinkerLeftMeshes: BABYLON.Mesh[] = [];
   private motoBlinkerRightMeshes: BABYLON.Mesh[] = [];
@@ -219,7 +221,7 @@ export class SimulatorService {
   // --- POV Controls ---
   setViewMode(mode: 'orbit' | 'cabin' | 'rider') {
     this.cameraService.viewMode.set(mode);
-    this.cameraService.updateCameraSetup(this.canvas, this.truckNode, this.motorcycleNode);
+    this.cameraService.updateCameraSetup(this.canvas, this.truckNode, this.motorcycleNode, this.activeScenario());
   }
 
   setLookDirection(dir: 'front' | 'left' | 'right') {
@@ -291,6 +293,9 @@ export class SimulatorService {
         this.motoBlinkerActive = active;
         this.motoBlinkerSide = side || 'both';
       },
+      setReverseActive: (active) => {
+        this.reverseActive = active;
+      },
       getTrailerRearPos: () => this.trailerRearPos,
       setTrailerRearPos: (pos) => { this.trailerRearPos = pos; },
       setScenarioText: (text) => { this.scenarioService.scenarioText.set(text); }
@@ -298,7 +303,7 @@ export class SimulatorService {
   }
 
   // --- Scenario handling ---
-  startScenario(type: 'free' | 'right_turn' | 'cut_off' | 'tailgate' | 'head_squeeze') {
+  startScenario(type: 'free' | 'right_turn' | 'cut_off' | 'tailgate' | 'head_squeeze' | 'reversing') {
     this.lastTruckPos = null;
     this.lastTrailerPos = null;
     this.lastMotorcyclePos = null;
@@ -324,7 +329,7 @@ export class SimulatorService {
     this.updateAudioForScenario(this.activeScenario());
   }
 
-  private updateAudioForScenario(type: 'free' | 'right_turn' | 'cut_off' | 'tailgate' | 'head_squeeze') {
+  private updateAudioForScenario(type: 'free' | 'right_turn' | 'cut_off' | 'tailgate' | 'head_squeeze' | 'reversing') {
     if (type !== 'free') {
       if (this.soundEnabled() && this.isPlayingScenario()) {
         this.audioService.initAudio();
@@ -392,6 +397,7 @@ export class SimulatorService {
       this.trailerNode = truckResult.trailerNode;
       this.blinkerLeft = truckResult.blinkerLeft;
       this.blinkerRight = truckResult.blinkerRight;
+      this.reverseLightMat = truckResult.reverseLightMat;
       this.motorcycleNode = this.vehiclesService.createMotorcycle(this.scene!);
       this.oncomingMotorcycleNode = this.vehiclesService.createMotorcycle(this.scene!, {
         frameColor: new BABYLON.Color3(0.95, 0.8, 0.0), // Yellow frame
@@ -480,6 +486,15 @@ export class SimulatorService {
       if (this.blinkerRight) {
         const mat = this.blinkerRight.material as BABYLON.StandardMaterial;
         mat.emissiveColor = new BABYLON.Color3(0.1, 0.1, 0.0);
+      }
+    }
+
+    // Reverse Light
+    if (this.reverseLightMat) {
+      if (this.reverseActive) {
+        this.reverseLightMat.emissiveColor = new BABYLON.Color3(1.0, 1.0, 1.0); // Bright white
+      } else {
+        this.reverseLightMat.emissiveColor = new BABYLON.Color3(0.0, 0.0, 0.0); // Off
       }
     }
 

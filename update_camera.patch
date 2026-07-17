@@ -1,0 +1,14 @@
+--- src/app/simulator-camera.service.ts
++++ src/app/simulator-camera.service.ts
+@@ -127,7 +127,10 @@
+     if (mode === 'orbit') {
+       this.mainCamera.parent = null;
+       if (scenario === 'reversing') {
+-        this.mainCamera.target = new BABYLON.Vector3(0, 1.8, -120);
++        this.mainCamera.target = new BABYLON.Vector3(5.0, 1.8, -80);
++        this.mainCamera.alpha = -Math.PI / 2;
++        this.mainCamera.beta = Math.PI / 2.5;
++        this.mainCamera.radius = 65;
+       } else {
+         this.mainCamera.target = new BABYLON.Vector3(0, 1.8, -10);
+       }

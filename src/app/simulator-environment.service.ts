@@ -9,7 +9,7 @@ export class SimulatorEnvironmentService {
     groundMat.diffuseColor = new BABYLON.Color3(0.18, 0.2, 0.22);
     groundMat.specularColor = new BABYLON.Color3(0.05, 0.05, 0.05);
 
-    const ground = BABYLON.MeshBuilder.CreatePlane('ground', { width: 200, height: 200 }, scene);
+    const ground = BABYLON.MeshBuilder.CreatePlane('ground', { width: 1000, height: 1000 }, scene);
     ground.rotation.x = Math.PI / 2;
     ground.position.y = 0;
     ground.material = groundMat;
@@ -34,8 +34,8 @@ export class SimulatorEnvironmentService {
       
       // Center Double Yellow Lines (Vạch vàng đôi nét liền)
       for (const x of [-0.15, 0.15]) {
-        const pCenter = rot(x, 57.5);
-        const centerLine = BABYLON.MeshBuilder.CreateBox(`centerLine_${d}_${x}`, { width: 0.15, height: 0.01, depth: 85.0 }, scene);
+        const pCenter = rot(x, 215.0);
+        const centerLine = BABYLON.MeshBuilder.CreateBox(`centerLine_${d}_${x}`, { width: 0.15, height: 0.01, depth: 400.0 }, scene);
         centerLine.position.set(pCenter.x, 0.01, pCenter.z);
         centerLine.rotation.y = angle;
         centerLine.material = yellowLineMat;
@@ -43,7 +43,7 @@ export class SimulatorEnvironmentService {
       }
 
       // White lane dividers (đứt khúc)
-      for (let i = 0; i < 14; i++) {
+      for (let i = 0; i < 60; i++) {
         const zPos = 17 + i * 6;
 
         // White lane dividers
@@ -77,8 +77,8 @@ export class SimulatorEnvironmentService {
 
       // 4. Solid road shoulder lines (outer edge lines at x = -9.0 and x = 9.0)
       for (const x of [-9.0, 9.0]) {
-        const pEdge = rot(x, 57.5);
-        const edgeLine = BABYLON.MeshBuilder.CreateBox(`edgeLine_${d}_${x}`, { width: 0.2, height: 0.01, depth: 85.0 }, scene);
+        const pEdge = rot(x, 215.0);
+        const edgeLine = BABYLON.MeshBuilder.CreateBox(`edgeLine_${d}_${x}`, { width: 0.2, height: 0.01, depth: 400.0 }, scene);
         edgeLine.position.set(pEdge.x, 0.01, pEdge.z);
         edgeLine.rotation.y = angle;
         edgeLine.material = whiteLineMat;

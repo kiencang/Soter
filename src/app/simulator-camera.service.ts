@@ -119,14 +119,24 @@ export class SimulatorCameraService {
     }
   }
 
-  updateCameraSetup(canvas: HTMLCanvasElement, truckNode: BABYLON.TransformNode | null, motorcycleNode: BABYLON.TransformNode | null) {
+  updateCameraSetup(canvas: HTMLCanvasElement, truckNode: BABYLON.TransformNode | null, motorcycleNode: BABYLON.TransformNode | null, scenario: string = 'right_turn') {
     if (!this.mainCamera || !truckNode || !motorcycleNode) return;
 
     const mode = this.viewMode();
 
     if (mode === 'orbit') {
       this.mainCamera.parent = null;
-      this.mainCamera.target = new BABYLON.Vector3(0, 1.8, -10);
+      if (scenario === 'reversing') {
+        this.mainCamera.target = new BABYLON.Vector3(5.0, 1.8, -110);
+        this.mainCamera.alpha = -Math.PI / 2;
+        this.mainCamera.beta = Math.PI / 2.5;
+        this.mainCamera.radius = 65;
+      } else {
+        this.mainCamera.target = new BABYLON.Vector3(0, 1.8, -10);
+        this.mainCamera.alpha = -Math.PI / 3;
+        this.mainCamera.beta = Math.PI / 4;
+        this.mainCamera.radius = 25;
+      }
       this.mainCamera.attachControl(canvas, true);
     } else if (mode === 'rider') {
       this.mainCamera.detachControl();

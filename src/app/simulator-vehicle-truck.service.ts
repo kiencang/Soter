@@ -407,6 +407,22 @@ export class SimulatorVehicleTruckService {
     sideBlinkR2.material = blinkerRightMat;
     sideBlinkR2.parent = trailerNode;
 
-    return { truckNode, trailerNode, blinkerLeft: blinkerLeft!, blinkerRight: blinkerRight! };
+    // Reverse lights (Đèn lùi màu trắng) on the rear bumper
+    const reverseMat = new BABYLON.StandardMaterial('reverselight', scene);
+    // start with off (dark gray)
+    reverseMat.emissiveColor = new BABYLON.Color3(0, 0, 0);
+    reverseMat.diffuseColor = new BABYLON.Color3(0.2, 0.2, 0.2);
+
+    const reverseL = BABYLON.MeshBuilder.CreateBox('reverseL', { width: 0.25, height: 0.18, depth: 0.11 }, scene);
+    reverseL.position.set(-0.35, 0.8, -10.70);
+    reverseL.material = reverseMat;
+    reverseL.parent = trailerNode;
+
+    const reverseR = BABYLON.MeshBuilder.CreateBox('reverseR', { width: 0.25, height: 0.18, depth: 0.11 }, scene);
+    reverseR.position.set(0.35, 0.8, -10.70);
+    reverseR.material = reverseMat;
+    reverseR.parent = trailerNode;
+
+    return { truckNode, trailerNode, blinkerLeft: blinkerLeft!, blinkerRight: blinkerRight!, reverseLightMat: reverseMat };
   }
 }

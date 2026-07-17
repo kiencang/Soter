@@ -4,6 +4,7 @@ import { SimulatorScenarioRightTurnService } from './simulator-scenario-right-tu
 import { SimulatorScenarioCutOffService } from './simulator-scenario-cut-off.service';
 import { SimulatorScenarioTailgateService } from './simulator-scenario-tailgate.service';
 import { SimulatorScenarioHeadSqueezeService } from './simulator-scenario-head-squeeze.service';
+import { SimulatorScenarioReversingService } from './simulator-scenario-reversing.service';
 
 export interface ScenarioContext {
   truckNode: BABYLON.TransformNode | null;
@@ -20,6 +21,7 @@ export interface ScenarioContext {
   laneLines: any[];
   setBlinkerActive: (active: boolean, side?: 'left' | 'right' | 'both') => void;
   setMotoBlinkerActive: (active: boolean, side?: 'left' | 'right' | 'both') => void;
+  setReverseActive: (active: boolean) => void;
   getTrailerRearPos: () => BABYLON.Vector3 | null;
   setTrailerRearPos: (pos: BABYLON.Vector3 | null) => void;
   setScenarioText: (text: string) => void;
@@ -31,8 +33,9 @@ export class SimulatorScenarioService {
   private cutOffScenario = inject(SimulatorScenarioCutOffService);
   private tailgateScenario = inject(SimulatorScenarioTailgateService);
   private headSqueezeScenario = inject(SimulatorScenarioHeadSqueezeService);
+  private reversingScenario = inject(SimulatorScenarioReversingService);
 
-  activeScenario = signal<'free' | 'right_turn' | 'cut_off' | 'tailgate' | 'head_squeeze'>('right_turn');
+  activeScenario = signal<'free' | 'right_turn' | 'cut_off' | 'tailgate' | 'head_squeeze' | 'reversing'>('right_turn');
   isPlayingScenario = signal<boolean>(false);
   isAtStart = signal<boolean>(true);
   isCompleted = signal<boolean>(false);
@@ -42,7 +45,7 @@ export class SimulatorScenarioService {
   
   scenarioTimer = 0;
 
-  startScenario(type: 'free' | 'right_turn' | 'cut_off' | 'tailgate' | 'head_squeeze', ctx: ScenarioContext) {
+  startScenario(type: 'free' | 'right_turn' | 'cut_off' | 'tailgate' | 'head_squeeze' | 'reversing', ctx: ScenarioContext) {
     this.activeScenario.set(type);
     this.isPlayingScenario.set(false);
     this.isAtStart.set(true);
@@ -54,6 +57,7 @@ export class SimulatorScenarioService {
     this.cutOffScenario.reset();
     this.tailgateScenario.reset();
     this.headSqueezeScenario.reset();
+    this.reversingScenario.reset();
 
     if (type === 'right_turn') {
       this.trafficLightColor.set('green');
@@ -76,11 +80,14 @@ export class SimulatorScenarioService {
       this.scenarioText.set("Bài học: Luôn giữ khoảng cách an toàn khi chạy sau xe tải lớn. Giúp bạn luôn có tầm nhìn thoáng và đủ thời gian phản ứng khi xe trước phanh gấp.");
     } else if (type === 'head_squeeze') {
       this.scenarioText.set("Bài học: Khi dừng chờ đèn đỏ tại các nút giao, TUYỆT ĐỐI không len lỏi chen vào dừng ngay trước đầu xe tải lớn/xe container.");
+    } else if (type === 'reversing') {
+      this.scenarioText.set("Bài học: Tuyệt đối không đỗ xe hoặc đứng sát ngay sau đuôi xe tải lớn. Khi lùi xe, điểm mù phía sau đuôi xe tải dài tới hàng chục mét.");
     } else {
       this.scenarioText.set("");
     }
     ctx.setBlinkerActive(false);
     ctx.setMotoBlinkerActive(false);
+    ctx.setReverseActive(false);
 
     // Reset positions
     if (ctx.truckNode) {
@@ -94,6 +101,8 @@ export class SimulatorScenarioService {
         initialTruckZ = -50.0;
       } else if (type === 'head_squeeze') {
         initialTruckZ = -20.7;
+      } else if (type === 'reversing') {
+        initialTruckZ = -250.0;
       } else {
         initialTruckZ = -40.0;
       }
@@ -133,7 +142,7 @@ export class SimulatorScenarioService {
     ctx.intersectionMeshes.forEach(mesh => mesh.isVisible = true);
 
     if (type === 'free') {
-      ctx.motorcycleX.set(6.05);
+      ctx.motorcycleX.set(7.5);
       ctx.motorcycleZ.set(-45.0);
       ctx.syncMotorcyclePosition();
       ctx.setViewMode('orbit');
@@ -155,6 +164,11 @@ export class SimulatorScenarioService {
     } else if (type === 'head_squeeze') {
       ctx.motorcycleX.set(6.05);
       ctx.motorcycleZ.set(-23.0);
+      ctx.syncMotorcyclePosition();
+      ctx.setViewMode('orbit');
+    } else if (type === 'reversing') {
+      ctx.motorcycleX.set(7.0);
+      ctx.motorcycleZ.set(-290.0);
       ctx.syncMotorcyclePosition();
       ctx.setViewMode('orbit');
     }
@@ -185,6 +199,8 @@ export class SimulatorScenarioService {
       this.tailgateScenario.animate(t, dt, ctx, setStage, setPlaying);
     } else if (scenario === 'head_squeeze') {
       this.headSqueezeScenario.animate(t, ctx, setStage, setPlaying, (color) => this.trafficLightColor.set(color));
+    } else if (scenario === 'reversing') {
+      this.reversingScenario.animate(t, ctx, setStage, setPlaying);
     }
 
     if (!this.isPlayingScenario()) {

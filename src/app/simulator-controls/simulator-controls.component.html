@@ -82,6 +82,18 @@
                   <span>04</span>
                   <span>Chen Đầu Xe</span>
                 </button>
+                <button (click)="sim.startScenario('reversing')" 
+                        class="py-2 px-1 text-[11px] rounded-xl border font-semibold transition-all text-center leading-tight flex flex-col justify-between h-14"
+                        [class.bg-amber-500/15]="sim.activeScenario() === 'reversing'"
+                        [class.text-amber-400]="sim.activeScenario() === 'reversing'"
+                        [class.border-amber-500/40]="sim.activeScenario() === 'reversing'"
+                        [class.bg-slate-800]="sim.activeScenario() !== 'reversing'"
+                        [class.text-slate-400]="sim.activeScenario() !== 'reversing'"
+                        [class.border-white/5]="sim.activeScenario() !== 'reversing'"
+                        id="scenario-reversing-btn">
+                  <span>05</span>
+                  <span>Lùi Xe</span>
+                </button>
               </div>
 
               <!-- Animated Scenario Box -->
@@ -92,6 +104,7 @@
                     @else if (sim.activeScenario() === 'cut_off') { TÌNH HUỐNG 2: TẠT ĐẦU XE }
                     @else if (sim.activeScenario() === 'tailgate') { TÌNH HUỐNG 3: SÁT ĐUÔI XE }
                     @else if (sim.activeScenario() === 'head_squeeze') { TÌNH HUỐNG 4: CHEN ĐẦU XE }
+                    @else if (sim.activeScenario() === 'reversing') { TÌNH HUỐNG 5: LÙI XE }
                   </span>
                   <div class="flex items-center gap-1.5">
                     @if (sim.isPlayingScenario()) {
