@@ -140,10 +140,13 @@ export class SimulatorScenarioService {
     }
 
     if (ctx.oncomingMotorcycleNode) {
-      ctx.oncomingMotorcycleNode.setEnabled(type === 'tailgate' || type === 'head_squeeze');
+      ctx.oncomingMotorcycleNode.setEnabled(type === 'tailgate' || type === 'head_squeeze' || type === 'cut_off');
       if (type === 'head_squeeze') {
         ctx.oncomingMotorcycleNode.rotation.set(0, 0, 0); // Hướng về phía trước
         ctx.oncomingMotorcycleNode.position.set(6.75, 0, -16.5); // Dừng an toàn sau vạch dừng
+      } else if (type === 'cut_off') {
+        ctx.oncomingMotorcycleNode.rotation.set(0, -Math.PI / 2, 0); // facing West
+        ctx.oncomingMotorcycleNode.position.set(50.0, 0, 6.75); // Start on East road (Lane 1 - right side)
       } else {
         ctx.oncomingMotorcycleNode.rotation.set(0, Math.PI, 0); // Facing the other way
         ctx.oncomingMotorcycleNode.position.set(-3.5, 0, 66.5); // Initial position for tailgate
@@ -151,9 +154,14 @@ export class SimulatorScenarioService {
     }
 
     if (ctx.carNode) {
-      ctx.carNode.setEnabled(type === 'tailgate');
-      ctx.carNode.position.set(6.75, 0, -75.0);
-      ctx.carNode.rotation.set(0, 0, 0);
+      ctx.carNode.setEnabled(type === 'tailgate' || type === 'cut_off');
+      if (type === 'cut_off') {
+        ctx.carNode.rotation.set(0, -Math.PI / 2, 0); // facing West
+        ctx.carNode.position.set(65.0, 0, 2.25); // Start on East road (Lane 2 - left side)
+      } else {
+        ctx.carNode.position.set(6.75, 0, -75.0);
+        ctx.carNode.rotation.set(0, 0, 0);
+      }
     }
 
     if (ctx.extraCarNode) {

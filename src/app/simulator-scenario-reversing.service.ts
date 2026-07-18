@@ -17,6 +17,7 @@ export class SimulatorScenarioReversingService {
     this.lastCarZ = -440;
     this.lastM1Z = -250;
     this.lastM2Z = -269;
+    this.audioService.stopHorn();
   }
 
   animate(
@@ -25,6 +26,13 @@ export class SimulatorScenarioReversingService {
     setStage: (stage: number) => void,
     setPlaying: (playing: boolean) => void
   ) {
+    // 3 honks of the horn during the lane change (first 3 seconds of Stage 0)
+    if (t < 10.0 && ((t >= 0.4 && t < 0.8) || (t >= 1.2 && t < 1.6) || (t >= 2.0 && t < 2.4))) {
+      this.audioService.playHorn();
+    } else {
+      this.audioService.stopHorn();
+    }
+
     let truckX = 2.25;
     let truckZ = -250;
     let truckRotY = 0;
