@@ -5,6 +5,7 @@ import * as BABYLON from '@babylonjs/core';
 export class SimulatorCameraService {
   viewMode = signal<'orbit' | 'cabin' | 'rider'>('orbit');
   lookDirection = signal<'front' | 'left' | 'right'>('front');
+  showMirrors = signal<boolean>(true);
 
   mainCamera: BABYLON.ArcRotateCamera | null = null;
   leftMirrorCamera: BABYLON.FreeCamera | null = null;
@@ -115,7 +116,7 @@ export class SimulatorCameraService {
 
   setFrontMirrorVisible(visible: boolean) {
     if (this.frontMirrorDisc) {
-      this.frontMirrorDisc.setEnabled(visible);
+      this.frontMirrorDisc.setEnabled(visible && this.showMirrors());
     }
   }
 
@@ -170,15 +171,29 @@ export class SimulatorCameraService {
   update(truckNode: BABYLON.TransformNode | null) {
     if (!truckNode) return;
 
+    // Dynamically manage activeCameras based on showMirrors setting
+    const scene = this.mainCamera?.getScene();
+    if (scene && this.mainCamera) {
+      if (this.showMirrors()) {
+        if (!scene.activeCameras || scene.activeCameras.length === 1) {
+          scene.activeCameras = [this.mainCamera, this.leftMirrorCamera!, this.rightMirrorCamera!];
+        }
+      } else {
+        if (scene.activeCameras && scene.activeCameras.length > 1) {
+          scene.activeCameras = [this.mainCamera];
+        }
+      }
+    }
+
     // 1. Update front mirror camera
-    if (this.frontMirrorCamera) {
+    if (this.frontMirrorCamera && this.showMirrors()) {
       // Rotation is locked locally relative to parent truckNode, so no setTarget is needed.
       // This prevents gimbal flip / 180-degree rotation bugs when looking straight down.
       this.frontMirrorCamera.update();
     }
 
     // 2. Update left mirror camera
-    if (this.leftMirrorCamera) {
+    if (this.leftMirrorCamera && this.showMirrors()) {
       this.leftMirrorCamera.update();
       const frameEl = document.getElementById('frame-left-mirror');
       const canvasEl = this.leftMirrorCamera.getScene().getEngine().getRenderingCanvas();
@@ -199,7 +214,7 @@ export class SimulatorCameraService {
     }
 
     // 3. Update right mirror camera
-    if (this.rightMirrorCamera) {
+    if (this.rightMirrorCamera && this.showMirrors()) {
       this.rightMirrorCamera.update();
       const frameEl = document.getElementById('frame-right-mirror');
       const canvasEl = this.rightMirrorCamera.getScene().getEngine().getRenderingCanvas();
@@ -223,7 +238,7 @@ export class SimulatorCameraService {
     if (this.frontMirrorDisc && this.mainCamera) {
       const frameEl = document.getElementById('frame-front-mirror');
       const canvasEl = this.mainCamera.getScene().getEngine().getRenderingCanvas();
-      if (frameEl && canvasEl) {
+      if (frameEl && canvasEl && this.showMirrors()) {
         this.frontMirrorDisc.setEnabled(true);
         const frameRect = frameEl.getBoundingClientRect();
         const canvasRect = canvasEl.getBoundingClientRect();

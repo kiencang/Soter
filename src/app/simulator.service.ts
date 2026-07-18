@@ -41,6 +41,11 @@ export class SimulatorService {
 
   get viewMode() { return this.cameraService.viewMode; }
   get lookDirection() { return this.cameraService.lookDirection; }
+  get showMirrors() { return this.cameraService.showMirrors; }
+
+  toggleMirrors() {
+    this.cameraService.showMirrors.update(val => !val);
+  }
   showBlindSpotOverlays = signal<boolean>(true);
   webGlSupported = signal<boolean>(true);
 

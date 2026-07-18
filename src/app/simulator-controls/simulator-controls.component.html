@@ -17,17 +17,29 @@
               </button>
             </div>
 
-            @if (sim.viewMode() === 'orbit') {
+            <div class="space-y-2">
+              @if (sim.viewMode() === 'orbit') {
+                <div class="flex items-center justify-between p-2.5 bg-slate-950/40 border border-white/5 rounded-xl transition-all">
+                  <span class="text-xs font-medium text-slate-300">Hiển thị vùng điểm mù</span>
+                  <button (click)="sim.toggleBlindSpotOverlays()" class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none cursor-pointer"
+                          [class.bg-amber-500]="sim.showBlindSpotOverlays()" [class.bg-slate-700]="!sim.showBlindSpotOverlays()"
+                          id="toggle-blindspot-right">
+                    <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform"
+                          [class.translate-x-6]="sim.showBlindSpotOverlays()" [class.translate-x-1]="!sim.showBlindSpotOverlays()"></span>
+                  </button>
+                </div>
+              }
+
               <div class="flex items-center justify-between p-2.5 bg-slate-950/40 border border-white/5 rounded-xl transition-all">
-                <span class="text-xs font-medium text-slate-300">Hiển thị vùng điểm mù</span>
-                <button (click)="sim.toggleBlindSpotOverlays()" class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none cursor-pointer"
-                        [class.bg-amber-500]="sim.showBlindSpotOverlays()" [class.bg-slate-700]="!sim.showBlindSpotOverlays()"
-                        id="toggle-blindspot-right">
+                <span class="text-xs font-medium text-slate-300">Hiển thị gương chiếu hậu</span>
+                <button (click)="sim.toggleMirrors()" class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none cursor-pointer"
+                        [class.bg-amber-500]="sim.showMirrors()" [class.bg-slate-700]="!sim.showMirrors()"
+                        id="toggle-mirrors">
                   <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform"
-                        [class.translate-x-6]="sim.showBlindSpotOverlays()" [class.translate-x-1]="!sim.showBlindSpotOverlays()"></span>
+                        [class.translate-x-6]="sim.showMirrors()" [class.translate-x-1]="!sim.showMirrors()"></span>
                 </button>
               </div>
-            }
+            </div>
           </div>
 
           <!-- Scenarios Content -->
