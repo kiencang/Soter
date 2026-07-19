@@ -1,7 +1,7 @@
 # Soter
 Ứng dụng mô phỏng điểm mù của xe tải, container. Dự án đang trong giai đoạn **phát triển & thử nghiệm**.
 
-Link: https://soter.nguyenducanh.workers.dev/
+Link: https://soter.wpsila.com hoặc https://soter.nguyenducanh.workers.dev
 
 Lưu ý: Ứng dụng mô phỏng một số tình huống tai nạn, có thể gây khó chịu cho người xem.
 
