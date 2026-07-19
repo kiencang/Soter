@@ -23,9 +23,9 @@ export class SimulatorScenarioCutOffService {
       ctx.truckNode.rotation.y = 0;
     }
 
-    // Đèn giao thông chuyển từ đỏ sang xanh ở giây thứ 4.1 (0.4 giây trước khi di chuyển ở 4.5s)
+    // Đèn giao thông chuyển từ đỏ sang xanh ở giây thứ 3.9 (0.6 giây trước khi di chuyển ở 4.5s)
     if (setTrafficLightColor) {
-      if (t < 4.1) {
+      if (t < 3.9) {
         setTrafficLightColor('red');
       } else {
         setTrafficLightColor('green');

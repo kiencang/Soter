@@ -6,7 +6,7 @@ import { SimulatorService } from '../simulator.service';
   template: `
     <div class="flex flex-col items-center gap-2.5 w-full">
       <p class="text-[10px] text-slate-500 font-mono text-center">
-        Soter • v1.0.43 • 
+        Soter • v1.0.44 • 
         <a href="https://github.com/kiencang/Soter" target="_blank" rel="noopener noreferrer" class="hover:text-slate-300 transition-colors">GitHub</a> • 
         Dự án An toàn Giao thông
       </p>
