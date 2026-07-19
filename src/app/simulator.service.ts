@@ -488,12 +488,14 @@ export class SimulatorService {
   // --- Simulation Flow ---
   startSimulation() {
     this.gameState.set('SIMULATION');
+    this.cameraService.inSimulation.set(true);
     this.cameraService.setFrontMirrorVisible(true);
     this.startScenario('right_turn');
   }
 
   goToMenu() {
     this.gameState.set('MENU');
+    this.cameraService.inSimulation.set(false);
     this.audioService.stopSound();
     this.cameraService.setFrontMirrorVisible(false);
     this.setViewMode('orbit');

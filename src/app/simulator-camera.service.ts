@@ -1,11 +1,23 @@
 import { Injectable, signal } from '@angular/core';
 import * as BABYLON from '@babylonjs/core';
 
+// Ensure the shader is only registered once
+if (!BABYLON.Effect.ShadersStore['flipMirrorPixelShader']) {
+  BABYLON.Effect.ShadersStore['flipMirrorPixelShader'] = `
+    varying vec2 vUV;
+    uniform sampler2D textureSampler;
+    void main(void) {
+      gl_FragColor = texture2D(textureSampler, vec2(1.0 - vUV.x, vUV.y));
+    }
+  `;
+}
+
 @Injectable({ providedIn: 'root' })
 export class SimulatorCameraService {
   viewMode = signal<'orbit' | 'cabin' | 'rider'>('orbit');
   lookDirection = signal<'front' | 'left' | 'right'>('front');
   showMirrors = signal<boolean>(true);
+  inSimulation = signal<boolean>(false);
 
   mainCamera: BABYLON.ArcRotateCamera | null = null;
   leftMirrorCamera: BABYLON.FreeCamera | null = null;
@@ -29,6 +41,7 @@ export class SimulatorCameraService {
     this.leftMirrorCamera.parent = truckNode;
     // Positioned inside left overlay on client canvas: 0.02 width-offset, 0.65 height-offset
     this.leftMirrorCamera.viewport = new BABYLON.Viewport(0.01, 0.63, 0.17, 0.33);
+    new BABYLON.PostProcess('flipL', 'flipMirror', null, null, 1.0, this.leftMirrorCamera);
 
     // 3. Right Mirror Camera (Backwards-Right angle from cabin mirror wing)
     this.rightMirrorCamera = new BABYLON.FreeCamera('rightMirrorCamera', new BABYLON.Vector3(1.65, 2.4, 3.2), scene);
@@ -36,6 +49,7 @@ export class SimulatorCameraService {
     this.rightMirrorCamera.parent = truckNode;
     // Positioned inside right overlay on client canvas: 0.82 width-offset, 0.65 height-offset
     this.rightMirrorCamera.viewport = new BABYLON.Viewport(0.82, 0.63, 0.17, 0.33);
+    new BABYLON.PostProcess('flipR', 'flipMirror', null, null, 1.0, this.rightMirrorCamera);
 
     // 4. Front Proximity Mirror Camera (convex look-down mirror on high cabin)
     // Mounted on the front-right corner of the cabin roof/visor pointing straight down & forward
@@ -116,7 +130,7 @@ export class SimulatorCameraService {
 
   setFrontMirrorVisible(visible: boolean) {
     if (this.frontMirrorDisc) {
-      this.frontMirrorDisc.setEnabled(visible && this.showMirrors());
+      this.frontMirrorDisc.setEnabled(visible && this.showMirrors() && this.inSimulation());
     }
   }
 
@@ -179,7 +193,7 @@ export class SimulatorCameraService {
     // Dynamically manage activeCameras based on showMirrors setting
     const scene = this.mainCamera?.getScene();
     if (scene && this.mainCamera) {
-      if (this.showMirrors()) {
+      if (this.showMirrors() && this.inSimulation()) {
         if (!scene.activeCameras || scene.activeCameras.length === 1) {
           scene.activeCameras = [this.mainCamera, this.leftMirrorCamera!, this.rightMirrorCamera!];
         }
@@ -191,14 +205,14 @@ export class SimulatorCameraService {
     }
 
     // 1. Update front mirror camera
-    if (this.frontMirrorCamera && this.showMirrors()) {
+    if (this.frontMirrorCamera && this.showMirrors() && this.inSimulation()) {
       // Rotation is locked locally relative to parent truckNode, so no setTarget is needed.
       // This prevents gimbal flip / 180-degree rotation bugs when looking straight down.
       this.frontMirrorCamera.update();
     }
 
     // 2. Update left mirror camera
-    if (this.leftMirrorCamera && this.showMirrors()) {
+    if (this.leftMirrorCamera && this.showMirrors() && this.inSimulation()) {
       this.leftMirrorCamera.update();
       const frameEl = document.getElementById('frame-left-mirror');
       const canvasEl = this.leftMirrorCamera.getScene().getEngine().getRenderingCanvas();
@@ -219,7 +233,7 @@ export class SimulatorCameraService {
     }
 
     // 3. Update right mirror camera
-    if (this.rightMirrorCamera && this.showMirrors()) {
+    if (this.rightMirrorCamera && this.showMirrors() && this.inSimulation()) {
       this.rightMirrorCamera.update();
       const frameEl = document.getElementById('frame-right-mirror');
       const canvasEl = this.rightMirrorCamera.getScene().getEngine().getRenderingCanvas();
@@ -243,7 +257,7 @@ export class SimulatorCameraService {
     if (this.frontMirrorDisc && this.mainCamera) {
       const frameEl = document.getElementById('frame-front-mirror');
       const canvasEl = this.mainCamera.getScene().getEngine().getRenderingCanvas();
-      if (frameEl && canvasEl && this.showMirrors()) {
+      if (frameEl && canvasEl && this.showMirrors() && this.inSimulation()) {
         this.frontMirrorDisc.setEnabled(true);
         const frameRect = frameEl.getBoundingClientRect();
         const canvasRect = canvasEl.getBoundingClientRect();
