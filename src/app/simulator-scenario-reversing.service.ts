@@ -50,6 +50,10 @@ export class SimulatorScenarioReversingService {
 
     // --- Choreographing Extra Vehicles ---
     
+    // 0. Yellow Car (Opposite Lane, X = -2.25)
+    // Moves from Z = 80 towards -Z at 22 m/s during early seconds (t = 0s to 6s)
+    let yellowCarZ = 80 - t * 22.0;
+
     // 1. Extra Car (Sleek deep blue car)
     // Moves continuously in Lane 2 (X = 2.25) at a steady speed of 20 units/s from far behind (Z = -440)
     // Passes alongside the truck cabin precisely as the truck prepares/starts to reverse (around t = 16.5s to 17.0s)
@@ -253,6 +257,12 @@ export class SimulatorScenarioReversingService {
       ctx.motorcycleNode.rotation.y = motoRotY;
       ctx.motorcycleNode.rotation.z = motoRotZ;
       ctx.motorcycleNode.scaling.set(motoScaleX, motoScaleY, motoScaleZ);
+    }
+
+    // Apply yellow car (opposite lane) position and rotation
+    if (ctx.carNode) {
+      ctx.carNode.position.set(-2.25, 0, yellowCarZ);
+      ctx.carNode.rotation.set(0, Math.PI, 0);
     }
 
     // Apply extra car position, rotation and wheel physics

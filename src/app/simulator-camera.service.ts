@@ -146,7 +146,7 @@ export class SimulatorCameraService {
         this.mainCamera.alpha = -Math.PI / 2;
         this.mainCamera.beta = Math.PI / 2.5;
         this.mainCamera.radius = 65;
-      } else if (scenario === 'cut_off') {
+      } else if (scenario === 'cut_off' || scenario === 'right_turn') {
         this.mainCamera.target = new BABYLON.Vector3(0, 1.8, -10);
         this.mainCamera.alpha = -Math.PI / 4; // Đông Nam nhìn Tây Bắc
         this.mainCamera.beta = Math.PI / 3;

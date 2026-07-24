@@ -154,10 +154,23 @@ export class SimulatorScenarioService {
     }
 
     if (ctx.carNode) {
-      ctx.carNode.setEnabled(type === 'tailgate' || type === 'cut_off');
+      ctx.carNode.setEnabled(type === 'tailgate' || type === 'cut_off' || type === 'reversing');
+      
+      const bodyMesh = ctx.carNode.getChildMeshes().find(m => m.name === 'carLowerBody');
+      if (bodyMesh && bodyMesh.material && bodyMesh.material instanceof BABYLON.StandardMaterial) {
+        if (type === 'reversing') {
+          bodyMesh.material.diffuseColor = new BABYLON.Color3(0.95, 0.75, 0.1); // Yellow car for reversing scenario
+        } else {
+          bodyMesh.material.diffuseColor = new BABYLON.Color3(0.85, 0.15, 0.15); // Red car for cut_off & tailgate
+        }
+      }
+
       if (type === 'cut_off') {
         ctx.carNode.rotation.set(0, -Math.PI / 2, 0); // facing West
         ctx.carNode.position.set(65.0, 0, 2.25); // Start on East road (Lane 2 - left side)
+      } else if (type === 'reversing') {
+        ctx.carNode.position.set(-2.25, 0, 80.0); // Opposite inner lane, facing South
+        ctx.carNode.rotation.set(0, Math.PI, 0);
       } else {
         ctx.carNode.position.set(6.75, 0, -75.0);
         ctx.carNode.rotation.set(0, 0, 0);
